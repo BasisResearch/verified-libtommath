@@ -6,7 +6,7 @@ import Tom.Machine.Api.MpMulmod
 
 * `mpModP`: `mp_mod(a, b, c)` (`Api/MpMod.lean`, `Fn.MpModG5.correct`), the placement of `c`'s
   digits in `Q` (`HContract.wp`);
-* `mpMulH`: `mp_mul(a, b, c)` with its contract (`Api.MpMul.Statement`, proved conditionally)
+* `mpMulH`: `mp_mul(a, b, c)` with its contract (`Api.MpMul.Statement`, proved: `Fn.MulGroupB.mulCorrect.1`)
   a conjunct of the residue, as `Api/Std_r6g.lean`'s `AlgRes.spec`.
 -/
 

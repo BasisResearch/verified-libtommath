@@ -12,7 +12,7 @@ import Tom.Spec.Reduce
 * `ok q d'`: `MP_OKAY`, `d'` at `q` with `MulmodPost a b c d'` (`d' = a b mod c`, `c > 0`);
 * `mem d'`: an allocation failed; `d`'s digits and the heap as before, only `d`'s sign may differ.
 
-`mp_mul` is proved conditionally (`Api/MulRec.lean`, `Fn/MulGroupK.lean`): its contract is the
+`mp_mul` is proved (`Fn.MulGroupB.mulCorrect`, `Fn/MulGroupB.lean`); its contract is the
 named premise `mul`. The stack depth is `mp_mul`'s at `a->used + b->used` below the 96-byte frame
 (`mp_mod`'s 976 is less). `a`, `b`, `c`, `d` are distinct (D6).
 -/
@@ -117,7 +117,7 @@ def rets (_ : P) (x : Out) (ra : BitVec 64) : GRegs :=
 /-- What `mp_mulmod(a, b, c, d)` needs. -/
 structure Res (p : P) : Prop where
   stk : StkRes p.sp (2864 + 8 * (p.a.used + p.b.used))
-  /-- `mp_mul`'s contract (proved conditionally on the mp_mul group's gaps). -/
+  /-- `mp_mul`'s contract (proved: `Fn.MulGroupB.mulCorrect.1`). -/
   mul : MpMul.Statement
   /-- `mp_mul` reads valid operands. -/
   va : p.a.Valid

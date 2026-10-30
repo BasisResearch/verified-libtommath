@@ -2,15 +2,15 @@ import Tom.Machine.Api.MpAdd
 import Tom.Machine.Api.MpSqr
 
 /-!
-# `mp_add(a, b, c)` with growth, `c` distinct: the allocating contract (a named premise)
+# `mp_add(a, b, c)` with growth, `c` distinct: the allocating contract
 
 `Api/MpAdd.lean` (`Api.MpAdd.correct`) assumes `max(a->used, b->used) + 1 ≤ c->alloc` (D5:
 no `mp_grow`). `s_mp_karatsuba_sqr`'s last `mp_add(&t1, &x1x1, b)` writes `mp_sqr`'s
 destination, which may be too small (karatsuba below karatsuba: `x0x0` has exactly `2B`
 digits): `s_mp_add`/`s_mp_sub`'s `mp_grow(c, …)` may re-place `c`'s digits or fail
-(`MP_MEM`). This file states that contract; it is **not proved** (the growing paths of
-`s_mp_add`/`s_mp_sub` over `Api/StdHeapFn.lean`'s `mpGrowH`): a named premise of
-karatsuba's proof, reported to the parent.
+(`MP_MEM`). This file states that contract (the growing paths of `s_mp_add`/`s_mp_sub` over
+`Api/StdHeapFn.lean`'s `mpGrowH`), used by karatsuba's proof. Proved by `Fn.GrowH.mpAddH`
+(`Fn/GrowH.lean`).
 
 Regions `Api/Bin.lean`'s, the site `c`'s digits; result `(ok, q, c')` as `Api/MpSqr.lean`'s.
 Stack: 608 bytes (`mp_add`'s 64, with the tail-called `s_mp_add`, and `mp_grow`'s 544).
@@ -103,7 +103,7 @@ structure Out (p : P) (x : X) : Prop where
 
 def Q (p : P) (x : X) : Prop := Out p x
 
-/-- **`mp_add(a, b, c)` with growth** (named premise, not proved). -/
+/-- **`mp_add(a, b, c)` with growth** (proved: `Fn.GrowH.mpAddH`). -/
 def Statement : Prop :=
   ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
     Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →

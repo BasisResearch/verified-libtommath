@@ -1,15 +1,16 @@
 import Tom.Machine.Api.MpLshdH
 
 /-!
-# `mp_mul_2(a, a)` with growth: the allocating contract (a named premise)
+# `mp_mul_2(a, a)` with growth: the allocating contract
 
 `bn_mp_mul_2.c` at `0x80005ca0` (frame 32): `if (b->alloc < a->used + 1) mp_grow(b, a->used + 1)`
 (`bge a1, a5` at `5cc0`, the call at `5d80`), then the doubling loop, the carry digit, the zeroed
 tail (`memset`) and `b->sign = a->sign`. In place (`b = a`) it reads each digit before writing
 it. `Api/Mul2.lean` (`Fn.Mul2.InPlace.correct_inplace`, `Std.mul2I`) assumes the room (D5). Here
 the growing path: result `(ok, q, a')` as `Api/MpLshdH.lean`'s, regions `Api/Un.lean`'s, the site
-`a`'s digits, stack 576 (the 32-byte frame and `mp_grow`'s 544). **Not proved**: a named premise of `s_mp_toom_sqr`'s
-`mp_mul_2(&a1, &a1)` (`a1 = a1·a2` from `mp_mul`, whose room is not known).
+`a`'s digits, stack 576 (the 32-byte frame and `mp_grow`'s 544). Used by `s_mp_toom_sqr`'s
+`mp_mul_2(&a1, &a1)` (`a1 = a1·a2` from `mp_mul`, whose room is not known). Proved by
+`Fn.Mul2HG5.correct` (`Fn/Mul2HMainG.lean`).
 -/
 
 namespace Tom.Machine.Api.Mul2H
@@ -79,7 +80,7 @@ structure Out (p : P) (x : X) : Prop where
 
 def Q (p : P) (x : X) : Prop := Out p x
 
-/-- **`mp_mul_2(a, a)` with growth** (named premise, not proved). -/
+/-- **`mp_mul_2(a, a)` with growth** (proved: `Fn.Mul2HG5.correct`). -/
 def Statement : Prop :=
   ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
     Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →

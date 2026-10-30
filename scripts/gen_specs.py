@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 """Generate SPECS.lean: the specification of every function of the proof image, for review.
 
-    python3 scripts/gen_specs.py            # write SPECS.lean
+    python3 scripts/gen_specs.py            # write SPECS.lean from experiments/specs_pp.jsonl
+    python3 scripts/gen_specs.py --lean     # first rerun Lean's pretty printer (needs the build)
     python3 scripts/gen_specs.py --check    # fail if SPECS.lean is not what it generates
 
-For each libtommath function of c/tommath-arith.elf (alphabetical): its C prototype, every proved
-form of its contract (experiments/specs.tsv, most general first) re-stated as a theorem whose proof
-is the machine proof, and the definitions the statement is made of, copied verbatim from the Lean
-sources (the contract's residue, result and postcondition, and the Tom/Spec definitions they use).
-Machine plumbing (stack depth, registers, regions) is summarised in one line per contract. The
-newlib/libgcc routines the functions reach are in a short appendix.
+Every proved form of each function's contract (experiments/specs.tsv, most general first) is stated
+as a theorem whose type is the contract expanded down to its `Triple` and whose proof is the machine
+proof; after each function, its postcondition's `.spec` lemmas (the meaning over Int/Nat) restated.
+The expansion is Lean's: scripts/specs_pp.lean (run by `--lean`, under `lake env lean`, with
+SPECS.lean's imports) unfolds the statement's wrappers and definitions, splits its precondition
+structures into one hypothesis per field and its witness bundle into one per region, and pretty
+prints; its output is kept in experiments/specs_pp.jsonl so that the check needs no build.
+SPECS.lean elaborating (scripts/check.sh, step 5) is what makes the printed statements faithful:
+each is checked against the machine proof's own.
 """
 import glob, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 OUT = 'SPECS.lean'
+OUT_INT = 'SPECS_INTERNAL.lean'
 
 # ---------------------------------------------------------------- Lean sources
 
@@ -209,123 +214,12 @@ def closure(roots, root_files, sig_only_first=False):
     return order
 
 
-def plumbing(stmt):
-    """One line: entry, arguments, stack, regions of a contract's namespace."""
-    ns = stmt.rsplit('.', 1)[0]
-    d0 = D[stmt]
-    def find(short):
-        for c in [ns + '.' + short] + [o + '.' + short for o in open_names(d0)]:
-            if c in D:
-                return D[c]
-    parts = []
-    e = find('entry')
-    if e:
-        m = re.search(r'0x[0-9a-f]+', e['code'])
-        if m: parts.append(f'entry `{m.group(0)}`')
-    a = find('args')
-    if a:
-        m = re.search(r'/--\s*(.*?)\s*-/', a['text'], re.S)
-        if m:
-            t = ' '.join(m.group(1).split()).rstrip('.')
-            parts.append(t[:1].lower() + t[1:])
-    f = find('F')
-    if f:
-        rhs = ' '.join(f['code'].split(':=', 1)[-1].split())
-        parts.append(f'stack reservation `F = {rhs}`' if len(rhs) < 90 else 'stack reservation `F` (by size)')
-    r = find('R')
-    if r and r['kind'] == 'inductive':
-        ctors = re.findall(r'\|\s*([\w\']+)', r['code'])
-        if ctors: parts.append('regions ' + ' '.join(ctors))
-    w = find('ws')
-    if w:
-        rhs = ' '.join(w['code'].split(':=', 1)[-1].split())
-        parts.append(f'written {rhs}')
-    return '; '.join(parts)
-
-
-def title(file):
-    for l in open(file, encoding='utf-8'):
-        if l.startswith('# '):
-            return l[2:].strip()
-    return ''
-
-
-SHAPE = ('def Statement : Prop := ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, '
-         'ra.toNat % 4 = 0 → Res p → Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → '
-         '(∀ r, Off (lay p r) (hin p)) → Triple (At entry ((1, ra) :: args p) m v.keep outp) '
-         '(fun cf => ∃ x M, At ra (rets p x ra) M v.keep outp cf ∧ Q p x ∧ '
-         "HPost (lay p) ws SITE (out p x) (site' p x) (hin p) (hout p x) m M)")
-
-
-def render(n):
-    """A declaration's text, the standard statement and plain parameter records compressed."""
-    d = D[n]
-    flat = ' '.join(d['code'].split())
-    m = re.fullmatch(re.escape(SHAPE).replace('SITE', r'(\.\w+)'), flat)
-    if m:
-        return f'def Statement : Prop := Standard.Statement Res Q (site {m.group(1)})  -- the standard shape (top of file)'
-    if d['kind'] == 'structure' and d['name'] == 'P':
-        fields = re.findall(r'^\s+(\w+) : (.+?)\s*$', d['code'], re.M)
-        if fields and len(fields) == len([l for l in d['code'].splitlines()[1:] if l.strip()]):
-            groups = []
-            for f, ty in fields:
-                if groups and groups[-1][1] == ty:
-                    groups[-1][0].append(f)
-                else:
-                    groups.append(([f], ty))
-            return 'structure P where  ' + '; '.join(f'({" ".join(fs)} : {ty})' for fs, ty in groups)
-    return d['text']
-
-
-def meaning(n):
-    """Statements (not proofs) of the theorems that read a postcondition over Nat/Int: `X.spec`, …"""
-    out = []
-    for k, d in D.items():
-        if d['kind'] == 'theorem' and k.rsplit('.', 1)[0] == n and \
-                re.match(r'(spec|val|valid)', k.rsplit('.', 1)[1]) and d['file'].startswith('Tom/Spec/'):
-            sig = d['text'][d['off']:d['off'] + len(signature(d['code']))].rstrip()
-            out.append(f'{sig} := …  -- proved in {d["file"]}')
-    return out
-
-
-def verbatim(names, printed, where):
-    """The definitions as a comment block; ones printed earlier are named only."""
-    out, again, cur = [], [], None
-    for n in names:
-        if n in printed:
-            again.append(n); continue
-        printed[n] = where
-        d = D[n]
-        if d['file'] != cur:
-            cur = d['file']
-            out.append(f'-- {cur}')
-        out.append(render(n))
-        out += meaning(n)
-        out.append('')
-    if again:
-        out.append('Also used (printed above): ' + ', '.join(
-            f'`{n}` ({printed[n]})' for n in again))
-    body = '\n'.join(out).rstrip()
-    return body
-
 # ---------------------------------------------------------------- inputs
 
 code = open('Tom/Machine/Code.lean', encoding='utf-8').read()
 FUNCS = [f for f, _, _ in re.findall(r'/-- `([^`]+)`: (\d+) instructions at \[0x([0-9a-f]+)', code)]
 TOM = sorted(f for f in FUNCS if f.startswith(('mp_', 's_mp_')))
 LIB = [f for f in FUNCS if f not in TOM]
-
-hdr = open('vendor/libtommath/tommath.h').read() + open('vendor/libtommath/tommath_private.h').read()
-def proto(f):
-    m = re.search(r'^(?:MP_PRIVATE\s+)?([\w ]+?[ *]' + re.escape(f) + r'\([^;]*\))[^;]*;', hdr, re.M)
-    return ' '.join(m.group(1).split()) + ';' if m else f
-
-notes = {}
-for row in open('experiments/coverage_map.tsv', encoding='utf-8'):
-    if row.startswith('#') or not row.strip():
-        continue
-    f, thm, how = row.rstrip('\n').split('\t')[:3]
-    notes.setdefault(f, []).append(how)
 
 forms, lib_forms = {}, []
 for row in open('experiments/specs.tsv', encoding='utf-8'):
@@ -341,9 +235,6 @@ missing = [f for f in TOM if f not in forms]
 missing += [f for f in LIB if not any(f in fs for fs, *_ in lib_forms)]
 if missing:
     sys.exit(f'gen_specs: no proved form listed in experiments/specs.tsv for {", ".join(missing)}')
-for name, *_ in [x for v in forms.values() for x in v] + [x[1:] for x in lib_forms]:
-    pass
-
 def head(term):
     return re.sub(r'\.[12]$', '', term.split()[0])
 
@@ -353,185 +244,254 @@ for f, fs in list(forms.items()) + [(' '.join(x[0]), [x[1:]]) for x in lib_forms
             if head(t) not in D:
                 sys.exit(f'gen_specs: {f}: unknown name {t}')
 
-# ---------------------------------------------------------------- output
+# ---------------------------------------------------------------- what Lean prints
 
-def restate(thm, name):
-    """A theorem re-stated under `Specs.name` in its own namespace and opens, proof by application."""
-    d = D[thm]
-    code = d['code']
-    sig = d['text'][d['off']:d['off'] + len(signature(code))].rstrip()
-    sig = re.sub(r'^(?:@\[[^\]]*\]\s*)?(?:private\s+)?theorem\s+\S+', '', sig, count=1)
-    doc = d['text'][:d['off']].strip()
-    ns = '.'.join(d['ns'])
-    out = [f'namespace {ns}'] + d['opens']
-    out.append(doc if doc else f'/-- {title(d["file"])} -/')
-    out.append(f'theorem _root_.Specs.{name}{sig} :=')
-    out.append(f'  {thm} {" ".join(binders(" ".join(signature(code).split()[2:])))}'.rstrip())
-    out.append(f'end {ns}')
+PP = 'experiments/specs_pp.jsonl'
+
+
+def scope(name):
+    """The namespace and `open` lines a declaration is stated in."""
+    d = D[name]
+    return '.'.join(d['ns']), d['opens']
+
+
+SPEC = {}
+for k, d in D.items():
+    if d['kind'] == 'theorem' and d['file'].startswith('Tom/Spec/') and \
+            re.match(r'(spec|val|valid)', k.rsplit('.', 1)[1]):
+        SPEC.setdefault(k.rsplit('.', 1)[0], []).append(k)
+
+
+def spec_lemmas(fn_forms, done):
+    """The `.spec` lemmas (Tom/Spec) of the definitions a function's statements are made of."""
+    out = []
+    for name, stmt, proof in fn_forms:
+        root = head(proof) if stmt == '-' else stmt.replace('∀ n, ', '').split()[0]
+        for n in closure([root], {D[root]['file']}, sig_only_first=stmt == '-'):
+            for k in SPEC.get(n, []):
+                if k not in done:
+                    done.add(k); out.append(k)
     return out
 
 
-def binders(sig):
-    """Explicit binder names of a theorem signature `name binders : type`."""
-    s = sig.split(None, 2)[2] if sig.startswith('theorem') else sig
-    names, i = [], 0
-    while i < len(s):
-        if s[i].isspace():
-            i += 1; continue
-        if s[i] not in '({[⦃':
-            break
-        close = {'(': ')', '{': '}', '[': ']', '⦃': '⦄'}[s[i]]
-        depth, j = 0, i
-        while j < len(s):
-            if s[j] in '({[⦃': depth += 1
-            elif s[j] in ')}]⦄':
-                depth -= 1
-                if depth == 0: break
-            j += 1
-        if s[i] == '(':
-            names += s[i + 1:j].split(':')[0].split()
-        i = j + 1
-    return names
+# The public functions: declared in tommath.h. SPECS.lean has each one's main contract (the growing
+# form, and its aliasing forms `mp_add(a, b, a)`, ...); SPECS_INTERNAL.lean everything else.
+PUBLIC = set(re.findall(r'\b(mp_\w+)\s*\(', open('vendor/libtommath/tommath.h', encoding='utf-8').read()))
 
 
-imports, printed, sections = set(), {}, []
+def main_form(fn, name):
+    return fn in PUBLIC and re.fullmatch(re.escape(fn) + r'_correct(_ca|_cb|_inplace|_alias)?', name)
 
-def form_block(fn, name, stmt, proof, primary):
+
+def items():
+    """Every theorem, in order: (file, section, name, stmt or None, proof, scope decl)."""
+    out, done = [], set()
+    def form(f, fn, name, stmt, proof):
+        out.append((f, fn, name, None if stmt == '-' else stmt, proof,
+                    head(proof) if stmt == '-' else stmt.replace('∀ n, ', '').split()[0]))
+    for f in (OUT, OUT_INT):
+        for fn in TOM:
+            fs = [x for x in forms[fn] if bool(main_form(fn, x[0])) == (f == OUT)]
+            for name, stmt, proof in fs:
+                form(f, fn, name, stmt, proof)
+            for k in spec_lemmas(fs, done):
+                out.append((f, fn, k.removeprefix('Tom.').replace('.', '_'), None, k, k))
+    for fs, name, stmt, proof in lib_forms:
+        form(OUT_INT, '@', name, stmt, proof)
+    return out
+
+
+ITEMS = items()
+
+
+def imports(f):
+    return sorted({D[head(p)]['file'][:-5].replace('/', '.') for g, *_, proof, _ in ITEMS if g == f
+                   for p in proof.split()})
+
+
+def lean_pp():
+    """Run scripts/specs_pp.lean on every item; keep its output in experiments/specs_pp.jsonl."""
+    import subprocess, tempfile, json
+    src = open('scripts/specs_pp.lean', encoding='utf-8').read()
+    src = src.split('\n', 1)[1] if src.startswith('import Lean\n') else src
+    lines = [f'import {m}' for m in sorted(set(imports(OUT) + imports(OUT_INT)))] + ['import Lean', src]
+    for _, _, name, stmt, proof, decl in ITEMS:
+        ns, opens = scope(decl)
+        lines += [f'namespace {ns}'] + opens
+        if stmt is None:
+            lines.append(f'#spec_pp_thm {name} := {proof}')
+        else:
+            lines.append(f'#spec_pp {name} : {stmt} := {proof}')
+        lines.append(f'end {ns}')
+    with tempfile.TemporaryDirectory() as t:
+        drv = os.path.join(t, 'SpecsPP.lean')
+        open(drv, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+        r = subprocess.run(['lake', 'env', 'lean', drv], capture_output=True, text=True)
+    rows, errs = [], []
+    for l in r.stdout.splitlines():
+        if l.startswith('{'):
+            rows.append(json.loads(l))
+        else:
+            errs.append(l)
+    if r.returncode != 0 or len(rows) != len(ITEMS):
+        sys.exit('gen_specs: scripts/specs_pp.lean failed:\n' + '\n'.join(errs[:40]) + r.stderr[-2000:])
+    with open(PP, 'w', encoding='utf-8') as f:
+        for j in rows:
+            f.write(json.dumps(j, ensure_ascii=False, sort_keys=True) + '\n')
+
+# ---------------------------------------------------------------- output
+
+def hexify(s):
+    """Large numerals (addresses, masks) in hex."""
+    return re.sub(r"(?<![\w.'#])(\d{7,})(?![\w.])", lambda m: hex(int(m.group(1))) if int(m.group(1)) >= 1 << 20
+                  else m.group(1), s)
+
+
+def indent(text, n):
+    return text.replace('\n', '\n' + ' ' * n)
+
+
+def wrap(words, first, rest, width=100):
+    """Words on lines of at most `width` columns."""
+    lines, cur = [], first
+    for w in words:
+        if cur.strip() and (len(cur) + 1 + len(w.split('\n')[0]) > width or '\n' in cur):
+            lines.append(cur.rstrip()); cur = rest + w
+        else:
+            cur = cur + (' ' if cur.strip() else '') + w
+    lines.append(cur.rstrip())
+    return '\n'.join(lines)
+
+
+def binder_groups(binders):
+    """Consecutive data binders of the same kind and type share one group: `{sp pa : Nat}`."""
+    close = {'{': '}', '(': ')', '⦃': '⦄', '[': ']'}
     out = []
-    if stmt == '-':
-        thm = head(proof)
-        d = D[thm]
-        imports.add(d['file'])
-        out += restate(thm, name)
-        roots, files = [thm], {d['file']}
-        defs = closure(roots, files, sig_only_first=True)
-        summary = ''
+    for bi, n, ty, hyp in binders:
+        ty = hexify(ty)
+        if out and not hyp and not out[-1][3] and out[-1][0] == bi and out[-1][2] == ty and '\n' not in ty:
+            out[-1][1].append(n)
+        else:
+            out.append([bi, [n], ty, hyp])
+    return [(f'{bi}{" ".join(ns)} : {indent(ty, 6)}{close[bi]}', hyp) for bi, ns, ty, hyp in out]
+
+
+def theorem(j, decl):
+    ns, opens = scope(decl)
+    binders = binder_groups(j['binders'])
+    k = next((i for i, (_, hyp) in enumerate(binders) if hyp), len(binders))
+    data = [b for b, _ in binders[:k]]     # the leading data binders on the first lines
+    hyps = [b for b, _ in binders[k:]]     # then one binder per line, in order
+    out = [f'namespace {ns}'] + opens
+    head_ = wrap(data, f'theorem _root_.Specs.{j["name"]}', '    ')
+    out.append(head_)
+    for h in hyps:
+        out.append('    ' + h)
+    out[-1] += ' :'
+    out.append('    ' + indent(hexify(j['concl']), 4) + ' :=')
+    words = []
+    for a in j['args']:
+        m = re.match(r'\(fun r => match r with (.*)\)$', a)
+        if m:
+            alts = re.split(r' (?=\| \.)', m.group(1))
+            words.append('(fun r => match r with\n        ' + '\n        '.join(alts) + ')')
+        else:
+            words += a.split(' ')
+    if j['hasStmt']:
+        stmt = next(x[3] for x in ITEMS if x[2] == j['name'])
+        names = {b[1] for b in j['binders']}
+        h = next(c for c in ['H', 'H0', 'H1', 'H2', 'HS'] if c not in names)
+        out.append(f'  have {h} : {stmt} := {j["proof"]}')
+        out.append(wrap(words, f'  @{h}', '      '))
     else:
-        sname = stmt.replace('∀ n, ', '').split()[0]
-        d = D[sname]
-        for p in proof.split():
-            imports.add(D[head(p)]['file'])
-        doc = title(d['file'])
-        out.append(f'/-- {doc} -/' if doc else '')
-        out.append(f'theorem Specs.{name} : {stmt} :=')
-        out.append(f'  {proof}')
-        roots, files = [sname], {d['file']}
-        defs = [sname] + closure(roots, files)
-        summary = plumbing(sname) if d['file'].startswith('Tom/Machine/Api/') else ''
-    block = verbatim(defs, printed, f'`{fn}`')
-    text = []
-    if summary:
-        text.append('Machine plumbing: ' + summary + '.')
-    if block:
-        text.append(block)
-    if text:
-        out.append('/-\n' + '\n\n'.join(text) + '\n-/')
-    return '\n'.join(x for x in out if x != '') + '\n'
-
-
-def section(fn):
-    out = [f'/-! ## `{fn}`\n\n`{proto(fn)}`']
-    if fn in notes:
-        out[0] += '\n\n' + '\n'.join(f'Coverage: {n}.' for n in notes[fn])
-    out[0] += '\n-/\n'
-    for k, (name, stmt, proof) in enumerate(forms[fn]):
-        out.append(form_block(fn, name, stmt, proof, k == 0))
+        out.append(wrap(words, f'  @{j["proof"]}', '      '))
+    out.append(f'end {ns}')
     return '\n'.join(out)
 
 
-INTRO = '''/-!
-# The specifications of libtommath v1.3.0 on RV64I, for review
+WHAT = {
+    OUT: '''the public functions of libtommath v1.3.0 (those declared in tommath.h), compiled for RV64I
+(c/tommath-arith.elf): for each, alphabetically, its main contract (the growing form, then the
+aliasing forms such as `mp_add(a, b, a)`) and the `.spec` lemmas that read its postcondition over
+Int/Nat. SPECS_INTERNAL.lean has the other forms, the s_mp_* helpers and newlib/libgcc''',
+    OUT_INT: '''the rest of c/tommath-arith.elf (libtommath v1.3.0 on RV64I): the forms of the public
+functions not in SPECS.lean (destination with room, called D5 in the sources; narrower aliasing
+forms), the s_mp_* helpers, and the newlib/libgcc routines (allocator, memset/memcpy, 64-bit
+multiply and divide)''',
+}
 
-Generated by `scripts/gen_specs.py` from `experiments/specs.tsv` and the Lean sources; do not edit.
-Every theorem below is proved (its proof is the machine proof, named after `:=`), and
-`#print axioms` on it shows only `propext`, `Classical.choice` and `Quot.sound`.
+INTRO = '''/-
+WHAT
+Each statement is the contract with its definitions unfolded; its proof names the contract as
+stated in the sources (`have H : …Statement := …`) and the machine proof:
 
-For each libtommath function of `c/tommath-arith.elf` (alphabetical): its C prototype, every proved
-form of its contract (the most general first: growing destinations, then the forms that assume
-the destination has room, called D5 in the sources, then aliasing variants), and the definitions
-the statement is made of, copied verbatim from the sources. The newlib/libgcc routines the
-functions reach are in the appendix.
+  theorem Specs.f {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}
+      (hyp₁ : ...) ... (hypₙ : ...) :
+      Triple (At entry regs m v.keep outp)
+        fun cf => ∃ x M, At ra rets M v.keep outp cf ∧ post x ∧ HPost ... m M
 
-## How to read a contract
-
-A contract is a total-correctness `Triple` over the Sail RISC-V model: from every machine state
-`At entry …` (the pc at the function's entry, the argument registers, memory `m`), some finite run
-reaches a state `At ra …` (returned to the caller) whose memory `M` satisfies the postcondition.
-Its parameters `p : P` name the `mp_int`s involved (`p.a`, `p.b`, …, as `MpInt` values: `used`,
-`alloc`, `sign` and the digit array) and where they are in memory. A contract `Statement` reads:
-
-    ∀ p m …, ra aligned → Res p →                      -- what the caller must provide
-      Sound (lay p) isW → Bundle (lay p) (kind p) m →  -- the regions are disjoint and hold p's mp_ints
-      AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) → -- the allocator's heap, regions off its blocks
-      Triple (At entry (args p) m …)
-        (fun cf => ∃ x M, At ra (rets p x ra) M … cf ∧ Q p x ∧   -- the result x satisfies Q
-                         HPost (lay p) ws site (out p x) … m M)  -- only the written regions changed
-
-Most allocating contracts state exactly this (`def Statement : Prop :=` in the sources); below,
-`Standard.Statement Res Q (site .s)` abbreviates that verbatim text with the site `.s`:
-
-    ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
-      Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →
-      Triple (At entry ((1, ra) :: args p) m v.keep outp)
-        (fun cf => ∃ x M, At ra (rets p x ra) M v.keep outp cf ∧ Q p x ∧
-          HPost (lay p) ws .s (out p x) (site' p x) (hin p) (hout p x) m M)
-
-`Res` (or `Pre`) is the precondition: validity of the operands (`MpInt.Valid`), the C's `int`
-arithmetic bounds, the stack. `Q` (or `Post`) is the arithmetic postcondition, stated with the
-`Tom/Spec` definitions (for `mp_add`: the result's `val` is `val a + val b`). The machine plumbing
-(the stack reservation, the register map, the regions) is summarised in one line per contract.
+* `Triple P Q` is total correctness on the Sail RISC-V model: from every state satisfying `P`, some
+  finite run reaches a state satisfying `Q`. `At pc regs m keep outp` is the machine at `pc` with
+  the registers `regs` (`(1, ra)`, `(2, sp)`, `(10, a0)`, `(11, a1)`, ...), memory `m`, the
+  callee-saved registers `keep` and console output `outp`. The run ends back at `ra` with memory `M`
+  and result `x`: `none` is MP_MEM, `some (q, c')` the new `mp_int` `c'` with its digits at `q`.
+* `p : P` (the structure `P` of the namespace opened above the theorem) names the `mp_int`s as
+  `MpInt` values (`p.a.used`, `.alloc`, `.sign`, `.digits`; `mag`/`val` its Nat/Int value) and where
+  they are: `p.pa` the struct, `p.adp` its digits, `p.sp` the stack pointer, `p.H` the live heap
+  blocks. Some contracts take these as separate binders (`pa adp : Nat`, `a : MpInt`).
+* The hypotheses are the precondition, one per line: the operands' invariants (`Valid`, `Shape`),
+  the C's `int` bounds, the stack (`F` bytes below `p.sp` are free RAM above the heap), and memory:
+  `Hdr m pa adp a` (the struct at `pa` holds `a`'s used/alloc/sign and the pointer `adp`),
+  `Dig m adp n f` (`n` digits `f` at `adp`), `MpAt` (both), `Ram`, `Img m` (the program image),
+  `Sound (lay p) isW` (the written regions are disjoint from all others), `AHeap m H` (the
+  allocator's heap with live blocks `H`), `Off` (the regions lie off the allocator's memory).
+* The postcondition: the result's arithmetic (`AddG`, `Post`, ... over Tom/Spec definitions; the
+  `Specs.X_spec` theorems state what it means, e.g. `x.val = a.val + b.val`) and the frame
+  (`HPost`, `Frm`: only the written regions `ws` and the allocator's footprint change).
+* Any other name is a definition in the opened namespace or in Tom/Spec, Tom/Machine/Kit,
+  Tom/Machine/Api; go to its definition for its meaning.
 -/
 '''
 
 
-def common():
-    out = ['/-! ## The common vocabulary\n\n`MpInt` is the `mp_int` struct with its digit array read as a list; `mag` and `val`\n'
-           'its magnitude (`Nat`) and value (`Int`); `Shape`/`Valid` the representation invariants;\n'
-           '`ShapeU`/`ValidU` the same with the digits at and above `used` unconstrained. `Triple` is\n'
-           'total correctness on the machine, `At` a machine state at a pc with registers and memory.\n-/\n']
-    for n in COMMON:
-        printed[n] = 'the common vocabulary'
-    block = []
-    cur = None
-    for n in COMMON:
-        d = D[n]
-        if d['file'] != cur:
-            cur = d['file']; block.append(f'-- {cur}')
-        block.append(d['text']); block.append('')
-    out.append('/-\n' + '\n'.join(block).rstrip() + '\n-/\n')
-    imports.update(D[n]['file'] for n in COMMON)
-    return '\n'.join(out)
+def render(f):
+    import json
+    rows = {}
+    for l in open(PP, encoding='utf-8'):
+        j = json.loads(l); rows[j['name']] = j
+    missing = [x[2] for x in ITEMS if x[2] not in rows]
+    if missing:
+        sys.exit(f'gen_specs: {PP} lacks {", ".join(missing[:5])}: run python3 scripts/gen_specs.py --lean')
+    body, prev = [], None
+    for g, sec, name, stmt, proof, decl in ITEMS:
+        if g != f:
+            continue
+        if sec != prev and prev is not None:
+            body.append('')
+        prev = sec
+        body.append(theorem(rows[name], decl))
+    import textwrap
+    what = textwrap.fill(f'The specifications of {" ".join(WHAT[f].split())}. Generated by '
+                         'scripts/gen_specs.py; `#print axioms` of each theorem shows only propext, '
+                         'Classical.choice and Quot.sound.', 100)
+    intro = INTRO.replace('WHAT', what)
+    text = ('\n'.join(f'import {m}' for m in imports(f)) + '\n\n' + intro +
+            '\nset_option linter.unusedVariables false\nset_option linter.ambiguousOpen false\n\n' + '\n\n'.join(body) + '\n')
+    return re.sub(r'\n{4,}', '\n\n\n', text)
 
 
-def appendix():
-    out = ['/-! ## Appendix: the newlib and libgcc routines\n\nThe allocator (newlib\'s dlmalloc, '
-           'with its locks and `sbrk`), `memset`/`memcpy`/`memmove` and libgcc\'s 64-bit multiply and '
-           'divide, as the libtommath functions call them. Each theorem covers the routines listed with it '
-           '(callees run inside the proof of their caller).\n-/\n']
-    for fs, name, stmt, proof in lib_forms:
-        out.append(f'-- {", ".join(fs)}')
-        if stmt == '-':
-            thm = head(proof); d = D[thm]
-            imports.add(d['file'])
-            out += restate(thm, name) + ['']
-        else:
-            for p in proof.split():
-                imports.add(D[head(p)]['file'])
-            out.append(f'theorem Specs.{name} : {stmt} :=\n  {proof}\n')
-    return '\n'.join(out)
-
-
-body = [common()]
-for fn in TOM:
-    body.append(section(fn))
-body.append(appendix())
-mods = sorted(f[:-5].replace('/', '.') for f in imports)
-text = '\n'.join(f'import {m}' for m in mods) + '\n\n' + INTRO + '\n' + '\n'.join(body)
-text = re.sub(r'\n{3,}', '\n\n', text)
-
-if '--check' in sys.argv:
-    old = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
-    sys.exit(0 if old == text else f'gen_specs: {OUT} is not what scripts/gen_specs.py generates')
-open(OUT, 'w', encoding='utf-8').write(text)
-print(f'gen_specs: {len(TOM)} functions, {sum(len(v) for v in forms.values())} forms, '
-      f'{len(LIB)} library routines -> {OUT} ({text.count(chr(10))} lines)')
+if '--lean' in sys.argv:
+    lean_pp()
+bad = []
+for f in (OUT, OUT_INT):
+    text = render(f)
+    if '--check' in sys.argv:
+        old = open(f, encoding='utf-8').read() if os.path.exists(f) else ''
+        if old != text:
+            bad.append(f)
+        continue
+    open(f, 'w', encoding='utf-8').write(text)
+    n = sum(1 for x in ITEMS if x[0] == f)
+    print(f'gen_specs: {n} theorems -> {f} ({text.count(chr(10))} lines)')
+if bad:
+    sys.exit(f'gen_specs: {", ".join(bad)} not what scripts/gen_specs.py generates')

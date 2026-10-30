@@ -15,7 +15,8 @@ The two schoolbook callees of `mp_mul(a, b, a)` (`Api/MpMulA.lean`) in place: re
   the column loop reads `a` (at its block after the grow) and `b` into `W` before the copy loop
   writes `a`.
 
-Both are **not proved**: named premises of `mp_mul(a, b, a)`'s proof (`Api/MpMulGA.lean`).
+Both are proved: `Fn.SMpMulDigsAG5.correct` (`Fn/SMpMulDigsAMainG.lean`) and
+`Fn.MulFastGAG5.correct` (`Fn/MulFastGAMainG.lean`).
 -/
 
 namespace Tom.Machine.Api.SMpMulDigsA
@@ -119,7 +120,7 @@ def Q (p : P) : Option (Nat × MpInt) → Prop
   | none => True
   | some (q, a') => Digs p q a'
 
-/-- **`s_mp_mul_digs(a, b, a, digs)` on the machine** (off the fast path; not proved). -/
+/-- **`s_mp_mul_digs(a, b, a, digs)` on the machine** (off the fast path; proved: `Fn.SMpMulDigsAG5.correct`). -/
 def Statement : Prop :=
   ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
     Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →
@@ -193,7 +194,7 @@ structure Out (p : P) (ok : Bool) (a' : MpInt) : Prop where
 def Q (p : P) : X → Prop
   | (ok, _, a') => Out p ok a'
 
-/-- **`s_mp_mul_digs_fast(a, b, a, digs)` with growth** (named premise, not proved). -/
+/-- **`s_mp_mul_digs_fast(a, b, a, digs)` with growth** (proved: `Fn.MulFastGAG5.correct`). -/
 def Statement : Prop :=
   ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
     Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →

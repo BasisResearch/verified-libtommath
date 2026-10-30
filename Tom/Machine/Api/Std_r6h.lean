@@ -20,7 +20,7 @@ import Tom.Machine.Fn.MpAddAlias
   induction hypothesis `SqrBelow n` (`Api/SqrRec.lean`) with `a->used < n`: the residue is
   `MpSqr.Res`, the bound and the hypothesis, and `spec` is the hypothesis.
 * `ksqr`, `ksqrA`, `toomSqr`, `toomSqrA`: the algorithms; the residue carries the algorithm's
-  Statement (a named premise until its assembly is proved).
+  Statement (a named premise, discharged when the group closes: `Fn.MulGroupB.sqrCorrect`).
 
 The parameters are the contracts' `P` fields, flat (the generator's anonymous constructor).
 -/
@@ -246,8 +246,8 @@ def sqrAB : HContract where
 
 /-! ## The algorithms, from their Statements -/
 
-/-- An algorithm's residue and its Statement (a named premise until it is proved: it travels
-in the residue, so the contract is a constant the generator can name). -/
+/-- An algorithm's residue and its Statement (a named premise, discharged by the group's closure: it
+travels in the residue, so the contract is a constant the generator can name). -/
 structure SqrAlgRes (entry : BitVec 64) (Rs : MpSqr.P → Prop) (p : MpSqr.P) : Prop where
   res : Rs p
   stmt : ∀ p, SqrAlg.SpecR entry Rs p

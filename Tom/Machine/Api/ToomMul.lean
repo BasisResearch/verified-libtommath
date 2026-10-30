@@ -7,7 +7,8 @@ import Tom.Machine.Api.MulAlg
 Toom-3 (`Tom/Spec/MulAlgo.lean`, `toom3_*`): five products by `mp_mul` (three of them in place,
 `c = a`: `Api/MpMulA.lean`), the interpolation by `mp_sub`, `mp_mul_2`, `mp_div_2`,
 `s_mp_div_3`, the recomposition by `mp_lshd`, `mp_add`. `mp_mul` calls it with
-`min ≥ TOOM_MUL_CUTOFF = 350` and not balanced (`max < 2 min`). Statement only.
+`min ≥ TOOM_MUL_CUTOFF = 350` and not balanced (`max < 2 min`). Proved by
+`Fn.ToomMulG5.correct` (`Fn/ToomMulMainG.lean`).
 -/
 
 namespace Tom.Machine.Api.ToomMul
@@ -25,7 +26,7 @@ structure Res (p : P) : Prop extends MulAlg.Base p where
 
 def Spec (p : P) : Prop := MulAlg.SpecR entry Res p
 
-/-- **`s_mp_toom_mul(a, b, c)` on the machine** (not proved). -/
+/-- **`s_mp_toom_mul(a, b, c)` on the machine** (proved: `Fn.ToomMulG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.ToomMul

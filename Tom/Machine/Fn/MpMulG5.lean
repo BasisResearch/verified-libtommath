@@ -2,8 +2,9 @@ import Tom.Machine.Fn.MpMulMainG
 
 /-! `mp_mul(a, b, c)` on the machine: the generated assembly (`Fn/MpMulMainG.lean`, over
 `Api/MpMulG.lean`) read back as `Api.MulRec.StatementI` (the contract under the induction
-hypothesis), given the callees without a proof (`Api.MpMulG.Gaps`: karatsuba, balance, toom,
-the growing fast multiplier). With `MulRec.StatementAI` (`mp_mul(a, b, a)`, not yet proved)
+hypothesis), given the callees' contracts (`Api.MpMulG.Gaps`: karatsuba, balance, toom, the
+growing fast multiplier; proved, discharged in `Fn/MulGroupK.lean`, `Fn/MulGroupT.lean`,
+`Fn/MulGroupB.lean`). With `MulRec.StatementAI` (`mp_mul(a, b, a)`, `Fn/MulGroupA.lean`)
 `MulRec.close` gives `Api.MpMul.Statement`. -/
 
 namespace Tom.Machine.Fn.MpMulG5I

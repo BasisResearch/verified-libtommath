@@ -1,7 +1,7 @@
 import Tom.Machine.Api.MpSqrA
 
 /-!
-# `mp_sqr` on a small operand, growing the destination (a named premise)
+# `mp_sqr` on a small operand, growing the destination
 
 `Api.MpSqr.Res.room` (D5 for the comba path: `a->used < 120 → 2 a->used ≤ b->alloc`) is not
 met inside `s_mp_toom_sqr`: `mp_sqr(&a0, &S0)` squares the clamped low third (any `used ≤ B`,
@@ -10,7 +10,8 @@ size). Below `KARATSUBA_SQR_CUTOFF = 120` digits `mp_sqr` calls `s_mp_sqr_fast(a
 grows `b` (`mp_grow(b, 2 a->used)`, not covered by `Api/SqrFast.lean`). This file states that
 path: `mp_sqr(a, b)` and `mp_sqr(a, a)` with `a->used < 120` and no room, on a 4096-byte stack
 (`mp_sqr`'s 16, `s_mp_sqr_fast`'s 2208, `mp_grow`'s 544 inside it), same regions, results,
-`Out` and heap as `Api/MpSqr.lean` / `Api/MpSqrA.lean`. **Not proved**: a named premise.
+`Out` and heap as `Api/MpSqr.lean` / `Api/MpSqrA.lean`. Proved by `Fn.MpSqrSG5.correct`
+(`Fn/MpSqrSMainG.lean`) and `Fn.MpSqrSAG5.correct` (`Fn/MpSqrSAMainG.lean`).
 -/
 
 namespace Tom.Machine.Api.MpSqrS
@@ -42,7 +43,7 @@ def Spec (p : P) : Prop :=
       (fun cf => ∃ x M, At ra (rets p x ra) M v.keep outp cf ∧ Q p x ∧
         HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M)
 
-/-- **`mp_sqr(a, b)`, `a->used < 120`, growing `b`** (named premise, not proved). -/
+/-- **`mp_sqr(a, b)`, `a->used < 120`, growing `b`** (proved: `Fn.MpSqrSG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.MpSqrS
@@ -71,7 +72,7 @@ def Spec (p : P) : Prop :=
       (fun cf => ∃ x M, At ra (rets p x ra) M v.keep outp cf ∧ Q p x ∧
         HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M)
 
-/-- **`mp_sqr(a, a)`, `a->used < 120`, growing `a`** (named premise, not proved). -/
+/-- **`mp_sqr(a, a)`, `a->used < 120`, growing `a`** (proved: `Fn.MpSqrSAG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.MpSqrSA

@@ -4,15 +4,17 @@ import Tom.Machine.Api.Std_r6g
 # `mp_mul(a, b, c)`: what its generated assembly proves
 
 `Api.MulRec.StatementI` (the contract with the induction hypothesis `ih : MulBelow μ`) with
-the contracts of the callees that are not proved yet in the residue (`Gaps`): the three
-algorithms and the growing fast multiplier. `stmtI` turns it into `StatementI` given the gaps.
+the callees' contracts in the residue (`Gaps`, named premises): the three algorithms and the
+growing fast multiplier. `stmtI` turns it into `StatementI` given the gaps. All four are proved
+(`Fn.KMulG5.correct`, `Fn.BalMulG5.correct`, `Fn.ToomMulG5.correct`, `Fn.MulFastGG5.correct`),
+discharged in `Fn/MulGroupK.lean`, `Fn/MulGroupT.lean`, `Fn/MulGroupB.lean`.
 -/
 
 namespace Tom.Machine.Api.MpMulG
 
 open Tom.Machine Tom.Machine.Api
 
-/-- The callees of `mp_mul` without a proof (named premises). -/
+/-- The callees of `mp_mul` (named premises, proved: see the module doc). -/
 structure Gaps : Prop where
   kmul : KMul.Statement
   bal : BalMul.Statement

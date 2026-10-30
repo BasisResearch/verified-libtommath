@@ -23,7 +23,7 @@ Regions `stk gS gD xS xD nS nD yS yD ks ts kc tc code` (`n` is the modulus `P`),
   `Std.mpMulG`/`mpMulAG`/`mpSqrAG`), so `Res` has no `P->used` bound and no room on the products;
   what is left is the frozen `mp_montgomery_calc_normalization`'s room, the DR digit, the lossy
   `2^p - d` setup and the C's `int`s.
-* `Api.SMpExptmod` (`0x8000261c`): **statement only**: `Out.ok` holds `SMpExptmodStep.Out`'s `MP_OKAY` case, errors
+* `Api.SMpExptmod` (`0x8000261c`, proved by `Fn.SExptG5.correct`): `Out.ok` holds `SMpExptmodStep.Out`'s `MP_OKAY` case, errors
   are `MP_MEM` or its `P = 0` `MP_VAL`. Its arithmetic residue `Arith` is opaque to its callers
   (`mp_exptmod` passes it on), so its prover may restate it (no room on the modulus).
 -/
@@ -252,7 +252,7 @@ def Q (p : P) : Out → Prop
   | .err r => r = Layout.mpMem ∨ SMpExptmodStep.Out p.g p.x p.n p.y p.y p.mode r
   | .ok _ y' => SMpExptmodStep.Out p.g p.x p.n p.y y' p.mode Layout.mpOkay
 
-/-- **`s_mp_exptmod(G, X, P, Y, redmode)` on the machine** (statement only). -/
+/-- **`s_mp_exptmod(G, X, P, Y, redmode)` on the machine** (proved: `Fn.SExptG5.correct`). -/
 def Statement : Prop := Spec entry F Res Q
 
 end Tom.Machine.Api.SMpExptmod

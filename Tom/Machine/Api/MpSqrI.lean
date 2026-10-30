@@ -5,8 +5,8 @@ import Tom.Machine.Api.ToomSqr
 # What `mp_sqr`'s generated assemblies prove
 
 `mp_sqr`'s contracts given the induction hypothesis (`SqrRec.StatementI`, `StatementAI`), with
-the algorithms it dispatches to as named premises (their Statements, until their assemblies are
-proved; `Api/Std_r6h.lean` carries them in the callee residue). `SqrRec.close` turns the pair
+the algorithms it dispatches to as named premises (their Statements; `Api/Std_r6h.lean` carries
+them in the callee residue), discharged by `Fn.MulGroupB.sqrCorrect`'s closure. `SqrRec.close` turns the pair
 into `Api.MpSqr.Statement ∧ Api.MpSqrA.Statement`.
 -/
 

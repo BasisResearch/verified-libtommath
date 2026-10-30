@@ -8,7 +8,8 @@ import Tom.Machine.Api.MpMulA
 # What toom squaring's generated assembly proves
 
 `s_mp_toom_sqr(a, b)`'s contract (`Api.ToomSqr.Statement`, the induction hypothesis in its
-residue) from its callees' contracts that are not proved yet (named premises, `Gaps`):
+residue) from its callees' contracts (named premises, `Gaps`; all proved and discharged by
+`Fn.ToomSqrG5.correctClosed`, `Fn/ToomSqrClosed.lean`, with `mulA` from `Fn.MulGroupB.mulCorrect`):
 
 * `sub`, `subA`: the growing `mp_sub(a, b, c)`, `mp_sub(a, b, a)` (`Api/MpSubH.lean`);
 * `mul2`: the growing `mp_mul_2(a, a)` (`Api/Mul2H.lean`);

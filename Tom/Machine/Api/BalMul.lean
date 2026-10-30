@@ -9,7 +9,8 @@ multiplied by the shorter one (`mp_mul(&a0, &B, &tmp)`, `B` a struct copy of the
 operand), shifted (`mp_lshd(&tmp, bsize * i)`, `__muldi3`) and added (`mp_add(&r, &tmp, &r)`);
 the left-over slice likewise; `mp_exch(&r, c)`, `mp_clear_multi`. `mp_mul` calls it with
 `min ≥ KARATSUBA_MUL_CUTOFF`, `max / 2 ≥ KARATSUBA_MUL_CUTOFF`, `max ≥ 2 min`; each
-recursive `mp_mul` is on `μ' ≤ 2 min ≤ μ - 80`. Statement only.
+recursive `mp_mul` is on `μ' ≤ 2 min ≤ μ - 80`. Proved by `Fn.BalMulG5.correct`
+(`Fn/BalMulMainG.lean`).
 -/
 
 namespace Tom.Machine.Api.BalMul
@@ -28,7 +29,7 @@ structure Res (p : P) : Prop extends MulAlg.Base p where
 
 def Spec (p : P) : Prop := MulAlg.SpecR entry Res p
 
-/-- **`s_mp_balance_mul(a, b, c)` on the machine** (not proved). -/
+/-- **`s_mp_balance_mul(a, b, c)` on the machine** (proved: `Fn.BalMulG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.BalMul

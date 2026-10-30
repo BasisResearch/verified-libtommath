@@ -3,15 +3,15 @@ import Tom.Machine.Api.MpMul
 import Tom.Machine.Api.MulFast
 
 /-!
-# `s_mp_mul_digs_fast(a, b, c, digs)` with growth: the allocating contract (a named premise)
+# `s_mp_mul_digs_fast(a, b, c, digs)` with growth: the allocating contract
 
 `Api/MulFast.lean` (`Fn.MulFast.correct`) assumes `digs ≤ c->alloc` (D5: no `mp_grow`).
 `mp_mul` calls the fast multiplier with `digs = a->used + b->used + 1` on any `c`
 (karatsuba's `x0y0` has `2B` digits, so `mp_grow` always reallocates there): the code's
 `if (c->alloc < digs) mp_grow(c, digs)` at its entry may re-place `c`'s digits or fail
-(`MP_MEM`, everything kept). This file states that contract; it is **not proved** (the
-growing path of `s_mp_mul_digs_fast` over `Api/StdHeapFn.lean`'s `mpGrowH`): a named
-premise of `mp_mul`'s proof, reported to the parent.
+(`MP_MEM`, everything kept). This file states that contract (the growing path of
+`s_mp_mul_digs_fast` over `Api/StdHeapFn.lean`'s `mpGrowH`), used by `mp_mul`'s proof.
+Proved by `Fn.MulFastGG5.correct` (`Fn/MulFastGMainG.lean`).
 
 Regions, parameters and heap as `Api/SMpMulDigs.lean`; results as `Api/MpMul.lean`
 (`(ok, q, c')`). Stack: the 2192 bytes of `Api/MulFast.lean` and `mp_grow`'s 544 below them.
@@ -87,7 +87,7 @@ structure Out (p : P) (ok : Bool) (c' : MpInt) : Prop where
 def Q (p : P) : X → Prop
   | (ok, _, c') => Out p ok c'
 
-/-- **`s_mp_mul_digs_fast` with growth** (named premise, not proved). -/
+/-- **`s_mp_mul_digs_fast` with growth** (proved: `Fn.MulFastGG5.correct`). -/
 def Statement : Prop :=
   ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
     Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →

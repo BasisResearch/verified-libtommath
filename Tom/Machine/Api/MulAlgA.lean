@@ -17,8 +17,9 @@ Karatsuba copies `a`'s digits into `x0`, `x1` first and writes `c` only by its l
 longer operand, copied before) and ends by `mp_exch(&r, c)`; toom splits `a` into `a0 a1 a2`
 (copies) before any write to `c`, and uses `c` only as a temporary after the split.
 
-`MulAlg.Base`'s facts about `c` are `a`'s (`a` valid). The contracts are **not proved**: named
-premises of `mp_mul(a, b, a)`'s proof (`Api/MpMulGA.lean`).
+`MulAlg.Base`'s facts about `c` are `a`'s (`a` valid). The contracts are proved:
+`Fn.KMulAG5.correct`, `Fn.BalMulAG5.correct`, `Fn.ToomMulAG5.correct` (`Fn/KMulAMainG.lean`,
+`Fn/BalMulAMainG.lean`, `Fn/ToomMulAMainG.lean`).
 -/
 
 namespace Tom.Machine.Api.MulAlgA
@@ -91,7 +92,7 @@ structure Res (p : P) : Prop extends MulAlgA.Base p where
 
 def Spec (p : P) : Prop := MulAlgA.SpecR KMul.entry Res p
 
-/-- **`s_mp_karatsuba_mul(a, b, a)` on the machine** (not proved). -/
+/-- **`s_mp_karatsuba_mul(a, b, a)` on the machine** (proved: `Fn.KMulAG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.KMulA
@@ -113,7 +114,7 @@ structure Res (p : P) : Prop extends MulAlgA.Base p where
 
 def Spec (p : P) : Prop := MulAlgA.SpecR BalMul.entry Res p
 
-/-- **`s_mp_balance_mul(a, b, a)` on the machine** (not proved). -/
+/-- **`s_mp_balance_mul(a, b, a)` on the machine** (proved: `Fn.BalMulAG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.BalMulA
@@ -134,7 +135,7 @@ structure Res (p : P) : Prop extends MulAlgA.Base p where
 
 def Spec (p : P) : Prop := MulAlgA.SpecR ToomMul.entry Res p
 
-/-- **`s_mp_toom_mul(a, b, a)` on the machine** (not proved). -/
+/-- **`s_mp_toom_mul(a, b, a)` on the machine** (proved: `Fn.ToomMulAG5.correct`). -/
 def Statement : Prop := ∀ p : P, Spec p
 
 end Tom.Machine.Api.ToomMulA

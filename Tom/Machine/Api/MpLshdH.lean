@@ -2,13 +2,13 @@ import Tom.Machine.Api.MpLshd
 import Tom.Machine.Api.MpSqr
 
 /-!
-# `mp_lshd(a, k)` with growth: the allocating contract (a named premise)
+# `mp_lshd(a, k)` with growth: the allocating contract
 
 `Api/MpLshd.lean` (`Fn.MpLshd.correct`) assumes `a->used + k ≤ a->alloc` (D5).
 `s_mp_karatsuba_sqr`'s `mp_lshd(&x1x1, 2B)` shifts `x1x1` (allocated with `2 (a->used - B)`
 digits) by `2B` digits: `mp_grow(a, a->used + k)` re-places its digits (or fails, `MP_MEM`).
-This file states that contract; it is **not proved** (the growing path over
-`Api/StdHeapFn.lean`'s `mpGrowH`): a named premise of karatsuba's proof, reported to the parent.
+This file states that contract (the growing path over `Api/StdHeapFn.lean`'s `mpGrowH`), used
+by karatsuba's proof. Proved by `Fn.GrowH.mpLshdH` (`Fn/GrowH.lean`).
 
 Regions `Api/Un.lean`'s, the site `a`'s digits; result `(ok, q, a')`. Stack: 576 bytes
 (`mp_lshd`'s frame and `mp_grow`'s 544).
@@ -82,7 +82,7 @@ structure Out (p : P) (x : X) : Prop where
 
 def Q (p : P) (x : X) : Prop := Out p x
 
-/-- **`mp_lshd(a, k)` with growth** (named premise, not proved). -/
+/-- **`mp_lshd(a, k)` with growth** (proved: `Fn.GrowH.mpLshdH`). -/
 def Statement : Prop :=
   ∀ {p : P} {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}, ra.toNat % 4 = 0 → Res p →
     Sound (lay p) isW → Bundle (lay p) (kind p) m → AHeap m (hin p) → (∀ r, Off (lay p r) (hin p)) →
