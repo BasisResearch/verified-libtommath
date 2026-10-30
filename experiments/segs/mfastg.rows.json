@@ -1,0 +1,589 @@
+{
+ "fn": "s_mp_mul_digs_fast",
+ "mod": "MulFastGG",
+ "src": "mfastg",
+ "pfx": "mfg",
+ "imports": [
+  "Tom.Machine.Kit.GenX_seg5a",
+  "Tom.Machine.Fn.MulFastGK"
+ ],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 r0 r9 r10",
+ "nat": "sp pa pb pr dg al ua ub n q d adp bdp wb ix iz tx ty iy w x y e ou p u a",
+ "keep": "gp tp",
+ "h0": [
+  "FF"
+ ],
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pb a2:pr a3:dg",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e",
+  "jn": "sp:sp-2192 s0:dg s1:pb s2:pa s3 s4 s5 s6 s7 s8 s9 s10 s11",
+  "gc": "@jn a0:pr a1:dg",
+  "gm0": "@jn a0:e",
+  "skz": "sp:sp-2192 s0:dg s1:pb s2:pa s3:ub s4:0 s5 s6 s7 s8:ua s9 s10 s11",
+  "zz": "@skz a0:q a2:ou",
+  "zms": "@skz a0:q+4*0 a1:0 a2:4*ou",
+  "kcz": "@skz a0:pr",
+  "oh": "sp:sp-2192 s0:r0 s1:wb+4*ix s3:ub s4:n s5:268435455 s6:(ub+18446744073709551615)%18446744073709551616 s7:adp s8:ua s9:r9 s10:r10 s11:w a2:ix",
+  "z4": "@oh s2:ix+1",
+  "ih": "@oh -a2 s0:adp+4*(tx+iy) s2:ix+1 s9:adp+4*(tx+iz) s10:bdp+4*(ty-iz)",
+  "m1": "@ih s9:adp+4*(tx+iz)+4 s10:bdp+4*(ty-iz)-4 a0:x a1:y",
+  "m2": "@ih s9:adp+4*(tx+iz)+4 s10:bdp+4*(ty-iz)-4 a0:x*y",
+  "lx": "sp:sp-2192 s0:r0 s1:wb+4*n s2:n s3:ub s4:n s5:268435455 s6:(ub+18446744073709551615)%18446744073709551616 s7:adp s8:ua s9:r9 s10:r10 s11:w",
+  "sk": "@lx s0:ou",
+  "kc": "@sk a0:pr",
+  "mcp": "@sk a0:q+4*0 a1:wb+4*0 a2:4*n",
+  "mr": "@sk a0:q+4*0",
+  "mms": "@sk a0:q+4*n a1:0 a2:4*(ou-n)",
+  "zp": "@skz a4:0 a5:pr",
+  "cq": "@lx a1:wb+4*0 a4:pr a5:pr",
+  "e1": "ra sp:sp-2032 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pb a2:pr a3:dg a5:al",
+  "e2": "sp:sp-2192 s0:dg s1:pb s2:pa s3 s4 s5 s6 s7 s8 s9 s10 s11 a3:dg a5:al"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 2192) 2192",
+   "sp % 16 = 0",
+   "2192 ≤ sp",
+   "sp ≤ sMpMulDigsFastBase ∨ sMpMulDigsFastBase + 568 ≤ sp - 2192"
+  ],
+  "SR": [
+   "Ram p 24",
+   "p % 8 = 0",
+   "p + 24 ≤ sp - 2192 ∨ sp ≤ p"
+  ],
+  "U": [
+   "bytesT4 M p = BitVec.ofNat 32 u",
+   "u < 2 ^ 31"
+  ],
+  "AL": [
+   "bytesT4 M (p + 4) = BitVec.ofNat 32 u",
+   "u < 2 ^ 31"
+  ],
+  "PT": [
+   "bytesT8 M (p + 16) = BitVec.ofNat 64 d"
+  ],
+  "RX": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = s1",
+   "bytesT8 M (sp - 32) = s2",
+   "bytesT8 M (sp - 40) = s3",
+   "bytesT8 M (sp - 48) = s4",
+   "bytesT8 M (sp - 56) = s5",
+   "bytesT8 M (sp - 64) = s6",
+   "bytesT8 M (sp - 72) = s7",
+   "bytesT8 M (sp - 80) = s8",
+   "bytesT8 M (sp - 88) = s9",
+   "bytesT8 M (sp - 96) = s10",
+   "bytesT8 M (sp - 104) = s11"
+  ],
+  "CP": [
+   "bytesT8 M (sp - 2184) = BitVec.ofNat 64 pr"
+  ],
+  "LF": [
+   "bytesT8 M (sp - 2192) = BitVec.ofNat 64 bdp",
+   "bytesT8 M (sp - 2176) = BitVec.ofNat 64 (ua + ub - 1)",
+   "bytesT8 M (sp - 2168) = BitVec.ofNat 64 ((18446744073709551617 - ub) % 18446744073709551616)"
+  ],
+  "DG": [
+   "bytesT4 M a = BitVec.ofNat 32 x",
+   "x < 268435456",
+   "Ram a 4"
+  ],
+  "SC": [
+   "Ram p 24",
+   "p % 8 = 0",
+   "p + 24 ≤ sp - 2192 ∨ sp ≤ p",
+   "p + 24 ≤ sMpMulDigsFastBase ∨ sMpMulDigsFastBase + 568 ≤ p"
+  ]
+ },
+ "segs": [
+  {
+   "n": "p1",
+   "at": "42f0 F",
+   "to": "4318",
+   "pre": "ent",
+   "post": "e1",
+   "h": [
+    "AL{p:=pr, u:=al}",
+    "SR{p:=pr}",
+    "dg < 2 ^ 31"
+   ],
+   "doc": "`digs ≥ 0`; the frame; `c->alloc`; save `ra`, `s0`–`s5`."
+  },
+  {
+   "n": "p2",
+   "at": "4318",
+   "to": "4344",
+   "pre": "e1",
+   "post": "e2",
+   "doc": "Save `s6`–`s11`, `c`."
+  },
+  {
+   "n": "pr",
+   "at": "4344 F",
+   "to": "4348",
+   "pre": "e2",
+   "post": "jn",
+   "h": [
+    "dg ≤ al",
+    "al < 2 ^ 31",
+    "dg < 2 ^ 31"
+   ],
+   "doc": "Room (`digs ≤ c->alloc`): to the join."
+  },
+  {
+   "n": "pg",
+   "at": "4344 T",
+   "pre": "e2",
+   "post": "gc",
+   "h": [
+    "CP",
+    "al < dg",
+    "al < 2 ^ 31",
+    "dg < 2 ^ 31"
+   ],
+   "doc": "No room: `mp_grow(c, digs)`."
+  },
+  {
+   "n": "gm",
+   "at": "4504 F",
+   "pre": "gm0",
+   "post": "rt",
+   "h": [
+    "RX",
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_grow` failed: restore, return its error."
+  },
+  {
+   "n": "go",
+   "at": "4504 T",
+   "to": "4348",
+   "pre": "gm0{e:=0}",
+   "post": "jn",
+   "doc": "Grown: to the join."
+  },
+  {
+   "n": "z1",
+   "at": "4348 F T",
+   "to": "4510",
+   "pre": "jn",
+   "post": "zp",
+   "h": [
+    "U{p:=pa, u:=ua}",
+    "U{p:=pb, u:=ub}",
+    "SR{p:=pa}",
+    "SR{p:=pb}",
+    "CP",
+    "ua + ub ≤ dg",
+    "ua + ub = 0",
+    "dg < 2 ^ 31"
+   ],
+   "doc": "`pa = a->used + b->used = 0`: `c->used := 0`."
+  },
+  {
+   "n": "z2",
+   "at": "4348 T T",
+   "to": "4510",
+   "pre": "jn",
+   "post": "zp",
+   "h": [
+    "U{p:=pa, u:=ua}",
+    "U{p:=pb, u:=ub}",
+    "SR{p:=pa}",
+    "SR{p:=pb}",
+    "CP",
+    "dg < ua + ub",
+    "dg = 0",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`pa = digs = 0`: `c->used := 0`."
+  },
+  {
+   "n": "zst",
+   "at": "4510",
+   "to": "443c",
+   "pre": "zp",
+   "post": "zz",
+   "h": [
+    "SC{p:=pr}",
+    "U{p:=pr, u:=ou}",
+    "PT{p:=pr, d:=q}"
+   ],
+   "doc": "`olduse := c->used`, `c->used := 0`."
+  },
+  {
+   "n": "zm",
+   "at": "443c F",
+   "pre": "zz",
+   "post": "zms",
+   "h": [
+    "0 < ou",
+    "ou < 2 ^ 31"
+   ],
+   "doc": "`MP_ZERO_DIGITS(c->dp, olduse)`."
+  },
+  {
+   "n": "zn",
+   "at": "443c T",
+   "pre": "zz",
+   "post": "kcz",
+   "h": [
+    "CP",
+    "ou = 0"
+   ],
+   "doc": "Nothing to zero: `mp_clamp(c)`."
+  },
+  {
+   "n": "mkz",
+   "at": "444c",
+   "pre": "skz",
+   "post": "kcz",
+   "h": [
+    "CP"
+   ],
+   "doc": "`mp_clamp(c)`."
+  },
+  {
+   "n": "rz",
+   "at": "4454",
+   "pre": "skz",
+   "post": "rt{e:=0}",
+   "h": [
+    "RX"
+   ],
+   "doc": "Restore, return `MP_OKAY`."
+  },
+  {
+   "n": "s1",
+   "at": "4348 F F",
+   "to": "439c",
+   "pre": "jn",
+   "post": "oh{ix:=0, w:=0, r0:=BitVec.ofNat 64 dg, r9:=s9, r10:=s10}",
+   "stu": [
+    "bdp",
+    "ua + ub - 1",
+    "(18446744073709551617 - ub) % 18446744073709551616"
+   ],
+   "h": [
+    "U{p:=pa, u:=ua}",
+    "U{p:=pb, u:=ub}",
+    "SR{p:=pa}",
+    "SR{p:=pb}",
+    "PT{p:=pa, d:=adp}",
+    "PT{p:=pb, d:=bdp}",
+    "ua + ub ≤ dg",
+    "n = ua + ub",
+    "0 < n",
+    "dg < 2 ^ 31",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`pa = a->used + b->used > 0`: the column loop's set-up."
+  },
+  {
+   "n": "s2",
+   "at": "4348 T F",
+   "to": "439c",
+   "pre": "jn",
+   "post": "oh{ix:=0, w:=0, r0:=BitVec.ofNat 64 dg, r9:=s9, r10:=s10}",
+   "stu": [
+    "bdp",
+    "ua + ub - 1",
+    "(18446744073709551617 - ub) % 18446744073709551616"
+   ],
+   "h": [
+    "U{p:=pa, u:=ua}",
+    "U{p:=pb, u:=ub}",
+    "SR{p:=pa}",
+    "SR{p:=pb}",
+    "PT{p:=pa, d:=adp}",
+    "PT{p:=pb, d:=bdp}",
+    "dg < ua + ub",
+    "n = dg",
+    "0 < n",
+    "ua + ub < 2 ^ 30",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`pa = digs > 0`: the column loop's set-up."
+  },
+  {
+   "n": "oa",
+   "at": "439c F F",
+   "to": "43c8",
+   "pre": "oh",
+   "post": "ih{tx:=0, ty:=ix, iy:=ix+1, iz:=0}",
+   "h": [
+    "LF",
+    "ix < ub",
+    "ix < ua",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`ix < b->used`, `ix < a->used`: `tx = 0`, `ty = ix`, `iy = ix + 1`."
+  },
+  {
+   "n": "ob",
+   "at": "439c F T T",
+   "to": "43c8",
+   "pre": "oh",
+   "post": "ih{tx:=0, ty:=ix, iy:=ua, iz:=0}",
+   "h": [
+    "LF",
+    "ix < ub",
+    "ua ≤ ix",
+    "0 < ua",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`ix < b->used`, `ix ≥ a->used > 0`: `tx = 0`, `ty = ix`, `iy = a->used`."
+  },
+  {
+   "n": "obz",
+   "at": "439c F T F",
+   "to": "44c4",
+   "pre": "oh",
+   "post": "z4{r0:=BitVec.ofNat 64 ua, r9:=BitVec.ofNat 64 adp}",
+   "h": [
+    "ix < ub",
+    "ua = 0",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`a->used = 0`: an empty column."
+  },
+  {
+   "n": "oc1",
+   "at": "439c T T T",
+   "to": "43c8",
+   "pre": "oh",
+   "post": "ih{tx:=ix+1-ub, ty:=ub-1, iy:=ua+ub-1-ix, iz:=0}",
+   "h": [
+    "LF",
+    "ub ≤ ix",
+    "ua ≤ ix",
+    "ix + 1 < ua + ub",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`ix ≥ b->used`, `ix ≥ a->used`: `iy = a->used - tx`."
+  },
+  {
+   "n": "oc1z",
+   "at": "439c T T F",
+   "to": "44c4",
+   "pre": "oh",
+   "post": "z4{r0:=BitVec.ofNat 64 (ua+ub-1-ix), r9:=BitVec.ofNat 64 (adp+4*(ix+1-ub))}",
+   "h": [
+    "LF",
+    "ub ≤ ix",
+    "ua ≤ ix",
+    "ua + ub ≤ ix + 1",
+    "ix < ua + ub",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`ix = a->used + b->used - 1`: an empty column."
+  },
+  {
+   "n": "oc2",
+   "at": "439c T F T",
+   "to": "43c8",
+   "pre": "oh",
+   "post": "ih{tx:=ix+1-ub, ty:=ub-1, iy:=ub, iz:=0}",
+   "h": [
+    "LF",
+    "ub ≤ ix",
+    "ix < ua",
+    "0 < ub",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`b->used ≤ ix < a->used`: `iy = b->used`."
+  },
+  {
+   "n": "oc2z",
+   "at": "439c T F F",
+   "to": "44c4",
+   "pre": "oh",
+   "post": "z4{r0:=BitVec.ofNat 64 ub, r9:=BitVec.ofNat 64 (adp+4*(ix+1-ub))}",
+   "h": [
+    "LF",
+    "ub ≤ ix",
+    "ix < ua",
+    "ub = 0",
+    "ua + ub < 2 ^ 30"
+   ],
+   "doc": "`b->used = 0`: an empty column."
+  },
+  {
+   "n": "zs1",
+   "at": "44c4 T",
+   "to": "439c",
+   "pre": "z4",
+   "post": "oh{ix:=ix+1, w:=w/268435456}",
+   "stu": [
+    "w % 268435456"
+   ],
+   "h": [
+    "ix + 1 < n",
+    "n < 2 ^ 31",
+    "ix < 512",
+    "w < 2 ^ 64",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`W[ix] := _W & MP_MASK`, `_W >>= 28`; the next column."
+  },
+  {
+   "n": "zs2",
+   "at": "44c4 F",
+   "to": "43fc",
+   "pre": "z4",
+   "post": "lx{w:=w/268435456}",
+   "stu": [
+    "w % 268435456"
+   ],
+   "h": [
+    "ix + 1 = n",
+    "n < 2 ^ 31",
+    "ix < 512",
+    "w < 2 ^ 64",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`W[ix] := _W & MP_MASK`: the last column."
+  },
+  {
+   "n": "ic",
+   "at": "43c8",
+   "pre": "ih",
+   "post": "m1",
+   "h": [
+    "DG{a:=bdp+4*(ty-iz), x:=y}",
+    "DG{a:=adp+4*(tx+iz)}"
+   ],
+   "doc": "The inner head: `__muldi3(*tmpx++, *tmpy--)`."
+  },
+  {
+   "n": "il",
+   "at": "43dc T",
+   "to": "43c8",
+   "pre": "m2",
+   "post": "ih{iz:=iz+1, w:=w+x*y}",
+   "h": [
+    "iz + 1 < iy",
+    "iy ≤ ty + 1",
+    "adp + 4 * (tx + iy) < 2 ^ 64",
+    "w + x * y < 2 ^ 64"
+   ],
+   "doc": "`_W += r`; the inner back edge."
+  },
+  {
+   "n": "ix1",
+   "at": "43dc F T",
+   "to": "439c",
+   "pre": "m2",
+   "post": "oh{ix:=ix+1, w:=(w+x*y)/268435456, r0:=BitVec.ofNat 64 (adp+4*(tx+iy)), r9:=BitVec.ofNat 64 (adp+4*(tx+iz)+4), r10:=BitVec.ofNat 64 (bdp+4*(ty-iz)-4)}",
+   "stu": [
+    "(w + x * y) % 268435456"
+   ],
+   "h": [
+    "iz + 1 = iy",
+    "adp + 4 * (tx + iy) < 2 ^ 64",
+    "w + x * y < 2 ^ 64",
+    "ix + 1 < n",
+    "n < 2 ^ 31",
+    "ix < 512",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`_W += r`; `W[ix] := _W & MP_MASK`, `_W >>= 28`; the next column."
+  },
+  {
+   "n": "ix2",
+   "at": "43dc F F",
+   "to": "43fc",
+   "pre": "m2",
+   "post": "lx{w:=(w+x*y)/268435456, r0:=BitVec.ofNat 64 (adp+4*(tx+iy)), r9:=BitVec.ofNat 64 (adp+4*(tx+iz)+4), r10:=BitVec.ofNat 64 (bdp+4*(ty-iz)-4)}",
+   "stu": [
+    "(w + x * y) % 268435456"
+   ],
+   "h": [
+    "iz + 1 = iy",
+    "adp + 4 * (tx + iy) < 2 ^ 64",
+    "w + x * y < 2 ^ 64",
+    "ix + 1 = n",
+    "n < 2 ^ 31",
+    "ix < 512",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`_W += r`; `W[ix] := _W & MP_MASK`: the last column."
+  },
+  {
+   "n": "cp",
+   "at": "43fc",
+   "pre": "lx",
+   "post": "cq",
+   "h": [
+    "CP",
+    "wb + 2160 = sp"
+   ],
+   "doc": "`olduse := c->used`, `c->used := pa`; `memcpy(c->dp, W, 4 pa)`.",
+   "to": "4408"
+  },
+  {
+   "n": "cq",
+   "at": "4408",
+   "pre": "cq",
+   "post": "mcp",
+   "h": [
+    "SC{p:=pr}",
+    "U{p:=pr, u:=ou}",
+    "PT{p:=pr, d:=q}",
+    "0 < n",
+    "n < 2 ^ 31"
+   ],
+   "doc": "`olduse := c->used`, `c->used := pa`; `memcpy(c->dp, W, 4 pa)`."
+  },
+  {
+   "n": "ms0",
+   "at": "4424 T",
+   "pre": "mr",
+   "post": "kc",
+   "h": [
+    "CP",
+    "ou ≤ n",
+    "ou < 2 ^ 31",
+    "0 < n",
+    "n < 2 ^ 31"
+   ],
+   "doc": "`olduse ≤ pa`: nothing to zero; `mp_clamp(c)`."
+  },
+  {
+   "n": "ms1",
+   "at": "4424 F",
+   "pre": "mr",
+   "post": "mms",
+   "h": [
+    "n < ou",
+    "ou < 2 ^ 31",
+    "0 < n",
+    "q + 4 * ou < 2 ^ 64"
+   ],
+   "doc": "`MP_ZERO_DIGITS(c->dp + pa, olduse - pa)`."
+  },
+  {
+   "n": "mk",
+   "at": "444c",
+   "pre": "sk",
+   "post": "kc",
+   "h": [
+    "CP"
+   ],
+   "doc": "`mp_clamp(c)`."
+  },
+  {
+   "n": "r",
+   "at": "4454",
+   "pre": "sk",
+   "post": "rt{e:=0}",
+   "h": [
+    "RX"
+   ],
+   "doc": "Restore, return `MP_OKAY`."
+  }
+ ]
+}

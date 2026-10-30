@@ -1,0 +1,283 @@
+{
+ "fn": "mp_gcd",
+ "mod": "MpGcdMainG",
+ "ns": "Tom.Machine.Fn.MpGcdG5",
+ "api": "MpGcd",
+ "hdig": false,
+ "rows": "experiments/segs/mgcdg.rows.json",
+ "code": "mpGcd",
+ "imports": ["Tom.Machine.Api.MpGcd", "Tom.Machine.Api.Std_r6c", "Tom.Machine.Kit.Run", "Tom.Machine.Fn.MpGcdG", "Tom.Spec.MpGcdStep"],
+ "F": 720,
+ "opens": [
+  "open Tom.Machine.Fn.MpGcdG Tom.GcdStep",
+  "open Tom.Machine.Api.MpGcd (R P lay kind Res isW ws)"],
+ "R": ["stk", "aS", "aD", "bS", "bD", "cS", "cD", "code"],
+ "written": ["stk", "cS", "cD"],
+ "Rk": {"aS": "S pa adp a", "aD": "D adp a", "bS": "S pb bdp b", "bD": "D bdp b", "cS": "S pc cdp c", "cD": "D cdp c"},
+ "site": ["uD", "vD"],
+ "pos": ["hres.apos", "hres.bpos", "hres.room"],
+ "frame": [["nT", 32], ["nV", 24], ["nU", 24], ["nL", 16]],
+ "refs": {
+  "nU": "S sp - 80",
+  "nV": "S sp - 56",
+  "uD": "D qu",
+  "vD": "D qv",
+  "nR .aS": "S pa",
+  "nR .aD": "D adp",
+  "nR .bS": "S pb",
+  "nR .bD": "D bdp",
+  "nR .cS": "S pc",
+  "nR .cD": "D cdp"},
+ "ctx_vocab": {
+  "A": "z.p.a.mag",
+  "B": "z.p.b.mag",
+  "N": "(max z.p.a.used z.p.b.used)",
+  "G": "(Nat.gcd (Gcd.oddPart z.p.a.mag) (Gcd.oddPart z.p.b.mag))",
+  "hin": "(Api.MpGcd.hin z.p)",
+  "Wr0": "(InAny (Api.MpGcd.lay z.p) Api.MpGcd.ws)"},
+ "rowdef": {
+  "ua": "a.used",
+  "ub": "b.used"},
+ "post": "fun cf => ∃ x M, At ra (Api.MpGcd.rets p x ra) M v.keep o cf ∧ Api.MpGcd.Q p x ∧ HPost (Api.MpGcd.lay p) Api.MpGcd.ws .cD (Api.MpGcd.out p x) (Api.MpGcd.site' p x) hin (Api.MpGcd.hout p x) m M",
+ "snaps": {
+  "F1": "W(m, p1)"},
+ "defs": [
+  "def ρ2 (p : P) (qu na qv nb : Nat) : X → Iv := Iv.upd (Iv.upd (ρX p) uD ⟨qu, 4 * na⟩) vD ⟨qv, 4 * nb⟩"],
+ "prelude": [
+  "have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi",
+  "have hva := hres.va; have hvb := hres.vb; have hsc := hres.sc; have := hres.room; have := hres.abits; have := hres.bbits",
+  "have := hres.apos; have := hres.bpos; have := hva.used_le; have := hva.alloc_lt; have := hvb.used_le; have := hvb.alloc_lt",
+  "have := hsc.used_le; have := hsc.alloc_lt",
+  "have eF : Api.MpGcd.F = 720 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have eL : allocLo = 0x800188a0 := rfl; have eB : mpGcdBase = 0x8000105c := rfl; have eTB : textBase = 0x80000000 := rfl",
+  "have eTL : textLen = 0x18880 := rfl; have eIC : MpInitCopy.F = 624 := rfl; have eC : MpClear.F = 544 := rfl",
+  "have eD : Layout.digitBits = 28 := rfl",
+  "have hN : Layout.digitBits * N < 2 ^ 31 := by have h1 := hres.abits; have h2 := hres.bbits; rw [eD] at h1 h2 ⊢; omega",
+  "have hR : RamH (sp - 96) 96 := ⟨Ram.sub (hB .stk).2 (by simp only [Api.MpGcd.lay, eF]; omega) (by simp only [Api.MpGcd.lay, eF]; omega)⟩",
+  "have hpa := hS .aS .stk (by decide); have hpb := hS .bS .stk (by decide); have hpc := hS .cS .stk (by decide)",
+  "have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, Api.MpGcd.lay, eF, textIv] at hpa hpb hpc hco"],
+ "cuts": {
+  "E": {
+   "pc": "105c",
+   "regs": "ent",
+   "mu": "4, 0, 0",
+   "state": [["st", "St (ρX p) wX WX (κX p m) m m"], ["hp", "HP (ρX p) wX hin hin Wr0 m m"]],
+   "edge":
+   [
+   ["if", "a.used = 0",
+     [
+     ["seg", "za", "0", {"ua": "a.used"}],
+     ["tac", "refine tail_std Std.mpAbsG ⟨sp, pb, bdp, pc, cdp, b, c⟩ (fun r : Two.R => match r with | .stk => Api.MpGcd.R.stk | .aS => Api.MpGcd.R.bS | .aD => Api.MpGcd.R.bD | .bS => Api.MpGcd.R.cS | .bD => Api.MpGcd.R.cD | .code => Api.MpGcd.R.code) (⟨hS, hB, Frm.refl _ _⟩ : St (Api.MpGcd.lay p) Api.MpGcd.isW Api.MpGcd.ws (Api.MpGcd.kind p) m m) ⟨hvb.toShape, hsc, hvb.sign_ok, by om, by om, by om⟩ hra (L' := [(1, ra), (10, 0#64)]) (K' := v.keep) fun c1 M1 cf hq hS1 hat => ?_"],
+     ["exit", "tail", {"_Q": "abs_b hau hvb hsc (by omega) hq"}]
+     ],
+     [
+     ["if", "b.used = 0",
+       [
+       ["seg", "zb", "0", {"ua": "a.used", "ub": "b.used"}],
+       ["tac", "refine tail_std Std.mpAbsG ⟨sp, pa, adp, pc, cdp, a, c⟩ (fun r : Two.R => match r with | .stk => Api.MpGcd.R.stk | .aS => Api.MpGcd.R.aS | .aD => Api.MpGcd.R.aD | .bS => Api.MpGcd.R.cS | .bD => Api.MpGcd.R.cD | .code => Api.MpGcd.R.code) (⟨hS, hB, Frm.refl _ _⟩ : St (Api.MpGcd.lay p) Api.MpGcd.isW Api.MpGcd.ws (Api.MpGcd.kind p) m m) ⟨hva.toShape, hsc, hva.sign_ok, by om, by om, by om⟩ hra (L' := [(1, ra), (10, 0#64)]) (K' := v.keep) fun c1 M1 cf hq hS1 hat => ?_"],
+       ["exit", "tail", {"_Q": "abs_a hbu hva hsc (by omega) hq"}]
+       ],
+       [
+       ["seg", "p1", "ws nT", {"ua": "a.used", "ub": "b.used"}],
+       ["forget", "nU"],
+       ["call", "mpInitCopyG", "sp - 96, sp - 80, pa, adp, a, hin", "xu", {"res": "⟨⟨by om, by om, by om⟩, by om, by unfold OffHeap; om, hres.aoff, hres.ablk, hva, hres.apos⟩", "hq": "hqu", "site": "uD"}],
+       ["cases", "xu", {
+         "none":
+           [
+           ["set", {"e": "18446744073709551614"}],
+           ["seg", "f1", "0"],
+           ["exit", "memU"]
+           ],
+         "some y":
+           [
+           ["tac", "obtain ⟨qu, u0⟩ := y"],
+           ["seg", "p2", "0"],
+           ["forget", "nV"],
+           ["call", "mpInitCopyG", "sp - 96, sp - 56, pb, bdp, b, (qu, 4 * u0.alloc) :: hin", "xv", {"res": "⟨⟨by om, by om, by om⟩, by om, by unfold OffHeap; om, hres.boff, List.mem_cons_of_mem _ hres.bblk, hvb, hres.bpos⟩", "hq": "hqv", "site": "vD"}],
+           ["cases", "xv", {
+             "none":
+               [
+               ["set", {"e": "18446744073709551614"}],
+               ["seg", "f2", "ws nL"],
+               ["call", "mpClearNullG", "sp - 56", "_", {"res": "by show Ram (sp - 56) 24; cfacts @H"}],
+               ["seg", "f2r", "0"],
+               ["exit", "memV"]
+               ],
+             "some y2":
+               [
+               ["tac", "obtain ⟨qv, v0⟩ := y2"],
+               ["bind", {"Mk": "@M"}],
+               ["seg", "p2x", "0"],
+               ["jump", "C", {"vars": {"qu": "qu", "qv": "qv", "u0": "u0", "v0": "v0", "Mk": "@M"}, "hu0": "hau", "hv0": "hbu"}]
+               ]}]
+           ]}]
+       ], "hbu"]
+     ], "hau"]
+   ]},
+  "C": {
+   "pc": "10c0",
+   "regs": "r5",
+   "regs_over": {"e": "0"},
+   "vars": "M Mk : Mem; qu qv : Nat; u0 v0 : MpInt",
+   "mu": "3, 0, 0",
+   "kinds": {"nT": ".frz F1", "nL": ".frz m", "nU": ".mpS (sp - 80) qu u0", "nV": ".mpS (sp - 56) qv v0", "uD": ".mpD qu u0.alloc u0.digit", "vD": ".mpD qv v0.alloc v0.digit"},
+   "state": [["st", "St (ρ2 p qu u0.alloc qv v0.alloc) wX WX (κC z x) Mk M"], ["hp", "HP (ρ2 p qu u0.alloc qv v0.alloc) wX hin ((qv, 4 * v0.alloc) :: (qu, 4 * u0.alloc) :: hin) Wr0 m Mk"]],
+   "prem": [["hqu", "Fresh hin qu (4 * initPrec a.used) ∧ CopyPost a (MpInt.zeroN (initPrec a.used)) u0"], ["hqv", "Fresh ((qu, 4 * u0.alloc) :: hin) qv (4 * initPrec b.used) ∧ CopyPost b (MpInt.zeroN (initPrec b.used)) v0"], ["hu0", "a.used ≠ 0"], ["hv0", "b.used ≠ 0"]],
+   "edge":
+   [
+   ["seg", "p3z", "ws"],
+   ["seg", "p3a", "s nV"],
+   ["seg", "p3b", "s nU"],
+   ["have", "tu : Tmp ({ u0 with sign := 0 } : MpInt) u0.alloc A N", "{ Tmp.init hva hqu.2 (Nat.le_max_left _ _) with alloc := rfl }"],
+   ["have", "tv : Tmp ({ v0 with sign := 0 } : MpInt) v0.alloc B N", "{ Tmp.init hvb hqv.2 (Nat.le_max_right _ _) with alloc := rfl }"],
+   ["call", "cntLsbG", "sp - 80, qu, ({ u0 with sign := 0 } : MpInt)", "_", {"res": "⟨tu.valid, tu.bits hN⟩"}],
+   ["set", {"ul": "cntLsb ({ u0 with sign := 0 } : MpInt)"}],
+   ["seg", "q1", "ws nL"],
+   ["call", "cntLsbG", "sp - 56, qv, ({ v0 with sign := 0 } : MpInt)", "_", {"res": "⟨tv.valid, tv.bits hN⟩"}],
+   ["set", {"vl": "cntLsb ({ v0 with sign := 0 } : MpInt)"}],
+   ["seg", "kz", "0"],
+   ["jump", "K", {"vars": {"Mk": "Mk"}, "hv0": "hv0"}]
+   ]},
+  "K": {
+   "from": "C",
+   "pc": "1120",
+   "regs": "l2a",
+   "mu": "2, 1, 0",
+   "edge": [["have", "hA0", "mag_ne_zero hva hu0"], ["have", "hB0", "mag_ne_zero hvb hv0"], ["have", "hul", "tu.lsb"], ["have", "hvl", "tv.lsb"], ["have", "hulb", "tu.lsb_lt hA0"], ["have", "hvlb", "tv.lsb_lt hB0"], ["if", "cntLsb ({ u0 with sign := 0 } : MpInt) ≤ cntLsb ({ v0 with sign := 0 } : MpInt)", [["if", "0 < cntLsb ({ u0 with sign := 0 } : MpInt)", [["seg", "k1", "ws nL"], ["call", "div2dG", "sp - 96, sp - 80, qu, ({ u0 with sign := 0 } : MpInt), cntLsb ({ u0 with sign := 0 } : MpInt)", "u2", {"res": "⟨tu.valid, (show cntLsb ({ u0 with sign := 0 } : MpInt) < 2 ^ 31 by omega), by om, by om⟩", "hq": "hqd1"}], ["seg", "dk", "0"], ["call", "div2dG", "sp - 96, sp - 56, qv, ({ v0 with sign := 0 } : MpInt), cntLsb ({ u0 with sign := 0 } : MpInt)", "v2", {"res": "⟨tv.valid, (show cntLsb ({ u0 with sign := 0 } : MpInt) < 2 ^ 31 by omega), by om, by om⟩", "hq": "hqd2"}], ["seg", "dk2", "0"], ["forget", "nL"], ["jump", "D", {"vars": {"na": "u0.alloc", "nb": "v0.alloc", "U": "u2", "V": "v2"}, "tu": "tu.div hqd1", "tv": "tv.div hqd2", "hk": "by show cntLsb ({ u0 with sign := 0 } : MpInt) = min (Gcd.lsb A) (Gcd.lsb B); omega", "hna": "by rw [hqu.2.alloc]; exact initPrec_pos _", "hnb": "by rw [hqv.2.alloc]; exact initPrec_pos _"}]], [["seg", "k0a", "0"], ["forget", "nL"], ["jump", "D", {"vars": {"na": "u0.alloc", "nb": "v0.alloc", "U": "({ u0 with sign := 0 } : MpInt)", "V": "({ v0 with sign := 0 } : MpInt)"}, "tu": "tu.re (by rw [show cntLsb ({ u0 with sign := 0 } : MpInt) = 0 by omega]; simp)", "tv": "tv.re (by rw [show cntLsb ({ u0 with sign := 0 } : MpInt) = 0 by omega]; simp)", "hk": "by show cntLsb ({ u0 with sign := 0 } : MpInt) = min (Gcd.lsb A) (Gcd.lsb B); omega", "hna": "by rw [hqu.2.alloc]; exact initPrec_pos _", "hnb": "by rw [hqv.2.alloc]; exact initPrec_pos _"}]], "hkp"]], [["if", "0 < cntLsb ({ v0 with sign := 0 } : MpInt)", [["seg", "k3", "ws nL"], ["call", "div2dG", "sp - 96, sp - 80, qu, ({ u0 with sign := 0 } : MpInt), cntLsb ({ v0 with sign := 0 } : MpInt)", "u2", {"res": "⟨tu.valid, (show cntLsb ({ v0 with sign := 0 } : MpInt) < 2 ^ 31 by omega), by om, by om⟩", "hq": "hqd1"}], ["seg", "dk", "0"], ["call", "div2dG", "sp - 96, sp - 56, qv, ({ v0 with sign := 0 } : MpInt), cntLsb ({ v0 with sign := 0 } : MpInt)", "v2", {"res": "⟨tv.valid, (show cntLsb ({ v0 with sign := 0 } : MpInt) < 2 ^ 31 by omega), by om, by om⟩", "hq": "hqd2"}], ["seg", "dk2", "0"], ["forget", "nL"], ["jump", "D", {"vars": {"na": "u0.alloc", "nb": "v0.alloc", "U": "u2", "V": "v2"}, "tu": "tu.div hqd1", "tv": "tv.div hqd2", "hk": "by show cntLsb ({ v0 with sign := 0 } : MpInt) = min (Gcd.lsb A) (Gcd.lsb B); omega", "hna": "by rw [hqu.2.alloc]; exact initPrec_pos _", "hnb": "by rw [hqv.2.alloc]; exact initPrec_pos _"}]], [["seg", "k0b", "0"], ["forget", "nL"], ["jump", "D", {"vars": {"na": "u0.alloc", "nb": "v0.alloc", "U": "({ u0 with sign := 0 } : MpInt)", "V": "({ v0 with sign := 0 } : MpInt)"}, "tu": "tu.re (by rw [show cntLsb ({ v0 with sign := 0 } : MpInt) = 0 by omega]; simp)", "tv": "tv.re (by rw [show cntLsb ({ v0 with sign := 0 } : MpInt) = 0 by omega]; simp)", "hk": "by show cntLsb ({ v0 with sign := 0 } : MpInt) = min (Gcd.lsb A) (Gcd.lsb B); omega", "hna": "by rw [hqu.2.alloc]; exact initPrec_pos _", "hnb": "by rw [hqv.2.alloc]; exact initPrec_pos _"}]], "hkp"]], "hkl"]],
+   "kinds": {"nL": ".frz (writeLog m [(sp - 96, 8, BitVec.ofNat 64 (cntLsb ({ u0 with sign := 0 } : MpInt)))])", "nU": ".mpS (sp - 80) qu ({ u0 with sign := 0 } : MpInt)", "nV": ".mpS (sp - 56) qv ({ v0 with sign := 0 } : MpInt)"},
+   "prelude": ["have tu : Tmp ({ u0 with sign := 0 } : MpInt) u0.alloc A N := { Tmp.init hva hqu.2 (Nat.le_max_left _ _) with alloc := rfl }", "have tv : Tmp ({ v0 with sign := 0 } : MpInt) v0.alloc B N := { Tmp.init hvb hqv.2 (Nat.le_max_right _ _) with alloc := rfl }"],
+   "-regs_over": ["e"],
+   "regs_over": {"ul": "cntLsb ({ u0 with sign := 0 } : MpInt)", "vl": "cntLsb ({ v0 with sign := 0 } : MpInt)"}
+  },
+  "D": {
+   "pc": "1138",
+   "regs": "dd",
+   "vars": "M Mk : Mem; qu qv na nb k ul vl : Nat; U V : MpInt",
+   "mu": "2, 0, 0",
+   "kinds": {"nT": ".frz F1", "nL": ".ram", "nU": ".mpS (sp - 80) qu U", "nV": ".mpS (sp - 56) qv V", "uD": ".mpD qu U.alloc U.digit", "vD": ".mpD qv V.alloc V.digit"},
+   "state": [["st", "St (ρ2 p qu na qv nb) wX WX (κD z x) Mk M"], ["hp", "HP (ρ2 p qu na qv nb) wX hin ((qv, 4 * nb) :: (qu, 4 * na) :: hin) Wr0 m Mk"]],
+   "prem": [["tu", "Tmp U na (A / 2 ^ k) N"], ["tv", "Tmp V nb (B / 2 ^ k) N"], ["hk", "k = min (Gcd.lsb A) (Gcd.lsb B)"], ["hul", "ul = Gcd.lsb A"], ["hvl", "vl = Gcd.lsb B"], ["hu0", "a.used ≠ 0"], ["hv0", "b.used ≠ 0"], ["hna", "0 < na"], ["hnb", "0 < nb"]],
+   "prelude": ["have hAl := (cntLsb_eq hva).2 hu0; have hBl := (cntLsb_eq hvb).2 hv0; have := tu.alloc; have := tv.alloc"],
+   "edge":
+   [
+   ["if", "vl < ul",
+     [
+     ["seg", "du", "ws"],
+     ["call", "div2dG", "sp - 96, sp - 80, qu, U, ul - k", "u3", {"res": "⟨tu.valid, (show ul - k < 2 ^ 31 by omega), by om, by om⟩", "hq": "hqd"}],
+     ["have", "tu3 : Tmp u3 na (Gcd.oddPart A) N", "tu.div hqd |>.re (by rw [hul]; exact Gcd.div_div_lsb _ _ (by omega))"],
+     ["have", "tv3 : Tmp V nb (Gcd.oddPart B) N", "tv.re (by rw [show k = Gcd.lsb B by omega]; rfl)"],
+     ["seg", "du2", "0"],
+     ["jump", "L0", {"vars": {"U": "u3"}, "tu": "tu3.self", "tv": "tv3.self", "inv": "by rw [tu3.mag, tv3.mag]; exact inv_init (mag_ne_zero hva hu0) (mag_ne_zero hvb hv0)", "hnb": "hnb"}]
+     ],
+     [
+     ["if", "ul < vl",
+       [
+       ["seg", "dv", "ws"],
+       ["call", "div2dG", "sp - 96, sp - 56, qv, V, vl - k", "v3", {"res": "⟨tv.valid, (show vl - k < 2 ^ 31 by omega), by om, by om⟩", "hq": "hqd"}],
+       ["have", "tu3 : Tmp U na (Gcd.oddPart A) N", "tu.re (by rw [show k = Gcd.lsb A by omega]; rfl)"],
+       ["have", "tv3 : Tmp v3 nb (Gcd.oddPart B) N", "tv.div hqd |>.re (by rw [hvl]; exact Gcd.div_div_lsb _ _ (by omega))"],
+       ["seg", "dv2", "0"],
+       ["jump", "L0", {"vars": {"V": "v3"}, "tu": "tu3.self", "tv": "tv3.self", "inv": "by rw [tu3.mag, tv3.mag]; exact inv_init (mag_ne_zero hva hu0) (mag_ne_zero hvb hv0)", "hnb": "hnb"}]
+       ],
+       [
+       ["have", "tu3 : Tmp U na (Gcd.oddPart A) N", "tu.re (by rw [show k = Gcd.lsb A by omega]; rfl)"],
+       ["have", "tv3 : Tmp V nb (Gcd.oddPart B) N", "tv.re (by rw [show k = Gcd.lsb B by omega]; rfl)"],
+       ["seg", "de", "0"],
+       ["jump", "L0", {"vars": {"V": "V"}, "tu": "tu3.self", "tv": "tv3.self", "inv": "by rw [tu3.mag, tv3.mag]; exact inv_init (mag_ne_zero hva hu0) (mag_ne_zero hvb hv0)", "hnb": "hnb"}]
+       ], "hb2"]
+     ], "hb1"]
+   ]},
+  "L0": {
+   "pc": "11c8",
+   "regs": "lh",
+   "vars": "M Mk : Mem; qu qv na nb k : Nat; U V : MpInt",
+   "mu": "1, U.mag + V.mag, 0",
+   "kinds": {"nT": ".frz F1", "nL": ".ram", "nU": ".mpS (sp - 80) qu U", "nV": ".mpS (sp - 56) qv V", "uD": ".mpD qu U.alloc U.digit", "vD": ".mpD qv V.alloc V.digit"},
+   "state": [["st", "St (ρ2 p qu na qv nb) wX WX (κL0 z x) Mk M"], ["hp", "HP (ρ2 p qu na qv nb) wX hin ((qv, 4 * nb) :: (qu, 4 * na) :: hin) Wr0 m Mk"]],
+   "prem": [["hk", "k = min (Gcd.lsb A) (Gcd.lsb B)"], ["tu", "Tmp U na U.mag N"], ["tv", "Tmp V nb V.mag N"], ["inv", "Gcd.GcdInv G U.mag V.mag"], ["hu0", "a.used ≠ 0"], ["hv0", "b.used ≠ 0"], ["hna", "0 < na"], ["hnb", "0 < nb"]],
+   "prelude": ["have hAl := (cntLsb_eq hva).2 hu0; have hBl := (cntLsb_eq hvb).2 hv0; have := tu.alloc; have := tv.alloc", "have := tu.valid.used_le; have := tu.valid.alloc_lt; have := tv.valid.used_le; have := tv.valid.alloc_lt"],
+   "edge":
+   [
+   ["if", "V.used = 0",
+     [
+     ["seg", "lz", "ws", {"vu": "V.used"}],
+     ["have", "hVm : V.mag = 0", "mag_zero_of_used hvz"],
+     ["have", "hUG : U.mag = G", "by have := inv; rw [hVm] at this; exact this.exit"],
+     ["have", "hroom", "fin_room hva (mag_ne_zero hva hu0) hk tu.valid hUG hres.room"],
+     ["call", "mul2dG", "sp - 96, sp - 80, qu, pc, cdp, U, k, c", "c2", {"res": "⟨tu.valid, hsc, by om, hroom, by om, by om⟩", "hq": "hqm"}],
+     ["have", "hfin", "fin_post (mag_ne_zero hva hu0) (mag_ne_zero hvb hv0) hk tu.valid hUG hroom hsc.alloc_lt hqm"],
+     ["seg", "ms1", "s nR .cS"],
+     ["tac", "have @H := @H.refz nL rfl"],
+     ["seg", "ms2", "ws nL"],
+     ["call", "mpClear", "sp - 96, sp - 80, qu, U, (qv, 4 * nb) :: hin", "_", {"perm": "show List.Perm ((qv, 4 * nb) :: (qu, 4 * na) :: hin) ((qu, 4 * U.alloc) :: (qv, 4 * nb) :: hin) by rw [tu.alloc]; exact List.Perm.swap _ _ _", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by rw [tu.alloc]; om⟩"}],
+     ["seg", "c2", "ws nL", {"e": "0"}],
+     ["call", "mpClear", "sp - 96, sp - 56, qv, V, hin", "_", {"perm": "show List.Perm ((qv, 4 * nb) :: hin) ((qv, 4 * V.alloc) :: hin) by rw [tv.alloc] <;> exact List.Perm.refl _", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by rw [tv.alloc]; om⟩"}],
+     ["seg", "c3", "0", {"e": "0"}],
+     ["exit", "ok"]
+     ],
+     [
+     ["seg", "lc", "ws", {"vu": "V.used"}],
+     ["call", "cmpMagG", "sp - 80, qu, sp - 56, qv, U, V", "_", {"res": "⟨tu.valid, tv.valid⟩"}],
+     ["set", {"cm": "ordNG (compare U.mag V.mag)"}],
+     ["if", "compare U.mag V.mag = .gt",
+       [
+       ["have", "hcm : ordNG (compare U.mag V.mag) = 1", "by rw [hcg]; rfl"],
+       ["seg", "gt", "0"],
+       ["call", "mpExch", "sp - 96, sp - 80, qu, sp - 56, qv, U, V", "_", {"res": "by show U.sign < 2 ^ 31; rw [tu.zpos]; decide"}],
+       ["seg", "xs", "0"],
+       ["have", "hlt : V.mag < U.mag", "cmp_gt.1 hcg"],
+       ["call", "sSubCA", "sp - 96, sp - 56, qu, sp - 80, qv, U, V", "w1", {"res": "⟨tu.shape, tv.shape, .inl tu.zpos, Tmp.ge tu tv (Nat.le_of_lt hlt), by om, by om⟩", "hq": "hqs"}],
+       ["have", "tw", "Tmp.sub tu tv (Nat.le_of_lt hlt) hqs"],
+       ["have", "htwa", "tw.alloc"],
+       ["have", "hnxt", "inv_gt inv (mag_ne_zero tv.valid hvz) hlt"],
+       ["seg", "sl", "0"],
+       ["call", "cntLsbG", "sp - 56, qu, w1", "_", {"res": "⟨tw.valid, tw.bits hN⟩"}],
+       ["set", {"vl": "cntLsb w1"}],
+       ["have", "hwl", "tw.lsb_lt' hN"],
+       ["seg", "ld", "0"],
+       ["call", "div2dG", "sp - 96, sp - 56, qu, w1, cntLsb w1", "w2", {"res": "⟨tw.valid, hwl, by om, by om⟩", "hq": "hqd"}],
+       ["have", "tw2", "tw.odd hqd"],
+       ["have", "hdec", "hnxt.2"],
+       ["have", "hw2m", "tw2.mag"],
+       ["seg", "lb", "0"],
+       ["jump", "L1", {"vars": {"U": "V", "V": "w2"}, "tu": "tv", "tv": "tw2.self", "inv": "by rw [tw2.mag]; exact hnxt.1", "hnb": "hnb"}]
+       ],
+       [
+       ["have", "hcm : ordNG (compare U.mag V.mag) ≠ 1", "fun h0 => hcg (ordNG_gt.1 h0)"],
+       ["have", "hcm2", "ordNG_lt (compare U.mag V.mag)"],
+       ["seg", "le", "0"],
+       ["have", "hle : U.mag ≤ V.mag", "Nat.le_of_not_lt fun h0 => hcg (cmp_gt.2 h0)"],
+       ["call", "sSubCA", "sp - 96, sp - 56, qv, sp - 80, qu, V, U", "w1", {"res": "⟨tv.shape, tu.shape, .inl tv.zpos, Tmp.ge tv tu hle, by om, by om⟩", "hq": "hqs"}],
+       ["have", "tw", "Tmp.sub tv tu hle hqs"],
+       ["have", "htwa", "tw.alloc"],
+       ["have", "hnxt", "inv_le inv (mag_ne_zero tv.valid hvz) hle"],
+       ["seg", "sl", "0"],
+       ["call", "cntLsbG", "sp - 56, qv, w1", "_", {"res": "⟨tw.valid, tw.bits hN⟩"}],
+       ["set", {"vl": "cntLsb w1"}],
+       ["have", "hwl", "tw.lsb_lt' hN"],
+       ["seg", "ld", "0"],
+       ["call", "div2dG", "sp - 96, sp - 56, qv, w1, cntLsb w1", "w2", {"res": "⟨tw.valid, hwl, by om, by om⟩", "hq": "hqd"}],
+       ["have", "tw2", "tw.odd hqd"],
+       ["have", "hdec", "hnxt.2"],
+       ["have", "hw2m", "tw2.mag"],
+       ["seg", "lb", "0"],
+       ["jump", "L0", {"vars": {"V": "w2"}, "tv": "tw2.self", "inv": "by rw [tw2.mag]; exact hnxt.1", "hnb": "hnb"}]
+       ], "hcg"]
+     ], "hvz"]
+   ]},
+  "L1": {
+   "from": "L0",
+   "pc": "11c8",
+   "regs": "lh",
+   "mu": "1, U.mag + V.mag, 0",
+   "edge": [["if", "V.used = 0", [["seg", "lz", "ws", {"vu": "V.used"}], ["have", "hVm : V.mag = 0", "mag_zero_of_used hvz"], ["have", "hUG : U.mag = G", "by have := inv; rw [hVm] at this; exact this.exit"], ["have", "hroom", "fin_room hva (mag_ne_zero hva hu0) hk tu.valid hUG hres.room"], ["call", "mul2dG", "sp - 96, sp - 80, qv, pc, cdp, U, k, c", "c2", {"res": "⟨tu.valid, hsc, by om, hroom, by om, by om⟩", "hq": "hqm"}], ["have", "hfin", "fin_post (mag_ne_zero hva hu0) (mag_ne_zero hvb hv0) hk tu.valid hUG hroom hsc.alloc_lt hqm"], ["seg", "ms1", "s nR .cS"], ["tac", "have @H := @H.refz nL rfl"], ["seg", "ms2", "ws nL"], ["call", "mpClear", "sp - 96, sp - 80, qv, U, (qu, 4 * na) :: hin", "_", {"perm": "show List.Perm ((qv, 4 * nb) :: (qu, 4 * na) :: hin) ((qv, 4 * U.alloc) :: (qu, 4 * na) :: hin) by rw [tu.alloc] <;> exact List.Perm.refl _", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by rw [tu.alloc]; om⟩"}], ["seg", "c2", "ws nL", {"e": "0"}], ["call", "mpClear", "sp - 96, sp - 56, qu, V, hin", "_", {"perm": "show List.Perm ((qu, 4 * na) :: hin) ((qu, 4 * V.alloc) :: hin) by rw [tv.alloc] <;> exact List.Perm.refl _", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by rw [tv.alloc]; om⟩"}], ["seg", "c3", "0", {"e": "0"}], ["exit", "ok"]], [["seg", "lc", "ws", {"vu": "V.used"}], ["call", "cmpMagG", "sp - 80, qv, sp - 56, qu, U, V", "_", {"res": "⟨tu.valid, tv.valid⟩"}], ["set", {"cm": "ordNG (compare U.mag V.mag)"}], ["if", "compare U.mag V.mag = .gt", [["have", "hcm : ordNG (compare U.mag V.mag) = 1", "by rw [hcg]; rfl"], ["seg", "gt", "0"], ["call", "mpExch", "sp - 96, sp - 80, qv, sp - 56, qu, U, V", "_", {"res": "by show U.sign < 2 ^ 31; rw [tu.zpos]; decide"}], ["seg", "xs", "0"], ["have", "hlt : V.mag < U.mag", "cmp_gt.1 hcg"], ["call", "sSubCA", "sp - 96, sp - 56, qv, sp - 80, qu, U, V", "w1", {"res": "⟨tu.shape, tv.shape, .inl tu.zpos, Tmp.ge tu tv (Nat.le_of_lt hlt), by om, by om⟩", "hq": "hqs"}], ["have", "tw", "Tmp.sub tu tv (Nat.le_of_lt hlt) hqs"], ["have", "htwa", "tw.alloc"], ["have", "hnxt", "inv_gt inv (mag_ne_zero tv.valid hvz) hlt"], ["seg", "sl", "0"], ["call", "cntLsbG", "sp - 56, qv, w1", "_", {"res": "⟨tw.valid, tw.bits hN⟩"}], ["set", {"vl": "cntLsb w1"}], ["have", "hwl", "tw.lsb_lt' hN"], ["seg", "ld", "0"], ["call", "div2dG", "sp - 96, sp - 56, qv, w1, cntLsb w1", "w2", {"res": "⟨tw.valid, hwl, by om, by om⟩", "hq": "hqd"}], ["have", "tw2", "tw.odd hqd"], ["have", "hdec", "hnxt.2"], ["have", "hw2m", "tw2.mag"], ["seg", "lb", "0"], ["jump", "L0", {"vars": {"U": "V", "V": "w2"}, "tu": "tv", "tv": "tw2.self", "inv": "by rw [tw2.mag]; exact hnxt.1", "hnb": "hnb"}]], [["have", "hcm : ordNG (compare U.mag V.mag) ≠ 1", "fun h0 => hcg (ordNG_gt.1 h0)"], ["have", "hcm2", "ordNG_lt (compare U.mag V.mag)"], ["seg", "le", "0"], ["have", "hle : U.mag ≤ V.mag", "Nat.le_of_not_lt fun h0 => hcg (cmp_gt.2 h0)"], ["call", "sSubCA", "sp - 96, sp - 56, qu, sp - 80, qv, V, U", "w1", {"res": "⟨tv.shape, tu.shape, .inl tv.zpos, Tmp.ge tv tu hle, by om, by om⟩", "hq": "hqs"}], ["have", "tw", "Tmp.sub tv tu hle hqs"], ["have", "htwa", "tw.alloc"], ["have", "hnxt", "inv_le inv (mag_ne_zero tv.valid hvz) hle"], ["seg", "sl", "0"], ["call", "cntLsbG", "sp - 56, qu, w1", "_", {"res": "⟨tw.valid, tw.bits hN⟩"}], ["set", {"vl": "cntLsb w1"}], ["have", "hwl", "tw.lsb_lt' hN"], ["seg", "ld", "0"], ["call", "div2dG", "sp - 96, sp - 56, qu, w1, cntLsb w1", "w2", {"res": "⟨tw.valid, hwl, by om, by om⟩", "hq": "hqd"}], ["have", "tw2", "tw.odd hqd"], ["have", "hdec", "hnxt.2"], ["have", "hw2m", "tw2.mag"], ["seg", "lb", "0"], ["jump", "L1", {"vars": {"V": "w2"}, "tv": "tw2.self", "inv": "by rw [tw2.mag]; exact hnxt.1", "hnb": "hnb"}]], "hcg"]], "hvz"]],
+   "kinds": {"nU": ".mpS (sp - 80) qv U", "nV": ".mpS (sp - 56) qu V", "uD": ".mpD qu V.alloc V.digit", "vD": ".mpD qv U.alloc U.digit"},
+   "prem": [["tu", "Tmp U nb U.mag N"], ["tv", "Tmp V na V.mag N"]]
+  }},
+ "exits": {
+  "tail": ["exact Or.inl ⟨.ok c1, M1, hat, _Q, HPost.inplace hS1 hc.heap hoff rfl rfl (fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | cS => exact hS1.wit .cS", "      | cD => exact absurd rfl hrs", "      | _ => simp [Api.MpGcd.ws] at hr) (hS1.wit .cD)⟩"],
+  "memU": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "exact Lbl.exit fun cf hat => ⟨.memU, _M, hat.sub rfl rfl, trivial,", "  { wit := fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | cS => exact ⟨Iv.sub_self _, _h.hdr (nR .cS) rfl⟩", "      | cD => exact absurd rfl hrs", "      | _ => simp [Api.MpGcd.ws] at hr", "    wsite := ⟨Iv.sub_self _, _h.dig (nR .cD) rfl⟩, place := .keep, frame := hfr, heap := hh", "    foot := fun _ h => .inl h, off := hoff .cD }⟩"],
+  "memV": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "have e1 : u0.alloc = initPrec a.used := hqu.2.alloc", "rw [e1] at hh", "exact Lbl.exit fun cf hat => ⟨.memV qu, _M, hat.sub rfl rfl, hqu.1,", "  { wit := fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | cS => exact ⟨Iv.sub_self _, _h.hdr (nR .cS) rfl⟩", "      | cD => exact absurd rfl hrs", "      | _ => simp [Api.MpGcd.ws] at hr", "    wsite := ⟨Iv.sub_self _, _h.dig (nR .cD) rfl⟩, place := .keep, frame := hfr, heap := hh", "    foot := fun _ h => .inl (Foot.of_cons h), off := (hoff .cD).mono fun _ _ hf => hf.imp Foot.of_cons id }⟩"],
+  "ok": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "exact Lbl.exit fun cf hat => ⟨.ok { c2 with sign := 0 }, _M, hat.sub rfl rfl, hfin,", "  { wit := fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | cS => exact ⟨Iv.sub_self _, _h.hdr (nR .cS) rfl⟩", "      | cD => exact absurd rfl hrs", "      | _ => simp [Api.MpGcd.ws] at hr", "    wsite := ⟨by show Iv.Sub ⟨_, 4 * c2.alloc⟩ _; rw [show c2.alloc = c.alloc from hfin.2]; exact Iv.sub_self _,", "      _h.dig (nR .cD) rfl⟩", "    place := .keep, frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .cD }⟩"]}
+}

@@ -1,0 +1,90 @@
+{
+ "fn": "mp_invmod", "mod": "MpInvmodMainG", "ns": "Tom.Machine.Fn.MpInvmodG5", "api": "MpInvmodOf",
+ "rows": "experiments/segs/minvg.rows.json", "code": "mpInvmod", "F": 1232, "lay_rfl": true, "dsimp_q": true, "hdig": false,
+ "imports": ["Tom.Machine.Api.Std_inv", "Tom.Machine.Kit.Run", "Tom.Machine.Fn.MpInvmodG"],
+ "opens": ["open Tom.Machine.Fn.MpInvmodG",
+           "open Tom.Machine.Api.Invmod (R P lay kind isW ws)", "open Tom.Machine.Api.MpInvmodOf (Res)"],
+ "callees": {
+  "cmpDc": {"heap": false, "ctor": "Ob", "params": ["p", "dp", "a", "d"], "regions": [["S", "S p"], ["D", "D dp"], ["code", "code"]],
+            "entry": "0x80000728"},
+  "invmodFastH": {"heap": true, "site": "cD", "ctor": "Api.Invmod.R", "params": ["sp", "pa", "adp", "pb", "bdp", "pc", "cdp", "a", "b", "c", "H"],
+                  "regions": [["stk", "stk"], ["aS", "S pa"], ["aD", "D adp"], ["bS", "S pb"], ["bD", "D bdp"], ["cS", "S pc"], ["cD", "D cdp"], ["code", "code"]],
+                  "entry": "0x80003338"},
+  "invmodSlowH": {"heap": true, "site": "cD", "ctor": "Api.Invmod.R", "params": ["sp", "pa", "adp", "pb", "bdp", "pc", "cdp", "a", "b", "c", "H"],
+                  "regions": [["stk", "stk"], ["aS", "S pa"], ["aD", "D adp"], ["bS", "S pb"], ["bD", "D bdp"], ["cS", "S pc"], ["cD", "D cdp"], ["code", "code"]],
+                  "entry": "0x80003670"}
+ },
+ "R": ["stk", "aS", "aD", "bS", "bD", "cS", "cD", "code"], "written": ["stk", "cS", "cD"],
+ "Rk": {"aS": "S pa adp a", "aD": "D adp a", "bS": "S pb bdp b", "bD": "D bdp b", "cS": "S pc cdp c", "cD": "D cdp c"},
+ "frame": [["nT", 48]],
+ "refs": {"nR .aS": "S pa", "nR .aD": "D adp", "nR .bS": "S pb", "nR .bD": "D bdp", "nR .cS": "S pc", "nR .cD": "D cdp"},
+ "ctx_vocab": {"sp": "z.p.sp", "pa": "z.p.pa", "adp": "z.p.adp", "pb": "z.p.pb", "bdp": "z.p.bdp", "pc": "z.p.pc", "cdp": "z.p.cdp",
+   "a": "z.p.a", "b": "z.p.b", "c": "z.p.c", "H": "z.p.H", "hin": "Api.Invmod.hin z.p"},
+ "rowdef": {"ub": "b.used", "sb": "b.sign", "d0": "b.digit 0"},
+ "post": "fun cf => ∃ x M, At ra (Api.Invmod.rets p x ra) M v.keep o cf ∧ Api.MpInvmod.Q p x ∧ HPost (lay p) ws .cD (Api.Invmod.out p x) (Api.Invmod.site' p x) hin (Api.Invmod.hout p x) m M",
+ "prelude": [
+  "have hvb := hres.vb; have := hvb.used_le; have := hvb.alloc_lt; have := hres.bpos",
+  "have hd0 : b.digit 0 < 2 ^ 31 := Nat.lt_of_lt_of_le (hvb.digit_lt 0) (by decide)",
+  "have hsb : b.sign < 2 ^ 31 := by rcases hvb.sign_ok with h | h <;> rw [h] <;> decide",
+  "have eF : Api.Invmod.F = 1232 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi",
+  "have eB : mpInvmodBase = 0x8000150c := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl",
+  "have hR : RamH (sp - 48) 48 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩",
+  "have hpb := hS .bS .stk (by decide); have hpc := hS .cS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_bS, layE_cS, layE_code, textIv] at hpb hpc hco"
+ ],
+ "let": {
+  "WIT": ["  { wit := fun r hr hrs => by",
+          "      cases r with",
+          "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+          "      | cS => exact ⟨Iv.sub_self _, _h.hdr (nR .cS) rfl⟩",
+          "      | cD => exact absurd rfl hrs",
+          "      | _ => simp [ws] at hr"]
+ },
+ "cuts": {
+  "E": {"pc": "150c", "regs": "ent", "mu": "0, 0, 0",
+   "state": [["st", "St (ρX p) wX WX (κX p m) m m"], ["hp", "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"]],
+   "edge": [
+    ["if", "b.sign = 1", [
+      ["seg", "neg", "ws nT"], ["seg", "negr", "0"], ["exit", "val", {"_Q": "Api.MpInvmod.Q_neg hs1"}]
+     ], [
+      ["seg", "pro", "ws nT"],
+      ["call", "cmpDc", "pb, bdp, b, 1", "_", {"res": "⟨hvb, hres.bpos, by show (1 : Nat) < radix; decide⟩"}],
+      ["set", {"cm": "ordNG (cmpD b 1)"}],
+      ["have", "hcmb : ordNG (cmpD b 1) < 2 ^ 64", "ordNG_lt _"],
+      ["if", "cmpD b 1 = .gt", [
+        ["have", "hcm : ordNG (cmpD b 1) = 1", "by rw [hgt]; rfl"],
+        ["have", "hb1 : 1 < b.mag", "(InvmodStep.gt_iff hvb (by simpa [Layout.mpNeg] using hs1) |>.1 hgt)"],
+        ["have", "hub : b.used ≠ 0", "fun e => by rw [MpInt.mag_used_zero e] at hb1; omega"],
+        ["seg", "gt", "0"],
+        ["if", "b.digit 0 % 2 = 1", [
+          ["seg", "tf", "0"],
+          ["tail", "invmodFastH", "sp, pa, adp, pb, bdp, pc, cdp, a, b, c, H", "x",
+           {"flat": {"kd": "kind p", "hp": "HP.flatE (ws := ws) hc.heap hoff (ramW hB) (by intro r hr; cases r <;> first | exact absurd hr (by decide) | decide)"}, "hq": "hq", "K'": "v.keep",
+            "res": "⟨{ hres.toBaseG with bz := Api.MpInvmod.zpos hvb hs1 }, hres.fast⟩"}],
+          ["exit", "tail", {"_Q": "Api.MpInvmod.Q_fast hvb hs1 hgt ⟨Nat.pos_of_ne_zero hub, hodd⟩ hq"}]
+         ], [
+          ["seg", "ts", "0"],
+          ["tail", "invmodSlowH", "sp, pa, adp, pb, bdp, pc, cdp, a, b, c, H", "x",
+           {"flat": {"kd": "kind p", "hp": "HP.flatE (ws := ws) hc.heap hoff (ramW hB) (by intro r hr; cases r <;> first | exact absurd hr (by decide) | decide)"}, "hq": "hq", "K'": "v.keep",
+            "res": "⟨{ hres.toBaseG with bz := Api.MpInvmod.zpos hvb hs1, even := Api.MpInvmod.even hvb hs1 hodd }, hres.slow⟩"}],
+          ["exit", "tail", {"_Q": "Api.MpInvmod.Q_slow hvb hs1 hgt (fun h => hodd h.2) hq"}]
+         ], "hodd"]
+       ], [
+        ["have", "hcm : ordNG (cmpD b 1) ≠ 1", "by revert hgt; cases cmpD b 1 <;> decide"],
+        ["seg", "bad", "0"],
+        ["exit", "val", {"_Q": "Api.MpInvmod.Q_le hvb hs1 hgt"}]
+       ], "hgt"]
+     ], "hs1"]
+   ]
+  }
+ },
+ "exits": {
+  "val": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err Layout.mpVal, _M, hat.sub rfl rfl, _Q,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .cD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .cD }⟩"],
+  "tail": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "exact Lbl.exit fun cf hat => ⟨x, _M, hat.sub rfl rfl, _Q, { hpo with frame := hfr }⟩"]
+ }
+}

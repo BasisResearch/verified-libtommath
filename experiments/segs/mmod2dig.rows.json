@@ -1,0 +1,47 @@
+{
+ "fn": "mp_mod_2d", "mod": "MpMod2dIG", "src": "mmod2dig", "pfx": "m2ig", "imports": ["Tom.Machine.Fn.MpMod2dIGK"],
+ "bv": "ra s0 s1", "nat": "sp pa b u D d e dp y x", "keep": "gp tp s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "regs": {
+  "ent": "ra sp s0 s1 a0:pa a1:b a2:pa",
+  "q1": "sp:sp-48 s0 s1:pa a0:pa a1:b a2:pa",
+  "q2": "sp:sp-48 s1:pa a0:pa a1:b a2:pa a4:u",
+  "pt": "sp:sp-48 s0:b s1:pa a0:pa a1:pa a5:28*u",
+  "tc": "ra sp s0 s1 a0:pa a1:pa",
+  "kc": "sp:sp-48 s0:b s1:pa a0:pa a1:pa",
+  "c0": "sp:sp-48 s0:b s1:pa a0:0",
+  "dv": "sp:sp-48 s0:b s1:pa a0:b a1:28",
+  "d1": "sp:sp-48 s0:b s1:pa a0:D",
+  "md": "sp:sp-48 s0:D s1:pa a0:b a1:28",
+  "d2": "sp:sp-48 s0:D s1:pa a0:d",
+  "m1": "sp:sp-48 s0:D s1:pa a2:u a3:d",
+  "m2": "@m1 a5:e",
+  "x2": "sp:sp-48 s0:4*D s1:pa a3:d a4:dp+4*D",
+  "ms": "sp:sp-48 s0:D s1:pa a0:dp+4*x a1:0 a2:4*(u-x)",
+  "mr": "sp:sp-48 s0:D s1:pa",
+  "cl": "sp:sp-48 s0:4*D s1:pa a0:pa",
+  "ce": "sp:sp-48 s0:4*D s1:pa",
+  "rt": "ra sp s0 s1 a0:0"
+ },
+ "facts": {
+  "UF": ["bytesT4 M pa = BitVec.ofNat 32 u", "u < 2 ^ 31", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 48 ∨ sp ≤ pa"],
+  "DP": ["bytesT8 M (pa + 16) = BitVec.ofNat 64 dp", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 48 ∨ sp ≤ pa"],
+  "DG": ["bytesT4 M (dp + 4 * D) = BitVec.ofNat 32 y", "y < 268435456", "Ram (dp + 4 * D) 4", "(dp + 4 * D) % 4 = 0",
+         "dp + 4 * D + 4 ≤ mpMod2dBase ∨ mpMod2dBase + 272 ≤ dp + 4 * D", "dp + 4 * D + 4 ≤ sp - 48 ∨ sp ≤ dp + 4 * D"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "SP": ["bytesT8 M (sp - 40) = BitVec.ofNat 64 d", "bytesT8 M (sp - 48) = BitVec.ofNat 64 dp"]
+ },
+ "segs": [
+  {"n": "p1", "at": "57a4 F", "to": "57b8", "pre": "ent", "post": "q1", "h": ["0 < b", "b < 2 ^ 31"], "doc": "`b > 0`: save `s1`, `ra`."},
+  {"n": "p2", "at": "57b8", "to": "57c0", "pre": "q1", "post": "q2", "h": ["UF"], "doc": "Load `a->used`, save `s0`."},
+  {"n": "p3", "at": "57c0", "to": "57d4", "pre": "q2", "post": "pt", "h": ["28 * u < 2 ^ 31"], "by": "exact BitW.mul28W' _ (by omega)", "doc": "`s0 := b`, `a5 := 28 a->used`."},
+  {"n": "tl", "at": "57d4 T", "to": "7e0", "pre": "pt", "post": "tc", "h": ["RF", "28 * u ≤ b", "b < 2 ^ 31", "28 * u < 2 ^ 31"], "doc": "`b ≥ 28 a->used`: restore, tail-jump to `mp_copy(a, a)`."},
+  {"n": "ck", "at": "57d4 F", "pre": "pt", "post": "kc", "h": ["b < 28 * u", "b < 2 ^ 31", "28 * u < 2 ^ 31"], "doc": "`b < 28 a->used`: `mp_copy(a, a)`."},
+  {"n": "d1", "at": "57dc F", "pre": "c0", "post": "dv", "doc": "`MP_OKAY`: `__divdi3(b, 28)`."},
+  {"n": "d2", "at": "57ec", "pre": "d1", "post": "md", "h": ["D < 2 ^ 31"], "doc": "`s0 := D`; `__moddi3(b, 28)`."},
+  {"n": "m1", "at": "5800", "pre": "d2", "post": "m1", "h": ["UF", "d < 28"], "doc": "`d` returned; load `a->used` (to the `snez`)."},
+  {"n": "z", "at": "5808", "alu": "snez", "pre": "m1", "post": "m2{e:=if d = 0 then 0 else 1}", "h": ["d < 28"], "doc": "`snez a5, a3`: `e = (d != 0)` (one step)."},
+  {"n": "m2t", "at": "580c T", "to": "5848", "pre": "m2", "post": "x2", "h": ["DP", "e ≤ 1", "D + e = u", "u < 2 ^ 31", "dp + 4 * u ≤ 2 ^ 32"], "doc": "`x = D + (d != 0) = a->used`: nothing to zero; `&a->dp[D]`."},
+  {"n": "m2f", "at": "580c F", "pre": "m2", "post": "ms{x:=D+e}", "stu": ["dp"], "h": ["DP", "e ≤ 1", "D + e < u", "u < 2 ^ 31", "dp + 4 * u ≤ 2 ^ 32"], "doc": "`x < a->used`: spill `d`, `a->dp`; `memset(a->dp + x, 0, 4 (a->used - x))`."},
+  {"n": "mr", "at": "5838", "to": "5848", "pre": "mr", "post": "x2", "h": ["SP", "D < 2 ^ 31", "dp + 4 * D < 2 ^ 32"], "doc": "After `memset`: reload `d`, `a->dp`; `&a->dp[D]`."},
+  {"n": "x2", "at": "5848", "pre": "x2", "post": "cl", "stu": ["y % 2 ^ d"], "h": ["DG", "d < 28"], "by": "exact mask_and_nf _ _ (by omega) (by omega)", "doc": "`a->dp[D] &= 2^d - 1`; `mp_clamp(a)`."},
+  {"n": "e", "at": "5868", "pre": "ce", "post": "rt", "h": ["RF"], "doc": "Restore, return `MP_OKAY`."}
+ ]}

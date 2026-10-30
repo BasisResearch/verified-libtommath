@@ -1,0 +1,23 @@
+{
+ "extends": "sdiv3i.asm.json",
+ "subst": {
+  "Div3I": "Div3N",
+  "Div3IMainG": "Div3NMainG",
+  "Div3IG5": "Div3NG5"},
+ "#": "The d == NULL branch at 6744 by the rows of div3n.rows.json (Fn.Div3NG.n_step, a raw step: this annotation runs over Fn/Div3.lean's Lean segments).",
+ "fn": "s_mp_div_3 (d = NULL)",
+ "imports": ["Tom.Machine.Api.Div3I", "Tom.Machine.Kit.Run", "Tom.Spec.Div3IStep", "Tom.Machine.Fn.Div3NG"],
+ "R": ["stk", "aS", "aD", "code"],
+ "written": ["stk", "aS", "aD"],
+ "Rk": {
+  "dS": null},
+ "ctx_vocab": {
+  "pd": "0",
+  "dd": null},
+ "pos": ["hres.apos"],
+ "prelude": ["have hva := hres.va; have hsa := hva.toShape; have hda := hsa.digit_lt; have := hsa.used_le; have := hsa.alloc_lt", "have := hres.apos; have := hres.u_pos", "have hsg : a.sign < 2 ^ 31 := by rcases hva.sign_ok with h | h <;> rw [h] <;> decide", "have eR : radix = 268435456 := rfl; have eF : Api.Div3I.F = 656 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl", "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi", "have eL : allocLo = 0x800188a0 := rfl; have eB : sMpDiv3Base = 0x80006640 := rfl; have eI : MpInit.Fsize = 576 := rfl", "have eC : MpClear.F = 544 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl", "have hR : RamH (sp - 80) 80 := ⟨Ram.sub (hB .stk).2 (by simp only [lay, eF]; omega) (by simp only [lay, eF]; omega)⟩", "have hAR := (hB .aD).2.ram; have := hAR.lo_ge; have := hAR.hi_le", "have hAS := (Hdr.geom (show Hdr m pa adp a from (hB .aS).2)).st; have := hAS.lo_ge; have := hAS.hi_le", "have hN : ua ≤ N := Nat.le_max_right _ _", "have hN31 : N < 2 ^ 31 := Nat.max_lt.2 ⟨by decide, by omega⟩", "have hpa := hS .aS .stk (by decide); have hco := hS .stk .code (by decide)", "simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hco"],
+ "cuts": {
+  "Z": {"edge": [["tac", "refine St.seq0 (Fn.Div3NG.n_step v o sp pa pc w @M (cd @H)) ?_", {"pc": "674c", "regs": "tL"}], ["seg", "t", "0"], ["setmp", "nQ", "nS", "qOf a N f"], ["have", "htA : (qOf a N f).alloc = N", "rfl"], ["call", "clamp", "sp - 56, qdp, qOf a N f", "t1", {"res": "qOf_shape pr hsa (by decide) hN hN31", "hq": "hcl"}], ["redig", "nS", "hcl.alloc", "hcl.digit"], ["have", "htB : t1.alloc = N", "hcl.alloc.trans htA"], ["seg", "x", "0"], ["call", "mpExch", "sp - 80, sp - 56, qdp, pa, adp, t1, a", "_", {"res": "by show t1.sign < 2 ^ 31; rw [hcl.sign]; split <;> first | decide | exact hsg"}], ["seg", "c", "0"], ["call", "mpClear", "sp - 80, sp - 56, adp, a, (qdp, 4 * N) :: H", "_", {"perm": "List.Perm.swap (digBlk adp a) (qdp, 4 * N) H"}], ["seg", "e", "0", {"r": "0#64"}], ["exit", "some"]]}},
+ "exits": {
+  "some": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "have hlf := long_fin pr rfl hcl", "exact Lbl.exit fun cf hat => ⟨some (qdp, t1), _M, hat.sub rfl rfl, hlf.1,", "  { wit := fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩", "      | aD => exact absurd rfl hrs", "      | _ => simp [ws] at hr", "    wsite := ⟨Iv.sub_self _, _h.dig nS rfl⟩", "    place := .fresh (by rw [hlf.2]; exact fr) (by rw [hlf.2]; om)", "    frame := hfr", "    heap := by show AHeap _ ((qdp, 4 * t1.alloc) :: H); rw [hlf.2]; exact hh", "    foot := fun _ hx => (foot_uncons (e := digBlk adp a) (Foot.of_cons hx)).imp id id", "    off := by show Off ⟨qdp, 4 * t1.alloc⟩ ((qdp, 4 * t1.alloc) :: H); rw [hlf.2]; exact _hp.off nS }⟩"],
+  "none": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "exact Lbl.exit fun cf hat => ⟨none, _M, hat.sub rfl rfl, trivial,", "  { wit := fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩", "      | aD => exact absurd rfl hrs", "      | _ => simp [ws] at hr", "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := .keep", "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .aD }⟩"]}}

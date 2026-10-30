@@ -1,0 +1,698 @@
+{
+ "fn": "s_mp_montgomery_reduce_fast",
+ "mod": "MontRedFastG",
+ "src": "mredfg",
+ "pfx": "mrf",
+ "imports": [
+  "Tom.Machine.Kit.GenX_seg5a",
+  "Tom.Machine.Kit.WinVal",
+  "Tom.Machine.Kit.GenX_capf"
+ ],
+ "opens": [
+  "Tom.Machine.WV.Win"
+ ],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "nat": "sp px pn rho nu ou al xdp ndp i ix iy md w y t u k e r p a x",
+ "keep": "gp tp",
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:px a1:pn a2:rho",
+  "e1": "sp:sp-4256 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:px a1:pn a2:rho",
+  "jo": "sp:sp-4256 s0 s1 s2 s3 s4 s5 s7 s8 s9 s11 s6:pn s10:nu a1:ou",
+  "gc": "@jo a0:px a1:nu+1",
+  "gm0": "sp:sp-4256 s0 s1 s2 s3 s4 s5 s7 s8 s9 s11 s6:pn s10:nu a0:e",
+  "zm": "@jo s3:sp-4208 s4:xdp a0:sp-4208+4*0 a1:0 a2:4*(2*(2*nu+1))",
+  "c1": "sp:sp-4256 s0 s1 s2 s5 s7 s8 s9 s11 s6:pn s10:nu s3:sp-4208 s4:xdp",
+  "cl": "@c1 a1:ou a2:xdp+4*ou a4:sp-4208+8*i a5:xdp+4*i",
+  "ce": "@c1 a1:ou",
+  "cz": "@c1 a0:sp-4208+4*(2*ou) a1:0 a2:4*(2*(2*nu+1)-2*ou)",
+  "oh": "sp:sp-4256 s1:ndp+4*nu s2:sp-4208+8*ix s3:sp-4208 s4:xdp s5:268435455 s6:pn s8:ndp s9:sp-4208+8*nu s10:nu",
+  "m1": "@oh s11:sp-4208+8*ix a0:w%268435456 a1:rho",
+  "m2": "@oh s11:sp-4208+8*ix a0:w%268435456*rho",
+  "ih": "@oh s0:md s7:ndp+4*iy s11:sp-4208+8*(ix+iy)",
+  "m3": "@ih s11:sp-4208+8*(ix+iy)+8 a0:y a1:md",
+  "m4": "@ih s11:sp-4208+8*(ix+iy)+8 a0:y*md",
+  "kh": "@ih s7:ndp+4*nu s11:sp-4208+8*(ix+nu)",
+  "lz": "sp:sp-4256 s0:md s1:ndp+4*nu s2:sp-4208+8*nu s3:sp-4208 s4:xdp s5:268435455 s6:pn s7:ndp+4*nu s8:ndp s9:sp-4208+8*nu s10:nu s11:sp-4208+8*(nu-1+nu)",
+  "th": "@lz a1:sp-4208+8*(2*nu+1) a2:sp-4208+8*(nu+k) a5:sp-4208+8*(nu+1+k)",
+  "t1": "@lz s3:sp-4208",
+  "xh": "@lz s3:sp-4208+8*(nu+i) s4:xdp+4*i a3:268435455 a4:i",
+  "y0": "@lz s3:sp-4208+8*(2*nu+1) s4:xdp+4*(nu+1) a3:268435455 a4:nu+1",
+  "y1": "@lz s3:sp-4208+8*(2*nu+1) s4:xdp+4*(nu+1)",
+  "ms": "@y1 a0:xdp+4*(nu+1) a1:0 a2:4*(ou-(nu+1))",
+  "cl0": "@y1 a0:px",
+  "cm": "@y1 a0:px a1:pn",
+  "cq": "@y1 a0:r",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e",
+  "ts": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:px a1:pn a2:px",
+  "g1": "sp:sp-4256 s0 s1 s2 s3 s4 s5 s7 s8 s9 s11 s6:pn s10:nu a5:px",
+  "j1": "@jo a5:px",
+  "u0": "@y1 a4:px a5:nu+1",
+  "jy": "@j1 s4:xdp a5:2*nu"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 4256) 4256",
+   "sp % 16 = 0",
+   "4256 ≤ sp",
+   "sp ≤ sMpMontgomeryReduceFastBase ∨ sMpMontgomeryReduceFastBase + 864 ≤ sp - 4256"
+  ],
+  "SR": [
+   "Ram p 24",
+   "p % 8 = 0",
+   "p + 24 ≤ sp - 4256 ∨ sp ≤ p"
+  ],
+  "U": [
+   "bytesT4 M p = BitVec.ofNat 32 u",
+   "u < 2 ^ 31"
+  ],
+  "AL": [
+   "bytesT4 M (p + 4) = BitVec.ofNat 32 u",
+   "u < 2 ^ 31"
+  ],
+  "PT": [
+   "bytesT8 M (p + 16) = BitVec.ofNat 64 a"
+  ],
+  "FO": [
+   "bytesT8 M (sp - 4240) = BitVec.ofNat 64 ou"
+  ],
+  "FR": [
+   "bytesT8 M (sp - 4248) = BitVec.ofNat 64 rho"
+  ],
+  "FX": [
+   "bytesT8 M (sp - 4232) = BitVec.ofNat 64 px"
+  ],
+  "F2": [
+   "bytesT8 M (sp - 4216) = BitVec.ofNat 64 (2 * nu)"
+  ],
+  "F8": [
+   "bytesT8 M (sp - 4224) = BitVec.ofNat 64 (8 * nu)"
+  ],
+  "FD": [
+   "bytesT8 M (sp - 4240) = BitVec.ofNat 64 ((ou + 18446744073709551616 - (nu + 1)) % 18446744073709551616)"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = s1",
+   "bytesT8 M (sp - 32) = s2",
+   "bytesT8 M (sp - 40) = s3",
+   "bytesT8 M (sp - 48) = s4",
+   "bytesT8 M (sp - 56) = s5",
+   "bytesT8 M (sp - 64) = s6",
+   "bytesT8 M (sp - 72) = s7",
+   "bytesT8 M (sp - 80) = s8",
+   "bytesT8 M (sp - 88) = s9",
+   "bytesT8 M (sp - 96) = s10",
+   "bytesT8 M (sp - 104) = s11"
+  ],
+  "DG": [
+   "bytesT4 M a = BitVec.ofNat 32 x",
+   "x < 268435456",
+   "Ram a 4"
+  ],
+  "LW": [
+   "bytesT8 M a = BitVec.ofNat 64 w",
+   "w < 2 ^ 64",
+   "Ram a 8"
+  ],
+  "WS": [
+   "Ram a 8",
+   "a % 8 = 0",
+   "a + 8 ≤ sMpMontgomeryReduceFastBase ∨ sMpMontgomeryReduceFastBase + 864 ≤ a"
+  ],
+  "XA": [
+   "Ram xdp (4 * al)",
+   "xdp % 4 = 0",
+   "xdp + 4 * al ≤ sMpMontgomeryReduceFastBase ∨ sMpMontgomeryReduceFastBase + 864 ≤ xdp",
+   "xdp + 4 * al ≤ sp - 4256 ∨ sp ≤ xdp",
+   "xdp + 4 * al ≤ pn ∨ pn + 24 ≤ xdp",
+   "al < 2 ^ 31"
+  ],
+  "L0": [
+   "bytesT8 M (sp - 4240) = BitVec.ofNat 64 ou",
+   "bytesT8 M (sp - 4248) = BitVec.ofNat 64 rho",
+   "bytesT8 M (sp - 4232) = BitVec.ofNat 64 px"
+  ],
+  "L1": [
+   "bytesT8 M (sp - 4240) = BitVec.ofNat 64 ou",
+   "bytesT8 M (sp - 4248) = BitVec.ofNat 64 rho",
+   "bytesT8 M (sp - 4232) = BitVec.ofNat 64 px",
+   "bytesT8 M (sp - 4216) = BitVec.ofNat 64 (2 * nu)",
+   "bytesT8 M (sp - 4224) = BitVec.ofNat 64 (8 * nu)"
+  ]
+ },
+ "segs": [
+  {
+   "n": "p1",
+   "at": "3d9c",
+   "to": "3de4",
+   "pre": "ent",
+   "post": "e1",
+   "h": [
+    "SR{p:=px}",
+    "U{p:=px, u:=ou}"
+   ],
+   "doc": "The frame; save `ra`, `s0`–`s11`; spill `olduse = x->used`.",
+   "stu": [
+    "ou"
+   ]
+  },
+  {
+   "n": "p2",
+   "at": "3de4 F F",
+   "to": "3e0c",
+   "pre": "e1",
+   "post": "jo",
+   "h": [
+    "FO",
+    "ou ≤ 512",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}",
+    "SR{p:=px}",
+    "AL{p:=px, u:=al}",
+    "nu < al"
+   ],
+   "doc": "`x->used ≤ MP_WARRAY`; spill `rho`, `x`; `x->alloc > n->used`: no `mp_grow`."
+  },
+  {
+   "n": "pg",
+   "at": "3de4 F T",
+   "pre": "e1",
+   "post": "gc",
+   "h": [
+    "FO",
+    "ou ≤ 512",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}",
+    "SR{p:=px}",
+    "AL{p:=px, u:=al}",
+    "al ≤ nu",
+    "nu < 2 ^ 30"
+   ],
+   "doc": "`x->alloc ≤ n->used`: spill `rho`, `x`; `mp_grow(x, n->used + 1)`."
+  },
+  {
+   "n": "gm",
+   "at": "4048 T",
+   "pre": "gm0",
+   "post": "rt",
+   "h": [
+    "RF",
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_grow` failed: restore, return its error."
+  },
+  {
+   "n": "go",
+   "at": "4048 F",
+   "to": "4054",
+   "pre": "gm0{e:=0}",
+   "post": "g1",
+   "h": [
+    "FX",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}"
+   ],
+   "doc": "Grown: `x`, `n->used` reloaded."
+  },
+  {
+   "n": "g2",
+   "at": "4054",
+   "to": "3e0c",
+   "pre": "g1",
+   "post": "jo",
+   "h": [
+    "SR{p:=px}",
+    "U{p:=px, u:=ou}"
+   ],
+   "doc": "`x->used`; to the copy-in."
+  },
+  {
+   "n": "jx",
+   "at": "3e0c",
+   "to": "3e10",
+   "pre": "jo",
+   "post": "j1",
+   "h": [
+    "FX"
+   ],
+   "doc": "`x` reloaded."
+  },
+  {
+   "n": "jz",
+   "at": "3e10 T",
+   "pre": "j1",
+   "post": "jy",
+   "h": [
+    "SR{p:=px}",
+    "PT{p:=px, a:=xdp}",
+    "ou = 0",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`olduse = 0`: `x->dp`; spill `2 n->used`.",
+   "stu": [
+    "2 * nu"
+   ],
+   "to": "40b4"
+  },
+  {
+   "n": "jw",
+   "at": "40b4 F",
+   "pre": "jy",
+   "post": "zm",
+   "h": [
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`MP_ZERO_BUFFER(W, 8 (2 n->used + 1))`."
+  },
+  {
+   "n": "zr",
+   "at": "40d0 T",
+   "to": "3e74",
+   "pre": "c1",
+   "post": "oh{ix:=0}",
+   "h": [
+    "SR{p:=pn}",
+    "PT{p:=pn, a:=ndp}",
+    "0 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`n->used ≠ 0`: `n->dp`, `8 n->used`, the mask; to the rows.",
+   "stu": [
+    "8 * nu"
+   ]
+  },
+  {
+   "n": "c0",
+   "at": "3e10 F",
+   "to": "3e2c",
+   "pre": "j1",
+   "post": "cl{i:=0}",
+   "h": [
+    "SR{p:=px}",
+    "PT{p:=px, a:=xdp}",
+    "0 < ou",
+    "ou ≤ 512"
+   ],
+   "doc": "`x->dp`; the copy-in's pointers."
+  },
+  {
+   "n": "ct",
+   "at": "3e2c T",
+   "to": "3e2c",
+   "pre": "cl",
+   "post": "cl{i:=i+1}",
+   "h": [
+    "DG{a:=xdp+4*i, x:=y}",
+    "WS{a:=sp-4208+8*i}",
+    "i + 1 < ou",
+    "ou ≤ 512"
+   ],
+   "doc": "`*_W++ = *tmpx++`; the back edge.",
+   "stu": [
+    "y"
+   ]
+  },
+  {
+   "n": "cf",
+   "at": "3e2c F",
+   "to": "3e40",
+   "pre": "cl",
+   "post": "ce",
+   "h": [
+    "DG{a:=xdp+4*i, x:=y}",
+    "WS{a:=sp-4208+8*i}",
+    "i + 1 = ou",
+    "ou ≤ 512"
+   ],
+   "doc": "The last digit copied.",
+   "stu": [
+    "y"
+   ]
+  },
+  {
+   "n": "cm",
+   "at": "3e40 T",
+   "pre": "ce",
+   "post": "cz",
+   "h": [
+    "ou ≤ 2 * nu",
+    "0 < ou",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`2 n->used ≥ olduse`: spill `2 n->used`; `MP_ZERO_BUFFER(_W, 8 (2 n->used + 1 - olduse))`.",
+   "stu": [
+    "2 * nu"
+   ]
+  },
+  {
+   "n": "cr",
+   "at": "403c",
+   "to": "3e74",
+   "pre": "c1",
+   "post": "oh{ix:=0}",
+   "h": [
+    "SR{p:=pn}",
+    "PT{p:=pn, a:=ndp}",
+    "0 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "To the rows: `n->dp`, `8 n->used`, the mask.",
+   "stu": [
+    "8 * nu"
+   ]
+  },
+  {
+   "n": "ol",
+   "at": "3e74",
+   "pre": "oh",
+   "post": "m1",
+   "h": [
+    "LW{a:=sp-4208+8*ix}",
+    "FR"
+   ],
+   "doc": "Row `ix`: `__muldi3(W[ix] & MP_MASK, rho)`."
+  },
+  {
+   "n": "om",
+   "at": "3e88",
+   "to": "3e98",
+   "pre": "m2",
+   "post": "ih{iy:=0, md:=w%268435456*rho%268435456}",
+   "h": [
+    "w % 268435456 * rho < 2 ^ 56"
+   ],
+   "doc": "`mu := … & MP_MASK`; the inner loop's pointers."
+  },
+  {
+   "n": "il",
+   "at": "3e98",
+   "pre": "ih",
+   "post": "m3",
+   "h": [
+    "DG{a:=ndp+4*iy, x:=y}"
+   ],
+   "doc": "The inner head: `__muldi3(n[iy], mu)`."
+  },
+  {
+   "n": "ib",
+   "at": "3ea8 T",
+   "to": "3e98",
+   "pre": "m4",
+   "post": "ih{iy:=iy+1}",
+   "st": [
+    "t + y * md"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*(ix+iy), w:=t}",
+    "WS{a:=sp-4208+8*(ix+iy)}",
+    "t + y * md < 2 ^ 64",
+    "iy + 1 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`*_W++ += mu * *tmpn++`; the back edge."
+  },
+  {
+   "n": "ie",
+   "at": "3ea8 F",
+   "to": "3ebc",
+   "pre": "m4",
+   "post": "kh",
+   "st": [
+    "t + y * md"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*(ix+iy), w:=t}",
+    "WS{a:=sp-4208+8*(ix+iy)}",
+    "t + y * md < 2 ^ 64",
+    "iy + 1 = nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "The row's last term."
+  },
+  {
+   "n": "kb",
+   "at": "3ebc T",
+   "to": "3e74",
+   "pre": "kh",
+   "post": "oh{ix:=ix+1}",
+   "st": [
+    "u + t / 268435456"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*ix, w:=t}",
+    "LW{a:=sp-4208+8*ix+8, w:=u}",
+    "WS{a:=sp-4208+8*ix+8}",
+    "u + t / 268435456 < 2 ^ 64",
+    "ix + 1 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`W[ix + 1] += W[ix] >> MP_DIGIT_BIT`; the next row."
+  },
+  {
+   "n": "ke",
+   "at": "3ebc F",
+   "to": "3ed8",
+   "pre": "kh",
+   "post": "lz",
+   "st": [
+    "u + t / 268435456"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*ix, w:=t}",
+    "LW{a:=sp-4208+8*ix+8, w:=u}",
+    "WS{a:=sp-4208+8*ix+8}",
+    "u + t / 268435456 < 2 ^ 64",
+    "ix + 1 = nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "The last row's carry."
+  },
+  {
+   "n": "t0",
+   "at": "3ed8 F",
+   "to": "3f14",
+   "pre": "lz",
+   "post": "th{k:=0}",
+   "h": [
+    "F2",
+    "F8",
+    "0 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "The tail carries' pointers (`ix = n->used`)."
+  },
+  {
+   "n": "tb",
+   "at": "3f14 T",
+   "to": "3f14",
+   "pre": "th",
+   "post": "th{k:=k+1}",
+   "st": [
+    "u + t / 268435456"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*(nu+k), w:=t}",
+    "LW{a:=sp-4208+8*(nu+1+k), w:=u}",
+    "WS{a:=sp-4208+8*(nu+1+k)}",
+    "u + t / 268435456 < 2 ^ 64",
+    "k + 1 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`W[ix + 1] += W[ix] >> MP_DIGIT_BIT`; the back edge."
+  },
+  {
+   "n": "tx",
+   "at": "3f14 F",
+   "to": "3f34",
+   "pre": "th",
+   "post": "t1",
+   "st": [
+    "u + t / 268435456"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*(nu+k), w:=t}",
+    "LW{a:=sp-4208+8*(nu+1+k), w:=u}",
+    "WS{a:=sp-4208+8*(nu+1+k)}",
+    "u + t / 268435456 < 2 ^ 64",
+    "k + 1 = nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "The last tail carry."
+  },
+  {
+   "n": "t2",
+   "at": "3f34 F",
+   "to": "3f44",
+   "pre": "t1",
+   "post": "t1",
+   "h": [
+    "0 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "Spill `8 n->used`.",
+   "stu": [
+    "8 * nu"
+   ]
+  },
+  {
+   "n": "t3",
+   "at": "3f44",
+   "to": "3f58",
+   "pre": "t1",
+   "post": "xh{i:=0}",
+   "h": [
+    "F8",
+    "0 < nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "The copy-out's pointers."
+  },
+  {
+   "n": "xb",
+   "at": "3f58 T",
+   "to": "3f58",
+   "pre": "xh",
+   "post": "xh{i:=i+1}",
+   "st": [
+    "w % 268435456"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*(nu+i)}",
+    "XA",
+    "i < al",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}",
+    "i + 1 ≤ nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`*tmpx++ = *_W++ & MP_MASK`; the back edge (`ix ≤ n->used`)."
+  },
+  {
+   "n": "xe",
+   "at": "3f58 F",
+   "to": "3f78",
+   "pre": "xh",
+   "post": "y0",
+   "st": [
+    "w % 268435456"
+   ],
+   "h": [
+    "LW{a:=sp-4208+8*(nu+i)}",
+    "XA",
+    "i < al",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}",
+    "i = nu",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "The top column copied."
+  },
+  {
+   "n": "y0",
+   "at": "3f78",
+   "to": "3f84",
+   "pre": "y0",
+   "post": "y1",
+   "stu": [
+    "(ou + 18446744073709551616 - (nu + 1)) % 18446744073709551616"
+   ],
+   "h": [
+    "FO",
+    "ou ≤ 512",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`olduse -= ix`."
+  },
+  {
+   "n": "ys",
+   "at": "3f84 T",
+   "pre": "y1",
+   "post": "u0",
+   "h": [
+    "FD",
+    "ou ≤ nu + 1",
+    "nu < 2 ^ 29",
+    "FX",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}"
+   ],
+   "doc": "Nothing above to zero.",
+   "to": "3fac"
+  },
+  {
+   "n": "yz",
+   "at": "3f84 F",
+   "pre": "y1",
+   "post": "ms",
+   "h": [
+    "FD",
+    "nu + 1 < ou",
+    "ou ≤ 512",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`MP_ZERO_DIGITS(tmpx, olduse)` (`memset`)."
+  },
+  {
+   "n": "yu",
+   "at": "3fa0",
+   "pre": "y1",
+   "post": "u0",
+   "h": [
+    "FX",
+    "SR{p:=pn}",
+    "U{p:=pn, u:=nu}",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "After `memset`.",
+   "to": "3fac"
+  },
+  {
+   "n": "us",
+   "at": "3fac",
+   "pre": "u0",
+   "post": "cl0",
+   "h": [
+    "SR{p:=px}",
+    "nu < 2 ^ 29"
+   ],
+   "doc": "`x->used := n->used + 1`; `mp_clamp(x)`."
+  },
+  {
+   "n": "fc",
+   "at": "3fb8",
+   "pre": "y1",
+   "post": "cm",
+   "h": [
+    "FX"
+   ],
+   "doc": "`mp_cmp_mag(x, n)`."
+  },
+  {
+   "n": "lt",
+   "at": "3fc4 F",
+   "pre": "cq",
+   "post": "rt{e:=0}",
+   "h": [
+    "RF",
+    "r = 18446744073709551615"
+   ],
+   "doc": "`|x| < |n|`: restore, return `MP_OKAY`."
+  },
+  {
+   "n": "ge",
+   "at": "3fc4 T",
+   "to": "4564",
+   "pre": "cq",
+   "post": "ts",
+   "h": [
+    "FX",
+    "RF",
+    "r ≠ 18446744073709551615",
+    "r < 2 ^ 64"
+   ],
+   "doc": "`|x| ≥ |n|`: restore; tail call `s_mp_sub(x, n, x)`."
+  }
+ ]
+}

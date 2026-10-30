@@ -1,0 +1,1351 @@
+{
+ "#": "s_mp_montgomery_reduce_fast(x, n, rho) growing x (Api/MontRedFastG.lean): mp_grow(x, n->used + 1) by Std.mpGrowF when x->alloc <= n->used, then the room proof's column algorithm (Fn/MontRedFastMain.lean) over x's block at q: W[MP_WARRAY] as a digit array of halves (Kit/W64.lean, St.seqD8' by the \"d8\" rule), the copy-in (C), the rows (O, I, K), the tail carries (T), the copy-out (X) by St.seqOvl, mp_clamp and mp_cmp_mag (Y), return or the tail call s_mp_sub(x, n, x) over x's re-placed block; model steps Spec/MontRedFastGStep.lean.",
+ "fn": "s_mp_montgomery_reduce_fast (growing)",
+ "mod": "MontRedFastGMainG",
+ "ns": "Tom.Machine.Fn.MontRedFastGG5",
+ "api": "MontRedFastG",
+ "rows": "experiments/segs/mredfg.rows.json",
+ "code": "sMpMontgomeryReduceFast",
+ "F": 4800,
+ "dsimp_q": true,
+ "hdig": false,
+ "imports": [
+  "Tom.Machine.Api.MontRedFastG",
+  "Tom.Machine.Api.StdNorm",
+  "Tom.Machine.Fn.MontRedFastG",
+  "Tom.Machine.Fn.MontRedFastMain",
+  "Tom.Machine.Kit.Run",
+  "Tom.Machine.Kit.Grow",
+  "Tom.Machine.Kit.Buf",
+  "Tom.Machine.Kit.Replace",
+  "Tom.Machine.Kit.Placed",
+  "Tom.Spec.MontRedFastGStep"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.MontRedFastG Tom.MontRedFastGStep Tom.Mont Tom.MontRedStep",
+  "open Tom.Machine.Fn.MontRedFast (gW W0 Ws Wt gW_upd gW_ld gW_lt gC_step gC_fill gC_zero W0_lt)",
+  "open Tom.Machine.Api.MpReduce2k (R P kind isW ws)",
+  "open Tom.Machine.Api.MontRedFastG (lay Res)"
+ ],
+ "R": [
+  "stk",
+  "aS",
+  "aD",
+  "nS",
+  "nD",
+  "code"
+ ],
+ "written": [
+  "stk",
+  "aS",
+  "aD"
+ ],
+ "Rk": {
+  "aS": "S pa adp a",
+  "aD": "D adp a"
+ },
+ "lay_rfl": {
+  "nS": "⟨p.pn, 24⟩",
+  "nD": "⟨p.ndp, 4 * p.n.alloc⟩"
+ },
+ "frame": [
+  [
+   "nH",
+   112
+  ],
+  [
+   "nW",
+   4096
+  ],
+  [
+   "nL",
+   48
+  ]
+ ],
+ "refs": {
+  "nW": "D sp - 4208",
+  "nR .aS": "S pa",
+  "nR .aD": "D q",
+  "nR .nS": "S pn",
+  "nR .nD": "D ndp"
+ },
+ "ctx_vocab": {
+  "px": "z.p.pa",
+  "rho": "z.p.d",
+  "nu": "z.p.n.used",
+  "al": "z.p.a.alloc",
+  "ou": "z.p.a.used",
+  "hin": "Api.MontRedFastG.hin z.p"
+ },
+ "rowdef": {
+  "xdp": "q"
+ },
+ "loads": {
+  "DG": {
+   "addr": "a",
+   "val": "x"
+  }
+ },
+ "digits": {
+  "q": "A.digit",
+  "ndp": "n.digit"
+ },
+ "pos": [
+  "hres.apos",
+  "MpInt.alloc_pos_of_mag hres.vn (npos hres.x_lt)"
+ ],
+ "defs": [
+  "/-- The layout once `x`'s digits are at `q` with `A`'s allocation. -/",
+  "def ρg (p : P) (q : Nat) (A : MpInt) : X → Iv := Iv.upd (ρX p) (nR .aD) ⟨q, 4 * A.alloc⟩"
+ ],
+ "prelude": [
+  "have eE : heapEnd = 0x87800000 := rfl; have eF : Api.MontRedFastG.F = 4800 := rfl; have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi",
+  "have hva := hres.va; have hvn := hres.vn; have := hva.used_le; have := hva.alloc_lt; have := hvn.used_le; have := hvn.alloc_lt",
+  "have := hres.apos; have hnu := nu_pos hres.x_lt; have hnul := hres.nu_le; have hrho : rho < 268435456 := hres.rho_lt",
+  "have hou : ou ≤ 2 * nu := MontRedStep.used_le hva hvn hres.x_lt; have hdn : ∀ j, n.digit j < radix := hvn.toShape.digit_lt",
+  "have hw0 : ∀ j, W0 a j < radix := W0_lt hva.toShape",
+  "have eB : sMpMontgomeryReduceFastBase = 0x80003d9c := rfl; have eG : MpGrow.F = 544 := rfl",
+  "have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hR : RamH (sp - 4256) 4256 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩",
+  "have hRa : RamH pa 24 := ⟨(Hdr.geom (show Hdr m pa adp a from (hB .aS).2)).st⟩; have hRn : RamH pn 24 := ⟨(Hdr.geom (show Hdr m pn ndp n from (hB .nS).2)).st⟩",
+  "have hpa := hS .aS .stk (by decide); have hpn := hS .nS .stk (by decide); have hco := hS .stk .code (by decide); have hca := hS .aS .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_nS, layE_code, textIv] at hpa hpn hco hca",
+  "have hco' : textBase + textLen ≤ sp - 4800 := by rcases hco with h | h <;> omega",
+  "have hpaF : DisjH (pa + 24 ≤ sp - 4256 ∨ sp ≤ pa) := ⟨by rcases hpa with h | h <;> omega⟩",
+  "have hpnF : DisjH (pn + 24 ≤ sp - 4256 ∨ sp ≤ pn) := ⟨by rcases hpn with h | h <;> omega⟩",
+  "have hcaH : DisjH (pa + 24 ≤ textBase ∨ textBase + textLen ≤ pa) := ⟨hca⟩",
+  "clear hco hpa hpn hca"
+ ],
+ "let": {
+  "RFP": "⟨by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log⟩",
+  "LOOP": "M Mk m0 m1 : Mem; q : Nat; A : MpInt; old : Nat → Nat",
+  "WB": "sp - 4208",
+  "DIG": "(by simp [ρg, Iv.upd, ρX, ρ3, Split.lay, layE_stk]; omega) (by simp [ρg, Iv.upd, ρX, ρ3, Split.lay, layE_stk]) (by om)",
+  "WIT": [
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩",
+   "      | aD => exact absurd rfl hrs",
+   "      | _ => simp [ws] at hr"
+  ],
+  "FOOT": "fun y hy => (foot_uncons (e := digBlk adp a) (Foot.of_cons hy)).imp id id",
+  "PREM": [
+   [
+    "rf",
+    "RF m0 ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s6 s.s7 s.s8 s.s9 s.s10 s.s11 sp"
+   ],
+   [
+    "lf",
+    "L1 m1 sp px rho nu ou"
+   ],
+   [
+    "hA",
+    "A = mfIn a nu"
+   ],
+   [
+    "pl",
+    "Place hin (lay p .aD) ⟨q, 4 * A.alloc⟩"
+   ]
+  ],
+  "AP": "have hAv := mfIn_valid (nu := nu) hva (by omega); rw [← hA] at hAv; have := hAv.used_le; have := hAv.alloc_lt; have hAr := mfIn_room a nu; rw [← hA] at hAr; have hAu := mfIn_used a nu; rw [← hA] at hAu",
+  "RO2": "by rw [Tom.Machine.Api.Two.bytesT8_log_out _ _ _ (by simp only [Vsa.Sim.OutLRange, and_true, true_and]; omega), Tom.Machine.Api.Two.bytesT8_log_out _ _ _ (by simp only [Vsa.Sim.OutLRange, and_true, true_and]; omega)]; load_fwd; try rfl",
+  "RO1L": "by rw [Tom.Machine.Api.Two.bytesT8_log_out _ _ _ (by simp only [Vsa.Sim.OutLRange, and_true, true_and]; omega)]; rd_log"
+ },
+ "blocks": {
+  "TAIL": [
+   [
+    "call",
+    "clamp",
+    "pa, q, outv A nu (outF n rho (W0 a))",
+    "x2",
+    {
+     "hq": "hcl",
+     "res": "outv_shape hAr hAv.alloc_lt (outF_lt n rho (W0 a))"
+    }
+   ],
+   [
+    "have",
+    "hmid",
+    "outv_mid (x := a) hva hvn hres.rho_ok hres.x_lt (fun j => rfl) (by rw [← hA]; exact hcl) (by omega)"
+   ],
+   [
+    "tac",
+    "rw [← hA] at hmid"
+   ],
+   [
+    "have",
+    "hx2a : x2.alloc = A.alloc",
+    "hmid.alloc"
+   ],
+   [
+    "redig",
+    "nR .aD",
+    "hcl.alloc",
+    "hcl.digit"
+   ],
+   [
+    "seg",
+    "fc",
+    "0"
+   ],
+   [
+    "call",
+    "cmpMag",
+    "pa, q, pn, ndp, x2, n",
+    "_",
+    {
+     "res": "⟨hmid.valid, hvn⟩"
+    }
+   ],
+   [
+    "if",
+    "x2.mag < n.mag",
+    [
+     [
+      "tac",
+      "simp only [Std.cmpMag, cmp_lt hlt]"
+     ],
+     [
+      "set",
+      {
+       "r": "18446744073709551615"
+      }
+     ],
+     [
+      "seg",
+      "lt",
+      "0"
+     ],
+     [
+      "exit",
+      "ok"
+     ]
+    ],
+    [
+     [
+      "tac",
+      "simp only [Std.cmpMag, cmp_ge hlt]; have hc1 : (if x2.mag = n.mag then 0 else 1) ≤ 1 := by split <;> omega"
+     ],
+     [
+      "set",
+      {
+       "r": "if x2.mag = n.mag then 0 else 1"
+      }
+     ],
+     [
+      "seg",
+      "ge",
+      "0"
+     ],
+     [
+      "forget",
+      "nH"
+     ],
+     [
+      "tail",
+      "sSubA",
+      "sp, pa, q, pn, ndp, x2, n",
+      "x3",
+      {
+       "hq": "hss",
+       "K'": "v.keep",
+       "res": "⟨hmid.valid.toShape, hvn.toShape, hmid.valid.sign_ok, hmid.ge hvn hlt, by om, by om⟩",
+       "sig": {
+        "stk": "nH"
+       }
+      }
+     ],
+     [
+      "exit",
+      "sub"
+     ]
+    ],
+    "hlt"
+   ]
+  ]
+ },
+ "cuts": {
+  "E": {
+   "pc": "3d9c",
+   "regs": "ent",
+   "mu": "6, 0, 0",
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κX p m) m m"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"
+    ]
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "q": "adp"
+     }
+    ],
+    [
+     "seg",
+     "p1",
+     "ws nH nL"
+    ],
+    [
+     "jump",
+     "P",
+     {
+      "rf": "{RFP}",
+      "lo": "⟨by rd_log⟩"
+     }
+    ]
+   ]
+  },
+  "J": {
+   "pc": "3e0c",
+   "regs": "jo",
+   "vars": "M Mk m0 m1 : Mem; q : Nat; A : MpInt",
+   "mu": "5, 0, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc A.digit",
+    "nW": ".frz m"
+   },
+   "state": "@g",
+   "prem": [
+    [
+     "rf",
+     "RF m0 ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s6 s.s7 s.s8 s.s9 s.s10 s.s11 sp"
+    ],
+    [
+     "lf",
+     "L0 m1 sp px rho ou"
+    ],
+    [
+     "hA",
+     "A = mfIn a nu"
+    ],
+    [
+     "pl",
+     "Place hin (lay p .aD) ⟨q, 4 * A.alloc⟩"
+    ]
+   ],
+   "prelude": [
+    "{AP}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "jx",
+     "0"
+    ],
+    [
+     "tac",
+     "have @H' := St.ramDig (@H.forget nW rfl) nW (by simp [Kind.set]) (dp := sp - 4208) (n := 1024) {DIG}"
+    ],
+    [
+     "bind",
+     {
+      "old": "rdD @M (sp - 4208)"
+     }
+    ],
+    [
+     "if",
+     "ou = 0",
+     [
+      [
+       "seg",
+       "jz",
+       "ws nL"
+      ],
+      [
+       "seg",
+       "jw",
+       "0"
+      ],
+      [
+       "call",
+       "memsetD",
+       "sp - 4208, 1024, old, 0, 2 * (2 * nu + 1), 2 * (2 * nu + 1) - 0",
+       "_",
+       {
+        "res": "⟨by om, by om, by om⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 (zfill old 0 (2 * (2 * nu + 1)))",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (Ws a n rho 0) old nu) = .mpD (sp - 4208) 1024 ((zfill old 0 (2 * (2 * nu + 1)))) by simp only [Ws, fastRows]; rw [gC_zero (x := a) (by omega)])"
+      ],
+      [
+       "seg",
+       "zr",
+       "ws nL"
+      ],
+      [
+       "jump",
+       "O",
+       {
+        "vars": {
+         "ix": "0"
+        },
+        "lf": "⟨{RO2}, {RO2}, {RO2}, {RO1L}, by rd_log⟩",
+        "hix": "hnu"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "c0",
+       "0"
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 old",
+       "(show Kind.mpD (sp - 4208) 1024 (ovl (h32 (W0 a)) old (2 * 0)) = .mpD (sp - 4208) 1024 (old) by rw [Nat.mul_zero, ovl_zero])"
+      ],
+      [
+       "jump",
+       "C",
+       {
+        "vars": {
+         "i": "0"
+        },
+        "hi": "by om"
+       }
+      ]
+     ],
+     "hz"
+    ]
+   ]
+  },
+  "C": {
+   "pc": "3e2c",
+   "regs": "cl",
+   "vars": "{LOOP}; i : Nat",
+   "mu": "4, ou - i, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (ovl (h32 (W0 a)) old (2 * i))",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc A.digit"
+   },
+   "state": "@g",
+   "prem": [
+    [
+     "rf",
+     "RF m0 ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s6 s.s7 s.s8 s.s9 s.s10 s.s11 sp"
+    ],
+    [
+     "lf",
+     "L0 m1 sp px rho ou"
+    ],
+    [
+     "hA",
+     "A = mfIn a nu"
+    ],
+    [
+     "pl",
+     "Place hin (lay p .aD) ⟨q, 4 * A.alloc⟩"
+    ],
+    [
+     "hi",
+     "i < ou"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hAd : A.digit = a.digit := by rw [hA]; exact mfIn_digit hva.toShape nu",
+    "have hyi : A.digit i = W0 a i := by rw [hAd]; simp only [W0, if_pos hi]",
+    "have hyl : A.digit i < 268435456 := by rw [hAd]; exact hva.toShape.digit_lt i"
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "g": "ovl (h32 (W0 a)) old (2 * i)"
+     }
+    ],
+    [
+     "if",
+     "i + 1 < ou",
+     [
+      [
+       "seg",
+       "ct",
+       "d8 nW g"
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (ovl (h32 (W0 a)) old (2 * (i + 1))) = .mpD (sp - 4208) 1024 (g) by rw [hyi, gC_step])"
+      ],
+      [
+       "jump",
+       "C",
+       {
+        "vars": {
+         "i": "i + 1"
+        },
+        "hi": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "cf",
+       "d8 nW g"
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (ovl (h32 (W0 a)) old (2 * ou)) = .mpD (sp - 4208) 1024 (g) by rw [show ou = i + 1 by om, hyi, gC_step])"
+      ],
+      [
+       "seg",
+       "cm",
+       "ws nL"
+      ],
+      [
+       "call",
+       "memsetD",
+       "sp - 4208, 1024, ovl (h32 (W0 a)) old (2 * ou), 2 * ou, 2 * (2 * nu + 1), 2 * (2 * nu + 1) - 2 * ou",
+       "_",
+       {
+        "res": "⟨by om, by om, by om⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 (zfill (ovl (h32 (W0 a)) old (2 * ou)) (2 * ou) (2 * (2 * nu + 1)))",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (Ws a n rho 0) old nu) = .mpD (sp - 4208) 1024 ((zfill (ovl (h32 (W0 a)) old (2 * ou)) (2 * ou) (2 * (2 * nu + 1)))) by simp only [Ws, fastRows]; rw [gC_fill (by omega)])"
+      ],
+      [
+       "seg",
+       "cr",
+       "ws nL"
+      ],
+      [
+       "jump",
+       "O",
+       {
+        "vars": {
+         "ix": "0"
+        },
+        "lf": "⟨{RO2}, {RO2}, {RO2}, {RO1L}, by rd_log⟩",
+        "hix": "hnu"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "O": {
+   "pc": "3e74",
+   "regs": "oh",
+   "vars": "{LOOP}; ix : Nat",
+   "mu": "3, nu - ix, nu + 2",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (gW (Ws a n rho ix) old nu)",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc A.digit"
+   },
+   "state": "@g",
+   "prem": [
+    "{PREM}",
+    [
+     "hix",
+     "ix < nu"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hwb := rows_lt (rho := rho) hdn hw0 hnul (show ix ≤ nu by omega) ix",
+    "have hwm : Ws a n rho ix ix % 268435456 < 268435456 := Nat.mod_lt _ (by decide)"
+   ],
+   "edge": [
+    [
+     "seg",
+     "ol",
+     "0",
+     {
+      "w": "Ws a n rho ix ix",
+      "LW{a:=sp-4208+8*ix}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hwb, hwb, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+     }
+    ],
+    [
+     "mul",
+     "m2"
+    ],
+    [
+     "seg",
+     "om",
+     "0"
+    ],
+    [
+     "jump",
+     "I",
+     {
+      "vars": {
+       "iy": "0"
+      },
+      "hmd": "rfl",
+      "hiy": "hnu"
+     }
+    ]
+   ]
+  },
+  "I": {
+   "pc": "3e98",
+   "regs": "ih",
+   "vars": "{LOOP}; ix iy md : Nat",
+   "mu": "3, nu - ix, nu - iy + 1",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (gW (wRow n.digit md ix (Ws a n rho ix) iy) old nu)",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc A.digit"
+   },
+   "state": "@g",
+   "prem": [
+    "{PREM}",
+    [
+     "hix",
+     "ix < nu"
+    ],
+    [
+     "hmd",
+     "md = Ws a n rho ix ix % 268435456 * rho % 268435456"
+    ],
+    [
+     "hiy",
+     "iy < nu"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hmdl : md < radix := by rw [hmd]; exact Nat.mod_lt _ (by decide)",
+    "have hwb := row_lt (rho := rho) hdn hw0 hnul hix hmdl iy (ix + iy)",
+    "have hsum := row_sum_lt (rho := rho) hdn hw0 hnul hix hmdl iy",
+    "have hyl := hdn iy"
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "g": "gW (wRow n.digit md ix (Ws a n rho ix) iy) old nu"
+     }
+    ],
+    [
+     "seg",
+     "il",
+     "0"
+    ],
+    [
+     "mul",
+     "m4"
+    ],
+    [
+     "if",
+     "iy + 1 < nu",
+     [
+      [
+       "seg",
+       "ib",
+       "d8 nW g (ix + iy)",
+       {
+        "t": "wRow n.digit md ix (Ws a n rho ix) iy (ix + iy)",
+        "LW{a:=sp-4208+8*(ix+iy), w:=t}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hwb, hwb, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (wRow n.digit md ix (Ws a n rho ix) (iy + 1)) old nu) = .mpD (sp - 4208) 1024 (g) by rw [gW_upd (by omega)]; simp only [wRow]; rw [Nat.mul_comm md])"
+      ],
+      [
+       "jump",
+       "I",
+       {
+        "vars": {
+         "iy": "iy + 1"
+        },
+        "hiy": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "ie",
+       "d8 nW g (ix + iy)",
+       {
+        "t": "wRow n.digit md ix (Ws a n rho ix) iy (ix + iy)",
+        "LW{a:=sp-4208+8*(ix+iy), w:=t}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hwb, hwb, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (wRow n.digit md ix (Ws a n rho ix) nu) old nu) = .mpD (sp - 4208) 1024 (g) by rw [show nu = iy + 1 by om, gW_upd (by omega)]; simp only [wRow]; rw [Nat.mul_comm md])"
+      ],
+      [
+       "jump",
+       "K",
+       {}
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "K": {
+   "pc": "3ebc",
+   "regs": "kh",
+   "vars": "{LOOP}; ix md : Nat",
+   "mu": "3, nu - ix, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (gW (wRow n.digit md ix (Ws a n rho ix) nu) old nu)",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc A.digit"
+   },
+   "state": "@g",
+   "prem": [
+    "{PREM}",
+    [
+     "hix",
+     "ix < nu"
+    ],
+    [
+     "hmd",
+     "md = Ws a n rho ix ix % 268435456 * rho % 268435456"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hmdl : md < radix := by rw [hmd]; exact Nat.mod_lt _ (by decide)",
+    "have hw0b := row_lt (rho := rho) hdn hw0 hnul hix hmdl nu ix",
+    "have hw1b := row_lt (rho := rho) hdn hw0 hnul hix hmdl nu (ix + 1)",
+    "have hfx : wRow n.digit md ix (Ws a n rho ix) nu (ix + 1) + wRow n.digit md ix (Ws a n rho ix) nu ix / 268435456 < 2 ^ 64 := by rw [hmd]; exact fix_lt (rho := rho) hdn hw0 hnul hix",
+    "have hfe : Ws a n rho (ix + 1) = upd (wRow n.digit md ix (Ws a n rho ix) nu) (ix + 1) (wRow n.digit md ix (Ws a n rho ix) nu (ix + 1) + wRow n.digit md ix (Ws a n rho ix) nu ix / 268435456) := by rw [hmd]; rfl"
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "g": "gW (wRow n.digit md ix (Ws a n rho ix) nu) old nu"
+     }
+    ],
+    [
+     "if",
+     "ix + 1 < nu",
+     [
+      [
+       "seg",
+       "kb",
+       "d8 nW g (ix + 1)",
+       {
+        "t": "wRow n.digit md ix (Ws a n rho ix) nu ix",
+        "u": "wRow n.digit md ix (Ws a n rho ix) nu (ix + 1)",
+        "LW{a:=sp-4208+8*ix, w:=t}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hw0b, hw0b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩",
+        "LW{a:=sp-4208+8*ix+8, w:=u}": "⟨by rw [show sp - 4208 + 8 * ix + 8 = sp - 4208 + 8 * (ix + 1) by omega]; exact gW_ld (_h.dig nW rfl) (by omega) (by omega) hw1b, hw1b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (Ws a n rho (ix + 1)) old nu) = .mpD (sp - 4208) 1024 (g) by rw [hfe, gW_upd (by omega)])"
+      ],
+      [
+       "jump",
+       "O",
+       {
+        "vars": {
+         "ix": "ix + 1"
+        },
+        "hix": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "ke",
+       "d8 nW g (ix + 1)",
+       {
+        "t": "wRow n.digit md ix (Ws a n rho ix) nu ix",
+        "u": "wRow n.digit md ix (Ws a n rho ix) nu (ix + 1)",
+        "LW{a:=sp-4208+8*ix, w:=t}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hw0b, hw0b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩",
+        "LW{a:=sp-4208+8*ix+8, w:=u}": "⟨by rw [show sp - 4208 + 8 * ix + 8 = sp - 4208 + 8 * (ix + 1) by omega]; exact gW_ld (_h.dig nW rfl) (by omega) (by omega) hw1b, hw1b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (fastTail nu (Ws a n rho nu) 0) old nu) = .mpD (sp - 4208) 1024 (g) by simp only [fastTail]; rw [show Ws a n rho nu = Ws a n rho (ix + 1) by rw [show ix + 1 = nu by om], hfe, gW_upd (by omega)])"
+      ],
+      [
+       "seg",
+       "t0",
+       "0"
+      ],
+      [
+       "jump",
+       "T",
+       {
+        "vars": {
+         "k": "0"
+        },
+        "hk": "hnu"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "T": {
+   "pc": "3f14",
+   "regs": "th",
+   "vars": "{LOOP}; md k : Nat",
+   "mu": "2, nu - k, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (gW (fastTail nu (Ws a n rho nu) k) old nu)",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc A.digit"
+   },
+   "state": "@g",
+   "prem": [
+    "{PREM}",
+    [
+     "hk",
+     "k < nu"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hw0b := tail_lt (rho := rho) hdn hw0 hnul k (nu + k)",
+    "have hw1b := tail_lt (rho := rho) hdn hw0 hnul k (nu + 1 + k)",
+    "have hfx := tfix_lt (rho := rho) hdn hw0 hnul k",
+    "rw [show nu + k + 1 = nu + 1 + k by omega] at hfx"
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "g": "gW (fastTail nu (Ws a n rho nu) k) old nu"
+     }
+    ],
+    [
+     "if",
+     "k + 1 < nu",
+     [
+      [
+       "seg",
+       "tb",
+       "d8 nW g (nu + 1 + k)",
+       {
+        "t": "fastTail nu (Ws a n rho nu) k (nu + k)",
+        "u": "fastTail nu (Ws a n rho nu) k (nu + 1 + k)",
+        "LW{a:=sp-4208+8*(nu+k), w:=t}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hw0b, hw0b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩",
+        "LW{a:=sp-4208+8*(nu+1+k), w:=u}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hw1b, hw1b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (fastTail nu (Ws a n rho nu) (k + 1)) old nu) = .mpD (sp - 4208) 1024 (g) by rw [gW_upd (by omega)]; simp only [fastTail, wFix]; rw [show nu + k + 1 = nu + 1 + k by omega]; rfl)"
+      ],
+      [
+       "jump",
+       "T",
+       {
+        "vars": {
+         "k": "k + 1"
+        },
+        "hk": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "tx",
+       "d8 nW g (nu + 1 + k)",
+       {
+        "t": "fastTail nu (Ws a n rho nu) k (nu + k)",
+        "u": "fastTail nu (Ws a n rho nu) k (nu + 1 + k)",
+        "LW{a:=sp-4208+8*(nu+k), w:=t}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hw0b, hw0b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩",
+        "LW{a:=sp-4208+8*(nu+1+k), w:=u}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hw1b, hw1b, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩"
+       }
+      ],
+      [
+       "reK",
+       "nW",
+       ".mpD (sp - 4208) 1024 g",
+       "(show Kind.mpD (sp - 4208) 1024 (gW (Wt a n rho) old nu) = .mpD (sp - 4208) 1024 (g) by rw [show Wt a n rho = fastTail nu (Ws a n rho nu) (k + 1) by rw [show k + 1 = nu by om], gW_upd (by omega)]; simp only [fastTail, wFix]; rw [show nu + k + 1 = nu + 1 + k by omega]; rfl)"
+      ],
+      [
+       "seg",
+       "t2",
+       "ws nL"
+      ],
+      [
+       "seg",
+       "t3",
+       "0"
+      ],
+      [
+       "reK",
+       "nR .aD",
+       ".mpD q A.alloc A.digit",
+       "(show Kind.mpD q A.alloc (ovl (outF n rho (W0 a)) A.digit 0) = .mpD q A.alloc A.digit by rw [ovl_zero])"
+      ],
+      [
+       "jump",
+       "U",
+       {
+        "vars": {
+         "i": "0"
+        },
+        "lf": "⟨by rd_out, by rd_out, by rd_out, by rd_out, by rd_log⟩",
+        "hi": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "Y": {
+   "pc": "3fb4",
+   "regs": "cl0",
+   "vars": "M Mk m0 m1 : Mem; q : Nat; A : MpInt; old : Nat → Nat; md : Nat",
+   "mu": "0, 0, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (gW (Wt a n rho) old nu)",
+    "nR .aS": ".mpS pa q (outv A nu (outF n rho (W0 a)))",
+    "nR .aD": ".mpD q (outv A nu (outF n rho (W0 a))).alloc (outv A nu (outF n rho (W0 a))).digit"
+   },
+   "state": "@g",
+   "prem": [
+    [
+     "rf",
+     "RF m0 ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s6 s.s7 s.s8 s.s9 s.s10 s.s11 sp"
+    ],
+    [
+     "lf",
+     "FX m1 sp px"
+    ],
+    [
+     "hA",
+     "A = mfIn a nu"
+    ],
+    [
+     "pl",
+     "Place hin (lay p .aD) ⟨q, 4 * A.alloc⟩"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hova : (outv A nu (outF n rho (W0 a))).alloc = A.alloc := rfl"
+   ],
+   "edge": [
+    [
+     "use",
+     "TAIL"
+    ]
+   ]
+  },
+  "U": {
+   "pc": "3f58",
+   "regs": "xh",
+   "vars": "{LOOP}; md i : Nat",
+   "mu": "1, nu + 1 - i, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".mpD (sp - 4208) 1024 (gW (Wt a n rho) old nu)",
+    "nR .aS": ".mpS pa q A",
+    "nR .aD": ".mpD q A.alloc (ovl (outF n rho (W0 a)) A.digit i)"
+   },
+   "state": "@g",
+   "prem": [
+    "{PREM}",
+    [
+     "hi",
+     "i ≤ nu"
+    ]
+   ],
+   "prelude": [
+    "{AP}",
+    "have hwb := tail_lt (rho := rho) hdn hw0 hnul nu (nu + i)",
+    "have hqs : DisjH (q + 4 * A.alloc ≤ sp - 4256 ∨ sp ≤ q) := ⟨by have hd := pl.disj (hoff .stk) (hS .aD .stk (by decide)); simp only [Iv.Disj, Disj, layE_stk, layE_aD] at hd; exact hd.imp (fun h => Nat.le_trans h (Nat.sub_le_sub_left (by decide) _)) (fun h => by rwa [Nat.sub_add_cancel (Nat.le_trans (by decide) hlo)] at h)⟩"
+   ],
+   "edge": [
+    [
+     "if",
+     "i + 1 ≤ nu",
+     [
+      [
+       "seg",
+       "xb",
+       "o nR .aD",
+       {
+        "w": "Wt a n rho (nu + i)",
+        "_st": "(by om) (Nat.lt_trans (Nat.mod_lt _ (by decide)) (by decide))",
+        "LW{a:=sp-4208+8*(nu+i)}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hwb, hwb, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩",
+        "al": "A.alloc"
+       }
+      ],
+      [
+       "jump",
+       "U",
+       {
+        "vars": {
+         "i": "i + 1"
+        },
+        "hi": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "xe",
+       "o nR .aD",
+       {
+        "w": "Wt a n rho (nu + i)",
+        "_st": "(by om) (Nat.lt_trans (Nat.mod_lt _ (by decide)) (by decide))",
+        "LW{a:=sp-4208+8*(nu+i)}": "⟨gW_ld (_h.dig nW rfl) (by omega) (by omega) hwb, hwb, Ram.sub (_h.dig nW rfl).ram (by omega) (by omega)⟩",
+        "al": "A.alloc"
+       }
+      ],
+      [
+       "seg",
+       "y0",
+       "ws nL",
+       {}
+      ],
+      [
+       "if",
+       "ou ≤ nu + 1",
+       [
+        [
+         "seg",
+         "ys",
+         "0",
+         {
+          "FX": "⟨by rw [St.frz _h nL rfl (by iv_omega)]; rd_out⟩"
+         }
+        ],
+        [
+         "seg",
+         "us",
+         "u nR .aS",
+         {}
+        ],
+        [
+         "setmp",
+         "nR .aS",
+         "nR .aD",
+         "outv A nu (outF n rho (W0 a))",
+         "intro j hj; simp only [outv, MpInt.ofDigits_digit, if_pos hj, ovl]; rw [show i = nu by om]; split <;> (try rfl); exact (hAv.high_zero j (by omega)).symm",
+         {
+          "used": "rfl"
+         }
+        ],
+        [
+         "jump",
+         "Y",
+         {
+          "lf": "⟨by rd_out⟩"
+         }
+        ]
+       ],
+       [
+        [
+         "seg",
+         "yz",
+         "0",
+         {}
+        ],
+        [
+         "call",
+         "memsetD",
+         "q, A.alloc, ovl (outF n rho (W0 a)) A.digit (i + 1), nu + 1, ou, ou - (nu + 1)",
+         "_",
+         {
+          "res": "⟨by om, by om, by om⟩"
+         }
+        ],
+        [
+         "seg",
+         "yu",
+         "0",
+         {
+          "FX": "⟨by rw [St.frz _h nL rfl (by iv_omega)]; rd_out⟩"
+         }
+        ],
+        [
+         "seg",
+         "us",
+         "u nR .aS",
+         {}
+        ],
+        [
+         "setmp",
+         "nR .aS",
+         "nR .aD",
+         "outv A nu (outF n rho (W0 a))",
+         "intro j hj; simp only [outv, MpInt.ofDigits_digit, if_pos hj, ovl, zfill]; rw [show i = nu by om]; (repeat' split) <;> first | rfl | omega | exact (hAv.high_zero j (by omega)).symm",
+         {
+          "used": "rfl"
+         }
+        ],
+        [
+         "jump",
+         "Y",
+         {
+          "lf": "⟨by rd_out⟩"
+         }
+        ]
+       ],
+       "hz"
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "P": {
+   "pc": "3de4",
+   "regs": "e1",
+   "vars": "M m0 m1 : Mem",
+   "mu": "5, 1, 0",
+   "kinds": {
+    "nH": ".frz m0",
+    "nL": ".frz m1",
+    "nW": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κP z x) m M"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"
+    ]
+   ],
+   "prem": [
+    [
+     "rf",
+     "RF m0 ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s6 s.s7 s.s8 s.s9 s.s10 s.s11 sp"
+    ],
+    [
+     "lo",
+     "FO m1 sp ou"
+    ]
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "q": "adp"
+     }
+    ],
+    [
+     "if",
+     "nu < al",
+     [
+      [
+       "seg",
+       "p2",
+       "ws nL"
+      ],
+      [
+       "jump",
+       "J",
+       {
+        "vars": {
+         "Mk": "z.m",
+         "q": "adp",
+         "A": "a"
+        },
+        "st": "(@H.congrL (Iv.upd_eq_self _ _ rfl)).congrK (by krfl)",
+        "hp": "@HP.congrL (Iv.upd_eq_self _ _ rfl)",
+        "lf": "⟨by rd_out, by rd_log, by rd_log⟩",
+        "pl": ".keep",
+        "hA": "by unfold mfIn; rw [if_neg (by omega)]"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "pg",
+       "ws nL"
+      ],
+      [
+       "call",
+       "mpGrowF",
+       "sp - 4256, pa, adp, a, nu + 1, H",
+       "xr",
+       {
+        "hq": "hq",
+        "res": "⟨⟨by om, by om, by om⟩, hres.aoff, hva.toShape, hres.apos, by om⟩"
+       }
+      ],
+      [
+       "cases",
+       "xr",
+       {
+        "none": [
+         [
+          "exit",
+          "absurd"
+         ]
+        ],
+        "mem": [
+         [
+          "set",
+          {
+           "e": "18446744073709551614"
+          }
+         ],
+         [
+          "seg",
+          "gm",
+          "0"
+         ],
+         [
+          "exit",
+          "mem"
+         ]
+        ],
+        "some ⟨q1,a1⟩": [
+         [
+          "tac",
+          "obtain ⟨hlt, hgr, hfr⟩ := hq; obtain rfl := GrowPost.eq_growTo hva.toShape hgr"
+         ],
+         [
+          "bind",
+          {
+           "q": "q1"
+          }
+         ],
+         [
+          "set",
+          {
+           "e": "0"
+          }
+         ],
+         [
+          "seg",
+          "go",
+          "0"
+         ],
+         [
+          "seg",
+          "g2",
+          "0"
+         ],
+         [
+          "jump",
+          "J",
+          {
+           "vars": {
+            "A": "a.growTo (nu + 1)"
+           },
+           "lf": "⟨by rd_out, by rd_log, by rd_log⟩",
+           "pl": ".regrow hfr (by simp only [MpInt.growTo, MpInt.ofDigits]; omega) rfl",
+           "hA": "by unfold mfIn; rw [if_pos (by omega)]"
+          }
+         ]
+        ]
+       }
+      ]
+     ],
+     "hr"
+    ]
+   ]
+  }
+ },
+ "exits": {
+  "absurd": [
+   "exact absurd hq hr"
+  ],
+  "mem": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨(false, adp, a), _M, hat.sub rfl rfl, ⟨hva.toShape, hres.apos, .keep, fun h => by simp at h⟩,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .aD }⟩"
+  ],
+  "ok": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "have hal2 : x2.alloc = A.alloc := hmid.alloc",
+   "have hpl : Place hin (lay p .aD) ⟨q, 4 * x2.alloc⟩ := by rw [hal2]; exact pl",
+   "exact Lbl.exit fun cf hat => ⟨(true, q, x2), _M, hat.sub rfl rfl, ⟨hmid.valid.toShape, by rw [hal2]; omega, hpl, fun _ => (RedcPost.toV (by rw [hA]; exact mfIn_mag hva.toShape nu) (by rw [hA]; exact mfIn_sign a nu) (hmid.fin_lt hlt))⟩,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := hpl",
+   "    frame := hfr, heap := by show AHeap _ ((q, 4 * x2.alloc) :: H); rw [hal2]; exact hh, foot := {FOOT}",
+   "    off := by show Off ⟨q, 4 * x2.alloc⟩ ((q, 4 * x2.alloc) :: H); rw [hal2]; exact _hp.off (nR .aD) }⟩"
+  ],
+  "sub": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "have hal2 : x2.alloc = A.alloc := hmid.alloc",
+   "have hal3 : x3.alloc = A.alloc := by rw [hss.alloc, hal2]",
+   "have hpl : Place hin (lay p .aD) ⟨q, 4 * x3.alloc⟩ := by rw [hal3]; exact pl",
+   "exact Lbl.exit fun cf hat => ⟨(true, q, x3), _M, hat.sub rfl rfl, ⟨(hmid.fin_sub hvn (npos hres.x_lt) hlt hss).valid.toShape, by rw [hal3]; omega, hpl, fun _ => (RedcPost.toV (by rw [hA]; exact mfIn_mag hva.toShape nu) (by rw [hA]; exact mfIn_sign a nu) (hmid.fin_sub hvn (npos hres.x_lt) hlt hss))⟩,",
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩",
+   "      | aD => exact absurd rfl hrs",
+   "      | _ => simp [ws] at hr",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := hpl",
+   "    frame := hfr, heap := by show AHeap _ ((q, 4 * x3.alloc) :: H); rw [hal3]; exact hh, foot := {FOOT}",
+   "    off := by show Off ⟨q, 4 * x3.alloc⟩ ((q, 4 * x3.alloc) :: H); rw [hal3]; exact _hp.off (nR .aD) }⟩"
+  ]
+ },
+ "statesets": {
+  "g": [
+   [
+    "st",
+    "St (ρg p q A) wX WX (κ@ z x) Mk M"
+   ],
+   [
+    "hp",
+    "HP (ρg p q A) wX hin ((q, 4 * A.alloc) :: H) (InAny (lay p) ws) m Mk"
+   ]
+  ]
+ }
+}

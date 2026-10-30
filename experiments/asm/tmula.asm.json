@@ -1,0 +1,17 @@
+{
+ "region": {"api": "Api.MpMulA", "gpre": {"res": "ToomMulA.Res p", "isW": "MpMulA.isW"}},
+"extends": "tmul.asm.json",
+ "subst": {"c": "a", "pc": "pa", "cdp": "adp", "cS": "aS", "cD": "aD",
+           "hres.sc": "hres.va.toShape", "hres.cpos": "hres.apos", "hres.coff": "hres.aoff", "hP.res.cpos": "hP.res.apos",
+           "MulAlg.lay": "MulAlgA.lay", "MulAlg.Q": "MulAlgA.Q", "MulAlg.F": "MulAlgA.F",
+           "Api.MpMul.ws": "Api.MpMulA.ws", "Api.MpMul.hin": "Api.MpMulA.hin", "Api.MpMul.lay": "Api.MpMulA.lay", "Api.MpMul.R": "Api.MpMulA.R",
+           "Api.MpMul.rets": "Api.MpMulA.rets", "Api.MpMul.out": "Api.MpMulA.out", "Api.MpMul.hout": "Api.MpMulA.hout",
+           "Api.MpMul.site'": "Api.MpMulA.site'", "Api.MpMul (P kind)": "Api.MpMulA (P kind)",
+           "Tom.Machine.Fn.ToomMulG5K": "Tom.Machine.Fn.ToomMulAG5K", "TQ": "TQA"},
+ "#": "s_mp_toom_mul(a, b, a) (Api/MulAlgA.lean ToomMulA): a is read only by the copy loops LA0 LA1 LA2 (a->used, a->dp), before the first call into c = a (mp_add(&b2, &b1, a)); the region type is Fn/ToomMulAG5K.lean's.",
+ "fn": "s_mp_toom_mul (in place)", "mod": "ToomMulAMainG", "ns": "Tom.Machine.Fn.ToomMulAG5", "api": "ToomMulA",
+ "R": ["stk", "aS", "aD", "bS", "bD", "kc", "tc", "code", "dS1", "dS2", "dT1", "dA0", "dA1", "dA2", "dB0", "dB1", "dB2"],
+ "written": ["stk", "aS", "aD", "dS1", "dS2", "dT1", "dA0", "dA1", "dA2", "dB0", "dB1", "dB2"],
+ "wit": {"cS": null, "cD": null},
+ "ctx_vocab": {"pc": "z.p.pa", "cdp": "z.p.adp", "c": "z.p.a"},
+ "let": {}}

@@ -1,0 +1,46 @@
+{
+ "fn": "s_mp_sqr", "mod": "SMpSqrG", "src": "smsqrg", "pfx": "sqg",
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "nat": "sp pa pb u e tdp adp ix x t0 iy c ay tv k tk a w0 w1", "keep": "gp tp", "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pb",
+  "ci": "sp:sp-160 s0:2*u+1 s1:pa s2 s3 s4 s5 s6 s7 s8 s9:u s10 s11 a0:sp-136 a1:2*u+1", "ir": "@ci -a1 a0:e", "st0": "@ir -a0",
+  "ep": "sp:sp-160 s0:w0 s1:w1 s2 s3 s4 s5 s6 s7 s8 s9:u s10 s11", "cl": "@ep a0:sp-136", "lp": "sp:sp-160 s0:c s1:268435455 s9:u", "ex": "@cl a1:pb",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e",
+  "oh": "sp:sp-160 s1:268435455 s4:tdp+4*(2*ix)+4 s5:adp+4*ix s7:ix s8:u+18446744073709551614-ix s9:u", "m1": "@oh s0:t0 s7:ix+1 a0:x a1:x",
+  "m2": "@oh s0:t0 s7:ix+1 a0:x*x", "mb": "@oh s0:c s7:ix+1 s11:tdp+4*(2*ix)+4", "ph": "@oh s7:ix+1 s0:c s11:tdp+4*k",
+  "ih": "@ph s2:tdp+4*ix+4*u s3:x s6:u-2-ix s10:adp+4*iy-4 s11:tdp+4*(ix+iy)", "m3": "@ih s0:c*4294967296 a0:ay a1:x",
+  "m4": "@ih s0:c*4294967296 a0:ay*x"
+ },
+ "facts": {
+  "AS": ["bytesT4 M pa = BitVec.ofNat 32 u", "u < 2 ^ 30", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 160 ∨ sp ≤ pa"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1", "bytesT8 M (sp - 88) = s9"],
+  "RS": ["bytesT8 M (sp - 32) = s2", "bytesT8 M (sp - 40) = s3", "bytesT8 M (sp - 48) = s4", "bytesT8 M (sp - 56) = s5", "bytesT8 M (sp - 64) = s6", "bytesT8 M (sp - 72) = s7", "bytesT8 M (sp - 80) = s8", "bytesT8 M (sp - 96) = s10", "bytesT8 M (sp - 104) = s11"],
+  "ER": ["bytesT8 M (sp - 160) = BitVec.ofNat 64 e"], "PT": ["bytesT8 M (sp - 136 + 16) = BitVec.ofNat 64 tdp", "bytesT8 M (pa + 16) = BitVec.ofNat 64 adp"],
+  "BP": ["bytesT8 M (sp - 152) = BitVec.ofNat 64 pb"], "DG": ["bytesT4 M a = BitVec.ofNat 32 x", "x < 268435456", "Ram a 4"],
+  "TA": ["Ram tdp (4 * (2 * u + 1))", "tdp % 4 = 0", "tdp + 4 * (2 * u + 1) ≤ sMpSqrBase ∨ sMpSqrBase + 444 ≤ tdp", "adp + 4 * u ≤ tdp ∨ tdp + 4 * (2 * u + 1) ≤ adp", "tdp + 4 * (2 * u + 1) ≤ sp - 160 ∨ sp ≤ tdp", "u < 2 ^ 30"]
+ },
+ "segs": [
+  {"n": "p1", "at": "6e54", "pre": "ent", "post": "ci", "h": ["AS"], "doc": "Save `ra`, `s0`, `s1`, `s9`, `b`; `mp_init_size(&t, 2 a->used + 1)`."},
+  {"n": "se", "at": "6e88", "to": "6e8c", "pre": "ir", "post": "ir", "doc": "`err := mp_init_size(…)` in the frame."},
+  {"n": "ie", "at": "6e8c T", "to": "6ff4", "pre": "ir", "post": "ep{w0:=2*u+1, w1:=pa}", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_init_size` failed."},
+  {"n": "iz", "at": "6e8c F T", "pre": "ir{e:=0}", "post": "cl{w0:=2*u+1, w1:=pa}", "h": ["u = 0"], "doc": "`a->used = 0`: `t.used := 1`; `mp_clamp(&t)`."},
+  {"n": "il0", "at": "6e8c F F", "to": "6e98", "pre": "ir{e:=0}", "post": "st0", "h": ["0 < u", "u < 2 ^ 30"], "doc": "`t.used := 2 a->used + 1`."},
+  {"n": "il1", "at": "6e98", "to": "6ed8", "pre": "st0", "post": "oh{ix:=0}", "h": ["PT", "Ram pa 24", "pa + 24 ≤ sp - 160 ∨ sp ≤ pa", "0 < u", "u < 2 ^ 30"], "doc": "Save `s2`–`s8`, `s10`, `s11`; `t.dp`, `a->dp`, the mask; to the outer head (`ix = 0`)."},
+  {"n": "oc", "at": "6ed8", "pre": "oh", "post": "m1", "h": ["DG{a:=adp+4*ix}", "DG{a:=tdp+4*(2*ix), x:=t0}", "ix < u", "u < 2 ^ 30"], "doc": "The outer head: `a->dp[ix]`, `t.dp[2 ix]`; `__muldi3(a->dp[ix], a->dp[ix])`."},
+  {"n": "ms", "at": "6eec", "to": "6f04", "pre": "m2", "post": "mb{c:=(t0+x*x)/268435456}", "st": ["(t0 + x * x) % 268435456"], "h": ["TA", "ix < u", "t0 < 268435456", "x * x < 2 ^ 56"], "doc": "`t.dp[2 ix] := r & MP_MASK`, `u := r >> 28`."},
+  {"n": "sk", "at": "6f04 T", "to": "6f70", "pre": "mb", "post": "ph{k:=2*ix+1}", "h": ["ix + 1 = u", "u < 2 ^ 30"], "doc": "`ix + 1 = a->used`: no inner loop."},
+  {"n": "in", "at": "6f04 F", "to": "6f24", "pre": "mb", "post": "ih{iy:=ix+1}", "h": ["TA", "DG{a:=adp+4*ix}", "ix + 1 < u"], "doc": "The inner loop's set-up (`tmpx`, the end of `tmpt`)."},
+  {"n": "ic", "at": "6f24", "pre": "ih", "post": "m3", "h": ["DG{a:=adp+4*iy, x:=ay}", "c < 2 ^ 30"], "doc": "The inner head: `__muldi3(a->dp[iy], tmpx)`."},
+  {"n": "il", "at": "6f34", "to": "6f60", "pre": "m4", "post": "ih{iy:=iy+1, c:=(2*(ay*x)+tv+c)/268435456}", "st": ["(2 * (ay * x) + tv + c) % 268435456"], "h": ["TA", "DG{a:=tdp+4*(ix+iy), x:=tv}", "ix < iy", "iy < u", "ay * x < 2 ^ 56", "c < 2 ^ 30"], "doc": "`*tmpt++ := r & MP_MASK`, `u := r >> 28`."},
+  {"n": "ib", "at": "6f60 T", "to": "6f24", "pre": "ih", "post": "ih", "h": ["iy < u", "u < 2 ^ 30"], "doc": "The inner back edge."},
+  {"n": "ix", "at": "6f60 F", "to": "6f70", "pre": "ih", "post": "ph{k:=ix+iy}", "h": ["iy = u", "ix + 1 < u", "u < 2 ^ 30"], "doc": "The inner loop's exit."},
+  {"n": "pg", "at": "6f70 F", "to": "6f74", "pre": "ph", "post": "ph", "h": ["c ≠ 0", "c < 2 ^ 30"], "doc": "A carry to propagate."},
+  {"n": "pz", "at": "6f70 T T", "to": "6ed8", "pre": "ph", "post": "oh{ix:=ix+1}", "h": ["c = 0", "ix + 1 < u", "u < 2 ^ 30"], "doc": "No carry: the next `ix`."},
+  {"n": "pzd", "at": "6f70 T F", "to": "6fb4", "pre": "ph", "post": "lp", "h": ["c = 0", "ix + 1 = u", "u < 2 ^ 30"], "doc": "No carry, the last `ix`."},
+  {"n": "pl", "at": "6f74 T", "to": "6f74", "pre": "ph", "post": "ph{k:=k+1, c:=(tk+c)/268435456}", "st": ["(tk + c) % 268435456"], "h": ["TA", "DG{a:=tdp+4*k, x:=tk}", "k < 2 * u + 1", "(tk + c) / 268435456 ≠ 0", "c < 2 ^ 30"], "doc": "`*tmpt++ := r & MP_MASK` with a carry out."},
+  {"n": "pe", "at": "6f74 F T", "to": "6ed8", "pre": "ph", "post": "oh{ix:=ix+1}", "st": ["(tk + c) % 268435456"], "h": ["TA", "DG{a:=tdp+4*k, x:=tk}", "k < 2 * u + 1", "(tk + c) / 268435456 = 0", "c < 2 ^ 30", "ix + 1 < u"], "doc": "The last carry: the next `ix`."},
+  {"n": "pd", "at": "6f74 F F", "to": "6fb4", "pre": "ph", "post": "lp{c:=(tk+c)/268435456}", "st": ["(tk + c) % 268435456"], "h": ["TA", "DG{a:=tdp+4*k, x:=tk}", "k < 2 * u + 1", "(tk + c) / 268435456 = 0", "c < 2 ^ 30", "ix + 1 = u"], "doc": "The last carry of the last `ix`."},
+  {"n": "rs", "at": "6fb4", "pre": "lp", "post": "cl{w0:=c, w1:=268435455}", "h": ["RS"], "doc": "Restore `s2`–`s8`, `s10`, `s11`; `mp_clamp(&t)`."},
+  {"n": "cx", "at": "6fe0", "pre": "ep", "post": "ex", "h": ["BP"], "doc": "`mp_exch(&t, b)`."},
+  {"n": "cc", "at": "6fec", "pre": "ep", "post": "cl", "doc": "`mp_clear(&t)`."},
+  {"n": "ret", "at": "6ff4", "pre": "ep", "post": "rt", "h": ["RF", "ER"], "doc": "Restore, return `err`."}
+ ]}

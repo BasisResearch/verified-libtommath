@@ -1,0 +1,526 @@
+{
+ "fn": "mp_lshd (growing)",
+ "mod": "MpLshdGMainG",
+ "ns": "Tom.Machine.Fn.MpLshdGG5",
+ "api": "MpLshdG",
+ "rows": "experiments/segs/mlshdgg.rows.json",
+ "code": "mpLshd",
+ "F": 576,
+ "dsimp_q": true,
+ "hdig": false,
+ "imports": [
+  "Tom.Machine.Api.MpLshdG",
+  "Tom.Machine.Fn.MpLshdGG",
+  "Tom.Machine.Kit.Run",
+  "Tom.Machine.Kit.Grow"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.MpLshdGG",
+  "open Tom.Machine.Api.MpLshdG (R P lay kind isW ws Res)"
+ ],
+ "callees": {
+  "memsetD": {
+   "ctor": "Dz",
+   "params": [
+    "dp",
+    "n",
+    "f",
+    "i",
+    "k",
+    "w"
+   ],
+   "regions": [
+    [
+     "D",
+     "D dp"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x800093a4"
+  }
+ },
+ "R": [
+  "stk",
+  "aS",
+  "aD",
+  "code"
+ ],
+ "written": [
+  "stk",
+  "aS",
+  "aD"
+ ],
+ "Rk": {
+  "aS": "S pa adp a",
+  "aD": "D adp a"
+ },
+ "frame": [
+  [
+   "nF",
+   32
+  ]
+ ],
+ "refs": {
+  "nR .aS": "S pa",
+  "nR .aD": "D q"
+ },
+ "ctx_vocab": {
+  "u": "z.p.a.used",
+  "al": "z.p.a.alloc"
+ },
+ "rowdef": {
+  "dp": "q"
+ },
+ "pos": [
+  "hres.apos"
+ ],
+ "defs": [
+  "/-- The layout once `a`'s digits are at `q` with `A`'s allocation. -/",
+  "def ρg (p : P) (q : Nat) (A : MpInt) : X → Iv := Iv.upd (ρX p) (nR .aD) ⟨q, 4 * A.alloc⟩"
+ ],
+ "snaps": {
+  "FR": "W(m, pr)",
+  "FG": "W(m, pg)"
+ },
+ "prelude": [
+  "have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi",
+  "have hsa := hres.sa; have := hsa.used_le; have := hsa.alloc_lt; have := hres.k_lt; have hsz := hres.size_lt; have := hres.apos",
+  "have eE : heapEnd = 0x87800000 := rfl; have eF : Api.MpLshdG.F = 576 := rfl; have eB : mpLshdBase = 0x800015b8 := rfl; have eG : MpGrow.F = 544 := rfl",
+  "have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hR : RamH (sp - 32) 32 := ⟨Ram.sub (hB .stk).2 (by simp only [lay, eF]; omega) (by simp only [lay, eF]; omega)⟩",
+  "have hpa := hS .aS .stk (by decide); have hco := hS .stk .code (by decide); have hca := hS .aS .code (by decide)",
+  "simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hco hca"
+ ],
+ "kindsets": {
+  "G": {
+   "nF": ".frz m0",
+   "nR .aS": ".mpS pa q A",
+   "nR .aD": ".mpD q A.alloc A.digit"
+  },
+  "L": {
+   "nF": ".frz m0",
+   "nR .aS": ".mpS pa q { A with used := A.used + k }",
+   "nR .aD": ".mpD q A.alloc (lshdT A k t)"
+  }
+ },
+ "statesets": {
+  "g": [
+   [
+    "st",
+    "St (ρg p q A) wX WX (κ@ z x) Mk M"
+   ],
+   [
+    "hp",
+    "HP (ρg p q A) wX hin ((q, 4 * A.alloc) :: H) (InAny (lay p) ws) m Mk"
+   ],
+   [
+    "rf",
+    "RF m0 ra sp"
+   ],
+   [
+    "pl",
+    "Place hin (lay p .aD) ⟨q, 4 * A.alloc⟩"
+   ],
+   [
+    "hA",
+    "A = lshdIn a k"
+   ],
+   [
+    "hk0",
+    "0 < k"
+   ],
+   [
+    "hu0",
+    "0 < u"
+   ]
+  ]
+ },
+ "cuts": {
+  "E": {
+   "pc": "15b8",
+   "regs": "ent",
+   "mu": "3, 0, 0",
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κX p m) m m"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"
+    ]
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "q": "adp"
+     }
+    ],
+    [
+     "if",
+     "k = 0",
+     [
+      [
+       "seg",
+       "n",
+       "0"
+      ],
+      [
+       "exit",
+       "noop"
+      ]
+     ],
+     [
+      [
+       "if",
+       "u = 0",
+       [
+        [
+         "seg",
+         "z",
+         "0"
+        ],
+        [
+         "exit",
+         "noop"
+        ]
+       ],
+       [
+        [
+         "if",
+         "u + k ≤ al",
+         [
+          [
+           "seg",
+           "pr",
+           "ws nF"
+          ],
+          [
+           "jump",
+           "G",
+           {
+            "vars": {
+             "Mk": "z.m",
+             "m0": "FR",
+             "q": "adp",
+             "A": "a"
+            },
+            "rf": "⟨by rd_log⟩",
+            "pl": ".keep",
+            "hA": "by unfold lshdIn; rw [if_neg (by omega)]",
+            "hk0": "by om",
+            "hu0": "by om"
+           }
+          ]
+         ],
+         [
+          [
+           "seg",
+           "pg",
+           "ws nF"
+          ],
+          [
+           "call",
+           "mpGrowF",
+           "sp - 32, pa, adp, a, u + k, H",
+           "xr",
+           {
+            "hq": "hq",
+            "res": "⟨⟨by om, by om, by om⟩, hres.aoff, hsa, hres.apos, hsz⟩"
+           }
+          ],
+          [
+           "cases",
+           "xr",
+           {
+            "none": [
+             [
+              "exit",
+              "absurd"
+             ]
+            ],
+            "mem": [
+             [
+              "set",
+              {
+               "e": "18446744073709551614"
+              }
+             ],
+             [
+              "seg",
+              "gm",
+              "0"
+             ],
+             [
+              "exit",
+              "mem"
+             ]
+            ],
+            "some ⟨q1,a1⟩": [
+             [
+              "tac",
+              "obtain ⟨hlt, hgr, hfr⟩ := hq; obtain rfl := GrowPost.eq_growTo hsa hgr"
+             ],
+             [
+              "bind",
+              {
+               "q": "q1"
+              }
+             ],
+             [
+              "set",
+              {
+               "e": "0"
+              }
+             ],
+             [
+              "seg",
+              "go",
+              "0"
+             ],
+             [
+              "seg",
+              "go2",
+              "0"
+             ],
+             [
+              "jump",
+              "G",
+              {
+               "vars": {
+                "m0": "FG",
+                "A": "a.growTo (u + k)"
+               },
+               "rf": "⟨by rd_log⟩",
+               "pl": ".regrow hfr (by simp only [MpInt.growTo, MpInt.ofDigits]; omega) rfl",
+               "hA": "by unfold lshdIn; rw [if_pos ⟨by omega, by omega, by omega⟩]",
+               "hk0": "by om",
+               "hu0": "by om"
+              }
+             ]
+            ]
+           }
+          ]
+         ],
+         "hr"
+        ]
+       ],
+       "hu"
+      ]
+     ],
+     "hk"
+    ]
+   ]
+  },
+  "G": {
+   "pc": "15e0",
+   "regs": "g",
+   "regs_over": {
+    "u": "A.used"
+   },
+   "vars": "M Mk m0 : Mem; q : Nat; A : MpInt",
+   "mu": "2, 0, 0",
+   "kinds": "@G",
+   "state": "@g",
+   "prelude": [
+    "have hg := lshdIn_grown hsa hsz; rw [← hA] at hg; have hgs := hg.shape; have := hgs.used_le; have := hgs.alloc_lt",
+    "have hroom : A.used + k ≤ A.alloc := by have := lshdIn_room a hk0 hu0; rw [← hA] at this; exact this",
+    "have hgu := hg.used"
+   ],
+   "edge": [
+    [
+     "seg",
+     "e",
+     "u nR .aS"
+    ],
+    [
+     "seg",
+     "e2",
+     "0"
+    ],
+    [
+     "seg",
+     "e3",
+     "0"
+    ],
+    [
+     "seg",
+     "e4",
+     "0"
+    ],
+    [
+     "redig",
+     "nR .aD",
+     "rfl",
+     "(lshdT_zero A k)"
+    ],
+    [
+     "jump",
+     "L",
+     {
+      "vars": {
+       "t": "0"
+      },
+      "ht": "by om"
+     }
+    ]
+   ]
+  },
+  "L": {
+   "pc": "1624",
+   "regs": "lh",
+   "regs_over": {
+    "u": "A.used"
+   },
+   "vars": "M Mk m0 : Mem; q : Nat; A : MpInt; t : Nat",
+   "mu": "1, A.used - t, 0",
+   "kinds": "@L",
+   "state": "@g",
+   "prem": [
+    [
+     "ht",
+     "t < A.used"
+    ]
+   ],
+   "prelude": [
+    "have hg := lshdIn_grown hsa hsz; rw [← hA] at hg; have hgs := hg.shape; have := hgs.used_le; have := hgs.alloc_lt",
+    "have hroom : A.used + k ≤ A.alloc := by have := lshdIn_room a hk0 hu0; rw [← hA] at this; exact this",
+    "have hgu := hg.used",
+    "have hdl : ∀ j, lshdT A k t j < 268435456 := lshdT_lt hgs k t"
+   ],
+   "edge": [
+    [
+     "bind",
+     {
+      "f": "lshdT A k t"
+     }
+    ],
+    [
+     "if",
+     "t + 1 < A.used",
+     [
+      [
+       "seg",
+       "lp",
+       "d nR .aD",
+       {
+        "y": "lshdT A k t (A.used - 1 - t)",
+        "_st": "(by omega) (Nat.lt_of_lt_of_le (hdl _) (by decide))"
+       }
+      ],
+      [
+       "redig",
+       "nR .aD",
+       "rfl",
+       "(lshdT_succ A hk0 ht)"
+      ],
+      [
+       "jump",
+       "L",
+       {
+        "vars": {
+         "t": "t + 1"
+        },
+        "ht": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "lx",
+       "d nR .aD",
+       {
+        "y": "lshdT A k t (A.used - 1 - t)",
+        "_st": "(by omega) (Nat.lt_of_lt_of_le (hdl _) (by decide))"
+       }
+      ],
+      [
+       "redig",
+       "nR .aD",
+       "rfl",
+       "(lshdT_last A hk0 (by omega))"
+      ],
+      [
+       "call",
+       "memsetD",
+       "q, A.alloc, lshdT A k A.used, 0, k, k",
+       "_",
+       {
+        "res": "⟨by om, by om, by om⟩"
+       }
+      ],
+      [
+       "seg",
+       "r",
+       "0"
+      ],
+      [
+       "setmp",
+       "nR .aS",
+       "nR .aD",
+       "lshdRes A k",
+       "intro j hj; rw [lshdRes, MpInt.ofDigits_digit, if_pos hj]; exact (lshdT_fill A k j).symm"
+      ],
+      [
+       "exit",
+       "ok"
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  }
+ },
+ "exits": {
+  "noop": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "have hQ : LshdPost (lshdIn a k) k a := by",
+   "  rw [show lshdIn a k = a by unfold lshdIn; rw [if_neg (by omega)]]; exact ⟨fun _ => rfl, fun _ _ => by exfalso; omega⟩",
+   "exact Lbl.exit fun cf hat => ⟨some (adp, a), _M, hat.sub rfl rfl, hQ,",
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩",
+   "      | aD => exact absurd rfl hrs",
+   "      | code => simp [ws] at hr",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .aD }⟩"
+  ],
+  "absurd": [
+   "exact absurd hq hr"
+  ],
+  "mem": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨none, _M, hat.sub rfl rfl, hq,",
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩",
+   "      | aD => exact absurd rfl hrs",
+   "      | code => simp [ws] at hr",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .aD }⟩"
+  ],
+  "ok": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "have hQ : LshdPost (lshdIn a k) k (lshdRes A k) := by",
+   "  rw [← hA]; exact ⟨fun h => absurd h (by omega), fun _ _ => lshdRes_shift hgs hroom⟩",
+   "exact Lbl.exit fun cf hat => ⟨some (q, lshdRes A k), _M, hat.sub rfl rfl, hQ,",
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩",
+   "      | aD => exact absurd rfl hrs",
+   "      | code => simp [ws] at hr",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := pl",
+   "    frame := hfr, heap := hh",
+   "    foot := fun _ hx => (foot_uncons (e := digBlk adp a) (Foot.of_cons hx)).imp id id",
+   "    off := _hp.off (nR .aD) }⟩"
+  ]
+ }
+}

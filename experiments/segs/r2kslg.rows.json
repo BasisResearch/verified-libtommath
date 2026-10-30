@@ -1,0 +1,22 @@
+{
+ "fn": "mp_reduce_2k_setup_l", "mod": "Reduce2kSetupLG", "src": "r2kslg", "pfx": "rlg", "imports": ["Tom.Machine.Kit.GenX_seg5a"],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "nat": "sp pa pd e nb", "keep": "gp tp", "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pd",
+  "ci": "sp:sp-80 s0:pa s1:pd s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:sp-56", "ir": "@ci a0:e", "cb": "@ci a0:pa", "pr": "@ci a0:nb",
+  "ex": "@ci a1:nb", "sc": "@ci a1:pa a2:pd", "c0": "@ci -a0",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e"
+ },
+ "facts": {
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "ER": ["bytesT8 M (sp - 72) = BitVec.ofNat 64 e"]
+ },
+ "segs": [
+  {"n": "pro", "at": "6174", "pre": "ent", "post": "ci", "doc": "Save `ra`, `s0`, `s1`; `mp_init(&tmp)`."},
+  {"n": "ie", "at": "6194 F", "pre": "ir", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_init` failed: return its error."},
+  {"n": "cb", "at": "6194 T", "pre": "ir{e:=0}", "post": "cb", "doc": "`mp_count_bits(a)`."},
+  {"n": "cr", "at": "61bc", "pre": "pr", "post": "ex", "doc": "`mp_2expt(&tmp, p)`."},
+  {"n": "xe", "at": "61c8 T", "pre": "ir", "post": "ci", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_2expt` failed (it grows `tmp`): `err`; `mp_clear(&tmp)`."},
+  {"n": "xo", "at": "61c8 F", "pre": "ir{e:=0}", "post": "sc", "doc": "`s_mp_sub(&tmp, a, d)`."},
+  {"n": "so", "at": "61e0", "pre": "ir", "post": "ci", "doc": "`err := s_mp_sub(…)`; `mp_clear(&tmp)`."},
+  {"n": "ret", "at": "61f0", "pre": "c0", "post": "rt", "h": ["RF", "ER"], "doc": "Restore, return `err`."}
+ ]}

@@ -1,0 +1,1312 @@
+{
+ "fn": "mp_div",
+ "mod": "MpDivG",
+ "src": "mdivg",
+ "pfx": "dvg",
+ "imports": [
+  "Tom.Machine.Kit.Alu1",
+  "Tom.Machine.Fn.MpDivGK"
+ ],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "nat": "sp pa pb pc pd ua ub sa sb e r cb rm nm w2 w5 w6 w8 ux uy xu sx t k qp xp yp t1p t2p j qv qd w xi xi1 xi2 yt yt1 ad dv",
+ "keep": "gp tp",
+ "h0": [
+  "FF"
+ ],
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pb a2:pc a3:pd",
+  "B0": "sp:sp-272 s0:pa s1 s2:pb s3:pc s4:pd s5 s6 s7 s8 s9 s10 s11",
+  "cm": "@B0 a0:pa a1:pb",
+  "cr": "@B0 a0:r",
+  "R0": "@B0 a0:e",
+  "B": "@B0 s1:0",
+  "R1": "@B a0:e",
+  "cpy": "@B a0:pa a1:pd",
+  "zc": "@B0 s1:e a0:pc",
+  "XE": "sp:sp-272 s0:pa s1:e s2:w2 s3:pc s4:pd s5 s6 s7 s8 s9 s10 s11",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e",
+  "M2r": "@B s2:27-rm a0:e",
+  "K": "sp:sp-272 s0:pa s1:nm s2:w2 s3:pc s4:pd s5 s6 s7 s8 s9 s10 s11",
+  "Lr": "@K s5:ux-uy s6:ux s8:uy a0:e",
+  "S": "@K s2:4*(ux-uy) s5:ux-uy s6:ux s8:uy",
+  "Sq": "@S a0:sp-208 a1:sp-184 a2:sp-208",
+  "O": "sp:sp-272 s0:pa s1:nm s2:w2 s3:pc s4:pd s5:k+t+1 s6:4*k+4*t s7:t s8:4*t s11:k a5:xu",
+  "N": "@O s10:4*k+4*t+18446744073709551612",
+  "Z": "sp:sp-272 s0:pa s1:nm s2:w2 s3:pc s4:pd s5:w5 s6:w6 s7 s8:w8 s9 s10 s11 a5:xu",
+  "Zb": "@Z -a5",
+  "Db": "@O -a5 s2:4*k s9:4*k+4*t+4 s10:4*k+4*t+18446744073709551612",
+  "Ob": "@Db -s2 a3:xp a4:xp+4*(k+t+1) a5:yp+4*t",
+  "Oc": "@Db a2:yt a3:xp a4:xi a5:qp+4*k",
+  "D": "@Db a1:qv a5:qp+4*k",
+  "Dc": "@Db a0:sp-160 a1:yt1 a2:sp-160 a5:yp",
+  "Dg": "@Db a0:sp-160 a1:sp-136 a3:xi2 a5:xp",
+  "ci": "@B0 a0:sp-232 a1:ua+2",
+  "c1": "@B a0:sp-160",
+  "c2": "@B a0:sp-136",
+  "cx": "@B a0:sp-208 a1:pa",
+  "cy": "@B a0:sp-184 a1:pb",
+  "cg": "@B a0:sp-184",
+  "cbr": "@B a0:cb",
+  "cbm": "@B a0:cb a1:28",
+  "rmr": "@B a0:rm",
+  "mx": "@B s2:27-rm a0:sp-208 a1:27-rm a2:sp-208",
+  "my": "@B s2:27-rm a0:sp-184 a1:27-rm a2:sp-184",
+  "XEq": "@XE a0:sp-232",
+  "XEy": "@XE a0:sp-184",
+  "XEx": "@XE a0:sp-208",
+  "XE2": "@XE a0:sp-136",
+  "XE1": "@XE a0:sp-160",
+  "lc": "@K s5:ux-uy s6:ux s8:uy a0:sp-184 a1:ux-uy",
+  "Sc": "@S a0:sp-208 a1:sp-184",
+  "Sr": "@S a0:r",
+  "Sa": "@Sq a5:qp+4*(ux-uy)",
+  "S0": "@S a0:e",
+  "Sy": "@S a0:sp-184 a1:ux-uy",
+  "Oc3": "@Oc a3:xp+4*(k+t)",
+  "Ou": "@Db a0:xi*268435456+xi1 a1:yt",
+  "Ow": "@Db a0:w",
+  "Dz": "@Db a0:sp-160",
+  "Dd": "@Dc -a1 a4:yp+4*(t-1)",
+  "De": "@Dc a3:t1p a4:qp a5:yp+4*t",
+  "Df": "@Db a0:sp-160 a1:yt a2:sp-160 a3:t1p a5:qp+4*k",
+  "Dm": "@Db a0:sp-160 a1:qd a2:sp-160",
+  "De0": "@Db a0:e",
+  "Dh": "@Dg -a3 a4:xp+4*(k+t-1)",
+  "Di": "@Dg a2:xp+4*(k+t) a4:t2p a5:xp+4*(k+t+1)",
+  "Dt": "@Db a0:sp-160 a1:sp-136",
+  "Dr": "@Db a0:r",
+  "Dq": "@Db a0:r a4:1 a5:qp+4*k",
+  "Dy": "@Db a0:sp-184 a1:qd a2:sp-160",
+  "Dl": "@Db a0:sp-160 a1:k",
+  "Ds": "@Db a0:sp-208 a1:sp-160 a2:sp-208",
+  "Dc2": "@Db a0:sp-184 a1:sp-160",
+  "Da4": "@Db a4:qp+4*k",
+  "Zq": "@Zb a0:sp-232",
+  "Zx": "@Zb a0:sp-232 a1:pc",
+  "Zd": "@Zb a5:!(BitVec.ofNat 64 sa - BitVec.ofNat 64 sb)",
+  "Zn": "@Zb a5:!(if BitVec.ofNat 64 sa - BitVec.ofNat 64 sb = 0#64 then 0#64 else 1#64)",
+  "Zv": "@Zb a0:sp-208 a1:nm a2:sp-208 a3:0",
+  "Z0": "@Zb a0:e",
+  "Ze": "@Zb s1:0 a0:sp-208 a1:pd",
+  "Z1": "@Zb s1:0",
+  "Oh": "@Ow a4:268435456 a5:qp+4*k",
+  "Ro1": "sp:sp-272 s0:pa s1:nm s2:w2 s3:pc s4:pd s5:k+t+1 s6:4*k+4*t s7:t s8:t+1 s9 s10 s11 a5:xu",
+  "Sa8": "@S a3:4*ux-8",
+  "DiB": "@Di -a3",
+  "DiC": "@DiB a5:xi",
+  "SgA": "@B a0:sp-184 a5:sb",
+  "SgB": "@B a0:sp-184 a5:sa"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 272) 272",
+   "sp % 16 = 0",
+   "272 ≤ sp",
+   "sp ≤ mpDivBase ∨ mpDivBase + 1480 ≤ sp - 272"
+  ],
+  "UB": [
+   "bytesT4 M pb = BitVec.ofNat 32 ub",
+   "Ram pb 24",
+   "0 < ub",
+   "ub < 2 ^ 31"
+  ],
+  "UA": [
+   "bytesT4 M pa = BitVec.ofNat 32 ua",
+   "Ram pa 24",
+   "ua + 3 < 2 ^ 30"
+  ],
+  "SB": [
+   "bytesT4 M (pb + 8) = BitVec.ofNat 32 sb",
+   "Ram pb 24",
+   "sb < 2 ^ 31"
+  ],
+  "SA": [
+   "bytesT4 M (pa + 8) = BitVec.ofNat 32 sa",
+   "Ram pa 24",
+   "sa < 2 ^ 31",
+   "pa + 24 ≤ sp - 272 ∨ sp ≤ pa"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = s1",
+   "bytesT8 M (sp - 32) = s2",
+   "bytesT8 M (sp - 40) = s3",
+   "bytesT8 M (sp - 48) = s4"
+  ],
+  "RS": [
+   "bytesT8 M (sp - 56) = s5",
+   "bytesT8 M (sp - 64) = s6",
+   "bytesT8 M (sp - 80) = s8"
+  ],
+  "RL": [
+   "bytesT8 M (sp - 72) = s7",
+   "bytesT8 M (sp - 88) = s9",
+   "bytesT8 M (sp - 96) = s10",
+   "bytesT8 M (sp - 104) = s11"
+  ],
+  "XU": [
+   "bytesT4 M (sp - 208) = BitVec.ofNat 32 xu",
+   "xu < 2 ^ 30"
+  ],
+  "YU": [
+   "bytesT4 M (sp - 184) = BitVec.ofNat 32 uy",
+   "uy < 2 ^ 30"
+  ],
+  "XS": [
+   "bytesT4 M (sp - 200) = BitVec.ofNat 32 sx",
+   "sx < 2 ^ 31"
+  ],
+  "QP": [
+   "bytesT8 M (sp - 216) = BitVec.ofNat 64 qp"
+  ],
+  "XP": [
+   "bytesT8 M (sp - 192) = BitVec.ofNat 64 xp"
+  ],
+  "YP": [
+   "bytesT8 M (sp - 168) = BitVec.ofNat 64 yp"
+  ],
+  "T1P": [
+   "bytesT8 M (sp - 144) = BitVec.ofNat 64 t1p"
+  ],
+  "T2P": [
+   "bytesT8 M (sp - 120) = BitVec.ofNat 64 t2p"
+  ],
+  "L0": [
+   "bytesT8 M (sp - 272) = BitVec.ofNat 64 (4 * t + 18446744073709551612)"
+  ],
+  "SPL": [
+   "bytesT8 M (sp - 248) = BitVec.ofNat 64 (qp + 4 * k)"
+  ],
+  "SG": [
+   "bytesT8 M (sp - 264) = BitVec.ofNat 64 sa",
+   "bytesT8 M (sp - 256) = BitVec.ofNat 64 sb"
+  ],
+  "DG": [
+   "bytesT4 M ad = BitVec.ofNat 32 dv",
+   "Ram ad 4",
+   "dv < 268435456",
+   "ad + 4 ≤ sp - 272 ∨ sp ≤ ad"
+  ],
+  "DS": [
+   "Ram ad 4",
+   "ad % 4 = 0",
+   "ad + 4 ≤ mpDivBase ∨ mpDivBase + 1480 ≤ ad",
+   "ad + 4 ≤ sp - 272 ∨ sp ≤ ad"
+  ],
+  "CS": [
+   "Ram pc 24",
+   "pc % 8 = 0",
+   "pc + 24 ≤ mpDivBase ∨ mpDivBase + 1480 ≤ pc",
+   "pc + 24 ≤ sp - 272 ∨ sp ≤ pc"
+  ]
+ },
+ "segs": [
+  {
+   "n": "pro",
+   "at": "0898 F",
+   "pre": "ent",
+   "post": "cm",
+   "h": [
+    "UB"
+   ],
+   "doc": "`b ≠ 0`: save `ra`, `s0`–`s4`; `mp_cmp_mag(a, b)`."
+  },
+  {
+   "n": "sm",
+   "at": "08d0 T F",
+   "pre": "cr",
+   "post": "cpy",
+   "h": [
+    "r = 18446744073709551615",
+    "pd ≠ 0",
+    "pd < 2 ^ 64"
+   ],
+   "doc": "`|a| < |b|`, `d != NULL`: `mp_copy(a, d)`."
+  },
+  {
+   "n": "sz",
+   "at": "0970 F",
+   "pre": "R1",
+   "post": "zc",
+   "h": [
+    "pc ≠ 0",
+    "pc < 2 ^ 64"
+   ],
+   "doc": "`c != NULL`: `mp_zero(c)`."
+  },
+  {
+   "n": "sr",
+   "at": "0980",
+   "pre": "XE{w2:=pb}",
+   "post": "rt",
+   "h": [
+    "RF"
+   ],
+   "doc": "Restore, return `err` (the copy/zero case)."
+  },
+  {
+   "n": "is",
+   "at": "08d0 F",
+   "pre": "cr",
+   "post": "ci",
+   "h": [
+    "r ≠ 18446744073709551615",
+    "r < 2 ^ 64",
+    "UA"
+   ],
+   "doc": "`mp_init_size(&q, a->used + 2)`."
+  },
+  {
+   "n": "ie",
+   "at": "08e8 F",
+   "pre": "R0",
+   "post": "rt",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "RF"
+   ],
+   "doc": "`mp_init_size` failed: return its error."
+  },
+  {
+   "n": "i1",
+   "at": "08e8 T",
+   "pre": "R0{e:=0}",
+   "post": "c1",
+   "h": [
+    "UA"
+   ],
+   "stu": [
+    "ua + 2"
+   ],
+   "doc": "`q.used := a->used + 2`; `mp_init(&t1)`."
+  },
+  {
+   "n": "t1e",
+   "at": "0928 F",
+   "pre": "R1",
+   "post": "XEq{w2:=pb}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init(&t1)` failed: `mp_clear(&q)`."
+  },
+  {
+   "n": "t1r",
+   "at": "0938",
+   "pre": "XE{w2:=pb}",
+   "post": "rt",
+   "h": [
+    "RF"
+   ],
+   "doc": "Restore, return `err`."
+  },
+  {
+   "n": "i2",
+   "at": "0928 T",
+   "pre": "R1{e:=0}",
+   "post": "c2",
+   "doc": "`mp_init(&t2)`."
+  },
+  {
+   "n": "t2e",
+   "at": "09ac T",
+   "pre": "R1",
+   "post": "XE1{w2:=pb}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init(&t2)` failed: `mp_clear(&t1)` (then `LBL_Q`)."
+  },
+  {
+   "n": "ix",
+   "at": "09ac F",
+   "pre": "R1{e:=0}",
+   "post": "cx",
+   "doc": "`mp_init_copy(&x, a)`."
+  },
+  {
+   "n": "xe",
+   "at": "09c0 F",
+   "pre": "R1",
+   "post": "XE2{w2:=pb}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_copy(&x, a)` failed: `mp_clear(&t2)` (then `LBL_T1`)."
+  },
+  {
+   "n": "iy",
+   "at": "09c0 T",
+   "pre": "R1{e:=0}",
+   "post": "cy",
+   "doc": "`mp_init_copy(&y, b)`."
+  },
+  {
+   "n": "ye",
+   "at": "0a00 T",
+   "pre": "R1",
+   "post": "XEx{w2:=pb}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_copy(&y, b)` failed: `mp_clear(&x)` (then `LBL_T2`)."
+  },
+  {
+   "n": "sgA",
+   "at": "0a00 F",
+   "to": "0a14",
+   "pre": "R1{e:=0}",
+   "post": "SgA",
+   "h": [
+    "SB"
+   ],
+   "doc": "`y.sign := MP_ZPOS`."
+  },
+  {
+   "n": "sgB",
+   "at": "0a14",
+   "to": "0a1c",
+   "pre": "SgA",
+   "post": "SgB",
+   "h": [
+    "SA"
+   ],
+   "doc": "Spill `b->sign`; load `a->sign`."
+  },
+  {
+   "n": "sgC",
+   "at": "0a1c",
+   "to": "0a20",
+   "pre": "SgB",
+   "post": "SgB",
+   "doc": "`x.sign := MP_ZPOS`."
+  },
+  {
+   "n": "sgD",
+   "at": "0a20",
+   "pre": "SgB",
+   "post": "cg",
+   "doc": "Spill `a->sign`; `mp_count_bits(&y)`."
+  },
+  {
+   "n": "cb",
+   "at": "0a28",
+   "pre": "cbr",
+   "post": "cbm",
+   "doc": "`__moddi3(mp_count_bits(&y), 28)`."
+  },
+  {
+   "n": "nz",
+   "at": "0a30 F",
+   "pre": "rmr",
+   "post": "mx",
+   "h": [
+    "rm < 27"
+   ],
+   "doc": "`norm := 27 - r`; `mp_mul_2d(&x, norm, &x)`."
+  },
+  {
+   "n": "n0",
+   "at": "0a30 T",
+   "to": "0a80",
+   "pre": "rmr",
+   "post": "K{nm:=0, w2:=pb}",
+   "h": [
+    "rm = 27"
+   ],
+   "doc": "`norm := 0`: save `s5`, `s6`, `s8`."
+  },
+  {
+   "n": "m2xe",
+   "at": "0a50 T",
+   "to": "0bc8",
+   "pre": "M2r",
+   "post": "XE{w2:=27-rm}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul_2d(&x)` failed: to `LBL_Y`."
+  },
+  {
+   "n": "m2y",
+   "at": "0a50 F",
+   "pre": "M2r{e:=0}",
+   "post": "my",
+   "doc": "`mp_mul_2d(&y, norm, &y)`."
+  },
+  {
+   "n": "m2ye",
+   "at": "0a68 T",
+   "to": "0bc8",
+   "pre": "M2r",
+   "post": "XE{w2:=27-rm}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul_2d(&y)` failed: to `LBL_Y`."
+  },
+  {
+   "n": "m2k",
+   "at": "0a68 F",
+   "to": "0a80",
+   "pre": "M2r{e:=0}",
+   "post": "K{nm:=27-rm, w2:=27-rm}",
+   "doc": "Save `s5`, `s6`, `s8`; `s1 := norm`."
+  },
+  {
+   "n": "ls",
+   "at": "0a80",
+   "pre": "K",
+   "post": "lc",
+   "h": [
+    "XU{xu:=ux}",
+    "YU",
+    "uy ≤ ux"
+   ],
+   "doc": "`n := x.used - 1`, `t := y.used - 1`; `mp_lshd(&y, n - t)`."
+  },
+  {
+   "n": "l0",
+   "at": "0a98 T",
+   "to": "0ac4",
+   "pre": "Lr{e:=0}",
+   "post": "S",
+   "doc": "To step 2's head."
+  },
+  {
+   "n": "le",
+   "at": "0a98 F",
+   "to": "0bc8",
+   "pre": "Lr",
+   "post": "XE{w2:=4*(ux-uy)}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "RS"
+   ],
+   "doc": "`mp_lshd(&y)` failed: restore `s5`, `s6`, `s8`; to `LBL_Y`."
+  },
+  {
+   "n": "sh",
+   "at": "0ac4",
+   "pre": "S",
+   "post": "Sc",
+   "doc": "Step 2's head: `mp_cmp(&x, &y)`."
+  },
+  {
+   "n": "sl",
+   "at": "0ad0 T",
+   "to": "0ab0",
+   "pre": "Sr",
+   "post": "Sa",
+   "h": [
+    "r ≠ 18446744073709551615",
+    "r < 2 ^ 64",
+    "QP"
+   ],
+   "doc": "`x ≥ y b^(n-t)`: the address of `q.dp[n-t]`."
+  },
+  {
+   "n": "sb",
+   "at": "0ab0",
+   "pre": "Sa",
+   "post": "Sq",
+   "h": [
+    "DG{ad:=qp+4*(ux-uy), dv:=j}",
+    "DS{ad:=qp+4*(ux-uy)}",
+    "j < 4"
+   ],
+   "stu": [
+    "j + 1"
+   ],
+   "doc": "`++q.dp[n-t]`; `mp_sub(&x, &y, &x)`."
+  },
+  {
+   "n": "sr2",
+   "at": "0ac0 F",
+   "to": "0ac4",
+   "pre": "S0{e:=0}",
+   "post": "S",
+   "doc": "Step 2's back edge."
+  },
+  {
+   "n": "sx",
+   "at": "0ad0 F",
+   "pre": "Sr",
+   "post": "Sy",
+   "h": [
+    "r = 18446744073709551615"
+   ],
+   "doc": "`x < y b^(n-t)`: `mp_rshd(&y, n - t)`."
+  },
+  {
+   "n": "rz",
+   "at": "0aec T",
+   "to": "0b58",
+   "pre": "S",
+   "post": "Z{w2:=4*(ux-uy), w5:=ux-uy, w6:=ux, w8:=uy}",
+   "h": [
+    "ux ≤ uy",
+    "XU",
+    "ux < 2 ^ 30",
+    "uy < 2 ^ 30"
+   ],
+   "doc": "`n < t + 1`: no step 3."
+  },
+  {
+   "n": "ro",
+   "at": "0aec F",
+   "to": "0af8",
+   "pre": "S",
+   "post": "Sa8",
+   "h": [
+    "0 < uy",
+    "uy < ux",
+    "ux < 2 ^ 30"
+   ],
+   "doc": "`n ≥ t + 1`: `4i - 4` for `i = n`."
+  },
+  {
+   "n": "ro1",
+   "at": "0af8",
+   "to": "0b0c",
+   "pre": "Sa8",
+   "post": "Ro1{w2:=4*(ux-uy)}",
+   "h": [
+    "ux = k + t + 2",
+    "uy = t + 1",
+    "k + t + 1 < 2 ^ 30",
+    "XU"
+   ],
+   "doc": "Save `s7`; `i := n`, `t`."
+  },
+  {
+   "n": "ro2",
+   "at": "0b0c",
+   "to": "0b2c",
+   "pre": "Ro1",
+   "post": "O",
+   "h": [
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "stu": [
+    "4 * t + 18446744073709551612"
+   ],
+   "doc": "Save `s9`–`s11`; `k`, `4t`, `4t - 4`; to step 3's head."
+  },
+  {
+   "n": "osb",
+   "at": "0b2c F T",
+   "to": "0b2c",
+   "pre": "O",
+   "post": "O{k:=k-1}",
+   "h": [
+    "xu < k + t + 1",
+    "0 < k",
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "doc": "`i > x.used`: skip, the next `i`."
+  },
+  {
+   "n": "osx",
+   "at": "0b2c F F",
+   "to": "0b58",
+   "pre": "O",
+   "post": "Z{w5:=t, w6:=4*t+18446744073709551612, w8:=4*t}",
+   "h": [
+    "xu < k + t + 1",
+    "k = 0",
+    "RL",
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "doc": "`i > x.used`, the last `i`: restore `s7`, `s9`–`s11`."
+  },
+  {
+   "n": "nb",
+   "at": "0b34 T",
+   "to": "0b2c",
+   "pre": "N",
+   "post": "O{k:=k-1}",
+   "h": [
+    "0 < k",
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "doc": "The next `i`."
+  },
+  {
+   "n": "nx",
+   "at": "0b34 F",
+   "to": "0b58",
+   "pre": "N",
+   "post": "Z{w5:=t, w6:=4*t+18446744073709551612, w8:=4*t}",
+   "h": [
+    "k = 0",
+    "RL",
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "doc": "After the last `i`: restore `s7`, `s9`–`s11`."
+  },
+  {
+   "n": "ob",
+   "at": "0b2c T",
+   "to": "0c20",
+   "pre": "O",
+   "post": "Ob",
+   "h": [
+    "k + t + 1 ≤ xu",
+    "XP",
+    "YP",
+    "k + t + 1 < 2 ^ 30",
+    "xu < 2 ^ 30"
+   ],
+   "doc": "Step 3.1: the addresses of `y.dp[t]`, `x.dp[i]`."
+  },
+  {
+   "n": "oc",
+   "at": "0c20",
+   "to": "0c40",
+   "pre": "Ob",
+   "post": "Oc",
+   "h": [
+    "DG{ad:=yp+4*t, dv:=yt}",
+    "DG{ad:=xp+4*(k+t+1), dv:=xi}",
+    "QP"
+   ],
+   "doc": "`y.dp[t]`, `x.dp[i]`, the address of `q.dp[k]`."
+  },
+  {
+   "n": "oe",
+   "at": "0c40 T",
+   "to": "0cf0",
+   "pre": "Oc",
+   "post": "D{qv:=0}",
+   "h": [
+    "xi = yt",
+    "DS{ad:=qp+4*k}"
+   ],
+   "doc": "`x[i] = y[t]`: `q.dp[k] := (MP_MASK + 1) & MP_MASK = 0`."
+  },
+  {
+   "n": "of",
+   "at": "0c40 F",
+   "to": "0c4c",
+   "pre": "Oc",
+   "post": "Oc3",
+   "h": [
+    "xi ≠ yt",
+    "xi < 268435456",
+    "yt < 268435456"
+   ],
+   "doc": "The address of `x.dp[i-1]`."
+  },
+  {
+   "n": "og",
+   "at": "0c4c",
+   "pre": "Oc3",
+   "post": "Ou",
+   "h": [
+    "DG{ad:=xp+4*(k+t), dv:=xi1}",
+    "xi < 268435456",
+    "yt < 268435456"
+   ],
+   "doc": "`__udivdi3((x[i] << 28) | x[i-1], y[t])`.",
+   "by": "first | exact hi_lo xi xi1 (by omega) (by omega) | omega"
+  },
+  {
+   "n": "oh",
+   "at": "0c6c",
+   "to": "0c74",
+   "pre": "Ow",
+   "post": "Oh",
+   "h": [
+    "SPL"
+   ],
+   "doc": "Reload the address of `q.dp[k]`; `MP_MASK + 1`."
+  },
+  {
+   "n": "oh0",
+   "at": "0c74 T",
+   "to": "0cf0",
+   "pre": "Oh",
+   "post": "D{qv:=(w+1)%268435456}",
+   "h": [
+    "DS{ad:=qp+4*k}",
+    "w < 268435456"
+   ],
+   "stu": [
+    "(w + 1) % 268435456"
+   ],
+   "doc": "`q.dp[k] := (tmp + 1) & MP_MASK`."
+  },
+  {
+   "n": "oh1",
+   "at": "0c74 F",
+   "to": "0cf0",
+   "pre": "Oh",
+   "post": "D{qv:=0}",
+   "h": [
+    "DS{ad:=qp+4*k}",
+    "268435456 ≤ w",
+    "w < 2 ^ 64"
+   ],
+   "stu": [
+    "0"
+   ],
+   "doc": "`tmp > MP_MASK`: `q.dp[k] := (MP_MASK + 1) & MP_MASK = 0`."
+  },
+  {
+   "n": "da",
+   "at": "0cf0",
+   "pre": "D",
+   "post": "Dz",
+   "h": [
+    "DS{ad:=qp+4*k}",
+    "qv < 268435456"
+   ],
+   "stu": [
+    "(qv + 268435455) % 268435456"
+   ],
+   "doc": "Step 3.2's body: `q.dp[k] := (q.dp[k] - 1) & MP_MASK`; `mp_zero(&t1)`."
+  },
+  {
+   "n": "db0",
+   "at": "0d0c T",
+   "to": "0d2c",
+   "pre": "Db",
+   "post": "Dc{yt1:=0}",
+   "h": [
+    "YP",
+    "t = 0",
+    "t < 2 ^ 30"
+   ],
+   "doc": "`t = 0`: `t1.dp[0] := 0`."
+  },
+  {
+   "n": "db1",
+   "at": "0d0c F",
+   "to": "0d28",
+   "pre": "Db",
+   "post": "Dd",
+   "h": [
+    "YP",
+    "L0",
+    "0 < t",
+    "t < 2 ^ 30"
+   ],
+   "doc": "The address of `y.dp[t-1]`."
+  },
+  {
+   "n": "db2",
+   "at": "0d28",
+   "to": "0d2c",
+   "pre": "Dd",
+   "post": "Dc",
+   "h": [
+    "DG{ad:=yp+4*(t-1), dv:=yt1}"
+   ],
+   "doc": "`y.dp[t-1]`."
+  },
+  {
+   "n": "dc",
+   "at": "0d2c",
+   "to": "0d38",
+   "pre": "Dc",
+   "post": "De",
+   "h": [
+    "T1P",
+    "QP"
+   ],
+   "doc": "`t1.dp`, the address of `y.dp[t]`."
+  },
+  {
+   "n": "dd",
+   "at": "0d38",
+   "to": "0d44",
+   "pre": "De",
+   "post": "Df",
+   "h": [
+    "DS{ad:=t1p}",
+    "DG{ad:=yp+4*t, dv:=yt}",
+    "t1p + 4 ≤ yp + 4 * t ∨ yp + 4 * t + 4 ≤ t1p"
+   ],
+   "doc": "`t1.dp[0] := y[t-1]`; `y.dp[t]`; the address of `q.dp[k]`."
+  },
+  {
+   "n": "deA",
+   "at": "0d44",
+   "to": "0d4c",
+   "pre": "Df",
+   "post": "Df",
+   "doc": "`t1.used := 2`."
+  },
+  {
+   "n": "deB",
+   "at": "0d4c",
+   "pre": "Df",
+   "post": "Dm",
+   "h": [
+    "DS{ad:=t1p+4}",
+    "DG{ad:=qp+4*k, dv:=qd}",
+    "t1p + 8 ≤ qp + 4 * k ∨ qp + 4 * k + 4 ≤ t1p + 4"
+   ],
+   "doc": "`t1.dp[1] := y[t]`; `mp_mul_d(&t1, q.dp[k], &t1)`."
+  },
+  {
+   "n": "dg0",
+   "at": "0d58 T T",
+   "to": "0cb0",
+   "pre": "De0{e:=0}",
+   "post": "Dg{xi2:=0}",
+   "h": [
+    "XP",
+    "k + t + 1 ≤ 1",
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "doc": "`i ≤ 1`: `t2.dp[0] := 0`."
+  },
+  {
+   "n": "dg1",
+   "at": "0d58 T F",
+   "to": "0cac",
+   "pre": "De0{e:=0}",
+   "post": "Dh",
+   "h": [
+    "XP",
+    "2 ≤ k + t + 1",
+    "k + t + 1 < 2 ^ 30"
+   ],
+   "doc": "The address of `x.dp[i-2]`."
+  },
+  {
+   "n": "dg2",
+   "at": "0cac",
+   "to": "0cb0",
+   "pre": "Dh",
+   "post": "Dg",
+   "h": [
+    "DG{ad:=xp+4*(k+t-1), dv:=xi2}"
+   ],
+   "doc": "`x.dp[i-2]`."
+  },
+  {
+   "n": "dh",
+   "at": "0cb0",
+   "to": "0cbc",
+   "pre": "Dg",
+   "post": "Di",
+   "h": [
+    "T2P"
+   ],
+   "doc": "`t2.dp`, the addresses of `x.dp[i-1]`, `x.dp[i]`."
+  },
+  {
+   "n": "diA",
+   "at": "0cbc",
+   "to": "0cc0",
+   "pre": "Di",
+   "post": "Di",
+   "h": [
+    "DS{ad:=t2p}"
+   ],
+   "doc": "`t2.dp[0] := x[i-2]`."
+  },
+  {
+   "n": "diB",
+   "at": "0cc0",
+   "to": "0cc8",
+   "pre": "Di",
+   "post": "DiB",
+   "stu": [
+    "xi1"
+   ],
+   "h": [
+    "DS{ad:=t2p+4}",
+    "DG{ad:=xp+4*(k+t), dv:=xi1}",
+    "t2p + 8 ≤ xp + 4 * (k + t) ∨ xp + 4 * (k + t) + 4 ≤ t2p + 4"
+   ],
+   "doc": "`t2.dp[1] := x[i-1]`."
+  },
+  {
+   "n": "diC",
+   "at": "0cc8",
+   "to": "0cd4",
+   "pre": "DiB",
+   "post": "DiC",
+   "h": [
+    "DG{ad:=xp+4*(k+t+1), dv:=xi}"
+   ],
+   "doc": "`t2.used := 3` (and `x[i]`)."
+  },
+  {
+   "n": "diD",
+   "at": "0cd4",
+   "pre": "DiC",
+   "post": "Dt",
+   "h": [
+    "DS{ad:=t2p+8}"
+   ],
+   "doc": "`t2.dp[2] := x[i]`; `mp_cmp_mag(&t1, &t2)`."
+  },
+  {
+   "n": "dj",
+   "at": "0cdc",
+   "to": "0ce8",
+   "pre": "Dr",
+   "post": "Dq",
+   "h": [
+    "QP"
+   ],
+   "doc": "The address of `q.dp[k]`."
+  },
+  {
+   "n": "dk",
+   "at": "0ce8 F",
+   "to": "0cf0",
+   "pre": "Dq",
+   "post": "D{qv:=qd}",
+   "h": [
+    "r = 1",
+    "DG{ad:=qp+4*k, dv:=qd}"
+   ],
+   "doc": "`MP_GT`: step 3.2 again."
+  },
+  {
+   "n": "dl",
+   "at": "0ce8 T",
+   "pre": "Dq",
+   "post": "Dy",
+   "h": [
+    "r ≠ 1",
+    "DG{ad:=qp+4*k, dv:=qd}",
+    "r < 2 ^ 64"
+   ],
+   "doc": "Step 3.3: `mp_mul_d(&y, q.dp[k], &t1)`."
+  },
+  {
+   "n": "dm",
+   "at": "0d98 F",
+   "pre": "De0{e:=0}",
+   "post": "Dl",
+   "doc": "`mp_lshd(&t1, k)`."
+  },
+  {
+   "n": "dme",
+   "at": "0d98 T",
+   "to": "0bc8",
+   "pre": "De0",
+   "post": "XE{w2:=4*k}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "RS",
+    "RL"
+   ],
+   "doc": "`mp_mul_d(&y, q, &t1)` failed: restore `s5`–`s11`; to `LBL_Y`."
+  },
+  {
+   "n": "dn",
+   "at": "0da8 F",
+   "pre": "De0{e:=0}",
+   "post": "Ds",
+   "doc": "`mp_sub(&x, &t1, &x)`."
+  },
+  {
+   "n": "dne",
+   "at": "0da8 T",
+   "to": "0bc8",
+   "pre": "De0",
+   "post": "XE{w2:=4*k}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "RS",
+    "RL"
+   ],
+   "doc": "`mp_lshd(&t1, k)` failed: restore `s5`–`s11`; to `LBL_Y`."
+  },
+  {
+   "n": "do0",
+   "at": "0dbc F F",
+   "to": "0b34",
+   "pre": "De0{e:=0}",
+   "post": "N{w2:=4*k}",
+   "h": [
+    "XS",
+    "sx ≠ 1",
+    "XU"
+   ],
+   "doc": "`x ≥ 0`: the next `i`."
+  },
+  {
+   "n": "do1",
+   "at": "0dbc F T",
+   "pre": "De0{e:=0}",
+   "post": "Dc2",
+   "h": [
+    "XS",
+    "sx = 1"
+   ],
+   "doc": "Step 3.4, `x < 0`: `mp_copy(&y, &t1)`."
+  },
+  {
+   "n": "dp",
+   "at": "0de0 F",
+   "pre": "De0{e:=0}",
+   "post": "Dl",
+   "doc": "`mp_lshd(&t1, k)`."
+  },
+  {
+   "n": "dq",
+   "at": "0df0 F",
+   "pre": "De0{e:=0}",
+   "post": "Ds",
+   "doc": "`mp_add(&x, &t1, &x)`."
+  },
+  {
+   "n": "dr",
+   "at": "0e04 F",
+   "to": "0e10",
+   "pre": "De0{e:=0}",
+   "post": "Da4",
+   "h": [
+    "QP"
+   ],
+   "doc": "The address of `q.dp[k]`."
+  },
+  {
+   "n": "ds",
+   "at": "0e10",
+   "to": "0b34",
+   "pre": "Da4",
+   "post": "N{w2:=4*k}",
+   "h": [
+    "DG{ad:=qp+4*k, dv:=qd}",
+    "DS{ad:=qp+4*k}",
+    "0 < qd",
+    "XU"
+   ],
+   "stu": [
+    "qd - 1"
+   ],
+   "doc": "`q.dp[k] := (q.dp[k] - 1) & MP_MASK`; the next `i`."
+  },
+  {
+   "n": "z0",
+   "at": "0b58 T F",
+   "pre": "Z",
+   "post": "Zq",
+   "h": [
+    "xu = 0",
+    "pc ≠ 0",
+    "pc < 2 ^ 64"
+   ],
+   "doc": "`x.used = 0`: `x.sign := MP_ZPOS`; `mp_clamp(&q)`."
+  },
+  {
+   "n": "z1",
+   "at": "0b58 F F",
+   "pre": "Z",
+   "post": "Zq",
+   "h": [
+    "xu ≠ 0",
+    "xu < 2 ^ 64",
+    "SA",
+    "pc ≠ 0",
+    "pc < 2 ^ 64"
+   ],
+   "stu": [
+    "sa"
+   ],
+   "doc": "`x.sign := a->sign`; `mp_clamp(&q)`."
+  },
+  {
+   "n": "zx",
+   "at": "0b70",
+   "pre": "Zb",
+   "post": "Zx",
+   "doc": "`mp_exch(&q, c)`."
+  },
+  {
+   "n": "zs",
+   "at": "0b7c",
+   "to": "0b88",
+   "pre": "Zb",
+   "post": "Zd",
+   "h": [
+    "SG"
+   ],
+   "doc": "`a->sign - b->sign` from the spills."
+  },
+  {
+   "n": "zn",
+   "alu": "snez",
+   "at": "0b88",
+   "pre": "Zd",
+   "post": "Zn",
+   "doc": "`neg := a->sign != b->sign` (`snez`)."
+  },
+  {
+   "n": "zt",
+   "at": "0b8c F",
+   "pre": "Zn",
+   "post": "Zv",
+   "h": [
+    "CS",
+    "pd ≠ 0",
+    "pd < 2 ^ 64"
+   ],
+   "doc": "`c->sign := neg`; `mp_div_2d(&x, norm, &x, NULL)`."
+  },
+  {
+   "n": "zd",
+   "at": "0ba8 F",
+   "pre": "Z0{e:=0}",
+   "post": "Ze",
+   "doc": "`mp_exch(&x, d)`."
+  },
+  {
+   "n": "ze",
+   "at": "0bbc",
+   "pre": "Z1",
+   "post": "XEy{e:=0}",
+   "h": [
+    "RS"
+   ],
+   "doc": "Restore `s5`, `s6`, `s8`; `mp_clear(&y)`."
+  },
+  {
+   "n": "xy",
+   "at": "0bc8",
+   "pre": "XE",
+   "post": "XEy",
+   "doc": "`LBL_Y`: `mp_clear(&y)`."
+  },
+  {
+   "n": "xx",
+   "at": "0bd0",
+   "pre": "XE",
+   "post": "XEx",
+   "doc": "`LBL_X`: `mp_clear(&x)`."
+  },
+  {
+   "n": "xt",
+   "at": "0bd8",
+   "pre": "XE",
+   "post": "XE2",
+   "doc": "`LBL_T2`: `mp_clear(&t2)`."
+  },
+  {
+   "n": "x1",
+   "at": "09d0",
+   "pre": "XE",
+   "post": "XE1",
+   "doc": "`LBL_T1`: `mp_clear(&t1)`."
+  },
+  {
+   "n": "x2",
+   "at": "09d8",
+   "pre": "XE",
+   "post": "XEq",
+   "doc": "`LBL_Q`: `mp_clear(&q)`."
+  },
+  {
+   "n": "x3",
+   "at": "09e0",
+   "pre": "XE",
+   "post": "rt",
+   "h": [
+    "RF"
+   ],
+   "doc": "Restore, return `err`."
+  },
+  {
+   "n": "dqe",
+   "at": "0df0 T",
+   "to": "0bc8",
+   "pre": "De0",
+   "post": "XE{w2:=4*k}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "RS",
+    "RL"
+   ],
+   "doc": "The add-back's `mp_lshd(&t1, k)` failed: restore `s5`–`s11`; to `LBL_Y`."
+  },
+  {
+   "n": "snc",
+   "at": "0970 T",
+   "pre": "R1",
+   "post": "rt",
+   "h": [
+    "pc = 0",
+    "RF"
+   ],
+   "doc": "`c == NULL`: skip `mp_zero(c)`; restore, return `err`."
+  },
+  {
+   "n": "smz",
+   "at": "08d0 T T F",
+   "pre": "cr",
+   "post": "zc{e:=0}",
+   "h": [
+    "r = 18446744073709551615",
+    "pd = 0",
+    "pc ≠ 0",
+    "pc < 2 ^ 64"
+   ],
+   "doc": "`|a| < |b|`, `d == NULL`: `err := MP_OKAY`; `mp_zero(c)`."
+  },
+  {
+   "n": "z0n",
+   "at": "0b58 T T F",
+   "pre": "Z",
+   "post": "Zv",
+   "h": [
+    "xu = 0",
+    "pc = 0",
+    "pd ≠ 0",
+    "pd < 2 ^ 64"
+   ],
+   "doc": "`c == NULL`, `x.used = 0`: `x.sign := MP_ZPOS`; `mp_div_2d(&x, norm, &x, NULL)`."
+  },
+  {
+   "n": "z1n",
+   "at": "0b58 F T F",
+   "pre": "Z",
+   "post": "Zv",
+   "h": [
+    "xu ≠ 0",
+    "xu < 2 ^ 64",
+    "SA",
+    "pc = 0",
+    "pd ≠ 0",
+    "pd < 2 ^ 64"
+   ],
+   "stu": [
+    "sa"
+   ],
+   "doc": "`c == NULL`: `x.sign := a->sign`; `mp_div_2d(&x, norm, &x, NULL)`."
+  },
+  {
+   "n": "ztq",
+   "at": "0b8c T",
+   "pre": "Zn",
+   "post": "XEy{e:=0}",
+   "h": [
+    "CS",
+    "pd = 0",
+    "RS"
+   ],
+   "doc": "`d == NULL`: `c->sign := neg`; restore `s5`, `s6`, `s8`; `err := MP_OKAY`; `mp_clear(&y)`."
+  }
+ ]
+}

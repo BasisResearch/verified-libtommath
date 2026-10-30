@@ -1,0 +1,38 @@
+{
+ "fn": "mp_mul_2", "mod": "Mul2HG", "src": "mul2hg", "pfx": "m2hg", "imports": ["Tom.Machine.Kit.Shift"],
+ "bv": "ra s0 s1", "nat": "sp pa u al q ou r x i j e n sg", "keep": "gp tp s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "regs": {
+  "ent": "ra sp s0 s1 a0:pa a1:pa",
+  "bd": "sp:sp-32 s0:pa s1:pa a1:u",
+  "gc": "sp:sp-32 s0:pa s1:pa a0:pa a1:u+1",
+  "m0": "sp:sp-32 s0:pa s1:pa a0:e",
+  "rt": "ra sp s0 s1 a0:e",
+  "lp": "sp:sp-32 s0:pa s1:pa a0:q a2:ou t1:268435455 a3:q+4*i a6:q+4*i a5:r a1:i",
+  "xl": "sp:sp-32 s0:pa s1:pa a0:q a2:ou a3:q+4*u a5:r",
+  "x2": "sp:sp-32 s0:pa s1:pa a0:q a2:ou",
+  "tl": "sp:sp-32 s0:pa s1:pa a0:q a1:n a2:ou"
+ },
+ "facts": {
+  "UA": ["bytesT4 M pa = BitVec.ofNat 32 u", "u < 2 ^ 31", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 32 ∨ sp ≤ pa",
+         "pa + 24 ≤ mpMul2Base ∨ mpMul2Base + 240 ≤ pa"],
+  "AL": ["bytesT4 M (pa + 4) = BitVec.ofNat 32 al", "al < 2 ^ 31"],
+  "DP": ["bytesT8 M (pa + 16) = BitVec.ofNat 64 q"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "SG": ["bytesT4 M (pa + 8) = BitVec.ofNat 32 sg", "sg < 2 ^ 31"],
+  "DG": ["bytesT4 M (q + 4 * i) = BitVec.ofNat 32 x", "x < 268435456", "Ram (q + 4 * i) 4"],
+  "SW": ["Ram (q + 4 * j) 4", "(q + 4 * j) % 4 = 0", "q + 4 * j + 4 ≤ mpMul2Base ∨ mpMul2Base + 240 ≤ q + 4 * j",
+         "q + 4 * j + 4 ≤ sp - 32 ∨ sp ≤ q + 4 * j", "q + 4 * j + 4 ≤ pa ∨ pa + 24 ≤ q + 4 * j"]
+ },
+ "segs": [
+  {"n": "p", "at": "5ca0 F", "to": "5cc4", "pre": "ent", "post": "bd", "h": ["UA", "AL", "u < al"], "doc": "The frame; room: `a->used < a->alloc`."},
+  {"n": "pg", "at": "5ca0 T", "pre": "ent", "post": "gc", "h": ["UA", "AL", "al ≤ u", "u + 1 < 2 ^ 31"], "doc": "No room: `mp_grow(a, a->used + 1)`."},
+  {"n": "gm", "at": "5d84 T", "pre": "m0", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_grow` failed: restore, return its error."},
+  {"n": "go", "at": "5d84 F", "to": "5cc4", "pre": "m0{e:=0}", "post": "bd", "h": ["UA"], "doc": "Grown: reload `a->used`."},
+  {"n": "b0", "at": "5cc4 T", "to": "5d34", "pre": "bd", "post": "tl{n:=u, ou:=u}", "h": ["UA", "DP", "u = 0"], "doc": "`b->used := a->used = 0`: no loop."},
+  {"n": "b", "at": "5cc4 F", "to": "5cec", "pre": "bd", "post": "lp{i:=0, r:=0, ou:=u}", "h": ["UA", "DP", "0 < u"], "doc": "`b->used := a->used`; the mask; enter the loop."},
+  {"n": "lp", "at": "5cec T", "to": "5cec", "pre": "lp", "post": "lp{i:=i+1, r:=x / 134217728}", "stu": ["(2 * x + r) % 268435456"], "h": ["DG", "SW{j:=i}", "UA", "r ≤ 1", "i + 1 < u"], "by": "exact mul2_digit x r (by omega) (by omega)", "doc": "The back edge: `b[i] := (2 a[i] + r) mod 2^28`, carry `a[i] >> 27`."},
+  {"n": "lx", "at": "5cec F", "to": "5d1c", "pre": "lp", "post": "xl{r:=x / 134217728}", "stu": ["(2 * x + r) % 268435456"], "h": ["DG", "SW{j:=i}", "UA", "r ≤ 1", "i + 1 = u"], "by": "exact mul2_digit x r (by omega) (by omega)", "doc": "The loop's last iteration."},
+  {"n": "cz", "at": "5d1c T", "to": "5d34", "pre": "xl{r:=0}", "post": "tl{n:=u}", "h": ["UA"], "doc": "No last carry."},
+  {"n": "c1", "at": "5d1c F", "to": "5d28", "pre": "xl", "post": "x2", "h": ["SW{j:=u}", "0 < r", "r < 2 ^ 64"], "doc": "A last carry: `b[used] := 1`."},
+  {"n": "c2", "at": "5d28", "to": "5d34", "pre": "x2", "post": "tl{n:=u+1}", "stu": ["u + 1"], "h": ["UA", "u + 1 < 2 ^ 31"], "doc": "`++b->used`."},
+  {"n": "t", "at": "5d34 T", "pre": "tl", "post": "rt{e:=0}", "stu": ["sg"], "h": ["UA", "SG", "RF", "ou ≤ n", "n < 2 ^ 31"], "doc": "No excess digits (in place: `oldused ≤ b->used`); `b->sign := a->sign`; return `MP_OKAY`."}
+ ]}

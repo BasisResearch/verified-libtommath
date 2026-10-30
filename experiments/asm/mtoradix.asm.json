@@ -1,0 +1,195 @@
+{
+ "fn": "mp_to_radix",
+ "mod": "MpToRadixMainG",
+ "ns": "Tom.Machine.Fn.MpToRadixG5",
+ "api": "MpToRadix",
+ "rows": "experiments/segs/mtoradix.rows.json",
+ "hdig": false,
+ "code": "mpToRadix",
+ "F": 816,
+ "lay_rfl": true,
+ "imports": ["Tom.Machine.Api.MpToRadix", "Tom.Machine.Kit.Run", "Tom.Machine.Fn.MpToRadixG5K", "Tom.Machine.Fn.MpToRadixG", "Tom.Machine.Fn.MpDivDIG5"],
+ "opens": ["open Tom.Machine.Fn.MpToRadixG Tom.Machine.Fn.MpToRadixG5K Tom.ToRadixStepL Tom.Radix Tom.Ledger", "open Tom.Machine.Api.MpToRadix (R P lay isW ws Res kind q_ok q_mem)"],
+ "callees": {
+  "mpClear": {"heap": true, "ctor": "Un.R", "params": ["sp", "pa", "adp", "a", "H"], "regions": [["stk", "stk"], ["aS", "S pa"], ["aD", "site"], ["code", "code"]], "entry": "0x80005018"}
+ },
+ "R": ["stk", "aS", "aD", "str", "code"],
+ "written": ["stk", "str"],
+ "Rk": {"aS": "S pa adp a", "aD": "D adp a", "str": "F pstr p.maxlen p.m0"},
+ "frame": [["nT", 80], ["nQ", 24], ["nD", 4], ["nL", 20]],
+ "site": "nS",
+ "refs": {"nQ": "S sp - 104", "nS": "D tq", "nD": "R sp - 108", "nR .aS": "S pa", "nR .aD": "D adp"},
+ "ctx_vocab": {
+  "hin": "(Api.MpToRadix.hin z.p)",
+  "Wr0": "(InAny (lay z.p) ws)"
+ },
+ "rowdef": {
+  "ml": "maxlen",
+  "rx": "radix",
+  "pstr": "pstr",
+  "pa": "pa",
+  "u": "a.used"
+ },
+ "snaps": {"F1": "W(m, p0)", "F2": "W(F1, p1)", "FN": "W(F2, nz)"},
+ "defs": ["def ρt (p : P) (q n : Nat) : X → Iv := Iv.upd (ρX p) nS ⟨q, 4 * n⟩"],
+ "post": "fun cf => ∃ x M, At ra (Api.MpToRadix.rets p x ra) M v.keep o cf ∧ Api.MpToRadix.Q p x ∧ HPost (lay p) ws .str (Api.MpToRadix.out p x) (Api.MpToRadix.site' p x) hin (Api.MpToRadix.hout p x) m M",
+ "prelude": [
+  "have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi",
+  "have hva := hres.va; have := hres.apos; have := hres.rx_lt; have := hva.used_le; have := hva.alloc_lt",
+  "have eF : Api.MpToRadix.F = 816 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have eL : allocLo = 0x800188a0 := rfl; have eB : mpToRadixBase = 0x80001f80 := rfl; have eTB : textBase = 0x80000000 := rfl",
+  "have eTL : textLen = 0x18880 := rfl; have eIC : MpInitCopy.F = 624 := rfl; have eCl : MpClear.F = 544 := rfl; have eDI : Api.MpDivDI.F = 688 := rfl",
+  "have hR : RamH (sp - 128) 128 := ⟨Ram.sub (hB .stk).2 (show sp - 816 ≤ sp - 128 by omega) (show sp - 128 + 128 ≤ sp - 816 + 816 by omega)⟩",
+  "have hstrR : Ram pstr maxlen := (hB .str).2.1; have := hstrR.lo_ge; have := hstrR.hi_le",
+  "have hpa := hS .aS .stk (by decide); have hco := hS .stk .code (by decide); have hsd := hS .str .stk (by decide); have hsc := hS .str .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_str, layE_code, textIv] at hpa hco hsd hsc",
+  "have hrb := rmap_byte; have hrp := rmap_ptr; have hrl := rmapAt_lt"
+ ],
+ "cuts": {
+  "E": {
+   "pc": "1f80",
+   "regs": "ent",
+   "mu": "3, 0, 0",
+   "state": [["st", "St (ρX p) wX WX (κX p m) m m"], ["hp", "HP (ρX p) wX hin hin Wr0 m m"]],
+   "edge": [
+    ["seg", "p0", "ws nT"],
+    ["if", "maxlen < 2",
+     [
+      ["seg", "small", "0"],
+      ["exit", "fin", {"_E": "Tom.Radix.mpBuf", "_Q": "q_ok (@H.bytesOf (r := nR .str) rfl rfl) (post_small hb1)"}]
+     ],
+     [
+      ["seg", "p1", "ws nT"],
+      ["if", "radix < 2 ∨ 64 < radix",
+       [
+        ["seg", "bad", "0"],
+        ["exit", "fin", {"_E": "Layout.mpVal", "_Q": "q_ok (@H.bytesOf (r := nR .str) rfl rfl) (post_val (by omega) (by unfold radixOk; omega))"}]
+       ],
+       [
+        ["if", "a.used = 0",
+         [
+          ["seg", "z1a", "ws nT"],
+          ["seg", "z1b", "ws nR .str"],
+          ["seg", "z2", "0"],
+          ["exit", "fin", {"_E": "Layout.mpOkay", "_Q": "q_ok (F := writeLog (writeLog p.m0 [(pstr + 1, 1, BitVec.ofNat 64 0)]) [(pstr, 1, BitVec.ofNat 64 48)]) (@H.bytesOf (r := nR .str) rfl rfl) (post_zeroE (by omega) (show radixOk (radix : Int) by unfold radixOk; omega) hb3 (Eq.trans (bytesOf_store (k := 0) (by omega) (by omega) (by decide)) (congrArg (Mont.upd · 0 48) (bytesOf_store (k := 1) rfl (by omega) (by decide)))))"}]
+         ],
+         [
+          ["seg", "nz", "ws nT"],
+          ["forget", "nQ"],
+          ["call", "mpInitCopy", "sp - 128, sp - 104, pa, adp, a, hin", "xi", {"hq": "hqi", "site": "nS", "res": "⟨⟨by om, by om, by om⟩, by om, by unfold OffHeap; om, hres.aoff, hres.ablk, hva, hres.apos⟩"}],
+          ["cases", "xi", {
+           "none": [
+            ["set", {"e": "18446744073709551614"}],
+            ["seg", "icm", "0"],
+            ["exit", "fin", {"_E": "Layout.mpMem", "_Q": "q_mem"}]
+           ],
+           "some ⟨tq, t0⟩": [
+            ["jump", "C", {"vars": {"t0": "t0"}, "hqi": "hqi.2", "hb1": "by omega"}]
+           ]
+          }]
+         ], "hb3"]
+       ], "hb2"]
+     ], "hb1"]
+   ]
+  },
+  "C": {
+   "pc": "2018",
+   "regs": "pc0",
+   "regs_over": {"e": "0"},
+   "vars": "M Mk : Mem; tq : Nat; t0 : MpInt",
+   "mu": "2, 0, 0",
+   "kinds": {"nS": ".mpD tq t0.alloc t0.digit", "nQ": ".mpS (sp - 104) tq t0", "nD": ".frz m", "nT": ".frz FN", "nL": ".frz m", "nR .str": ".frz p.m0"},
+   "state": [["st", "St (ρt p tq t0.alloc) wX WX (κC z x) Mk M"], ["hp", "HP (ρt p tq t0.alloc) wX hin ((tq, 4 * t0.alloc) :: hin) Wr0 m Mk"]],
+   "prem": [["hqi", "CopyPost a (MpInt.zeroN (initPrec a.used)) t0"], ["hb3", "¬ a.used = 0"], ["hb1", "2 ≤ maxlen"], ["hb2", "¬ (radix < 2 ∨ 64 < radix)"]],
+   "edge": [
+    ["have", "hen : Env a maxlen (radix : Int)", "⟨hva, hb3, by omega, by unfold radixOk; omega⟩"],
+    ["have", "hsg : a.sign ≤ 1", "by rcases hva.sign_ok with h | h <;> rw [h] <;> decide"],
+    ["tac", "have hts := hqi.sign; have htu := hqi.used"],
+    ["if", "t0.sign = 1",
+     [
+      ["seg", "ng1", "ws nT", {"sg": "t0.sign"}],
+      ["seg", "ng2", "ws nR .str"],
+      ["seg", "ng3", "s nQ"],
+      ["seg", "ng4", "ws nT", {"tu": "t0.used"}],
+      ["forget", "nD"],
+      ["jump", "H", {"vars": {"t": "({ t0 with sign := 0 } : MpInt)"}, "rf": "⟨by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log⟩", "r6": "⟨by rd_log⟩", "env": "hen", "hps": "by unfold ToRadixStepL.pre; rw [if_pos (by rw [← hts]; exact hb4)] <;> omega", "hq": "rfl", "hrm": "by unfold ToRadixStepL.pre; rw [if_pos (by rw [← hts]; exact hb4)]; omega", "pr": "start_negE hen hqi hb4 (bytesOf_store (by omega) (by omega) (by decide))"}]
+     ],
+     [
+      ["seg", "pos", "ws nT", {"sg": "t0.sign", "tu": "t0.used"}],
+      ["forget", "nD"],
+      ["jump", "H", {"vars": {"t": "t0"}, "rf": "⟨by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log⟩", "r6": "⟨by rd_log⟩", "env": "hen", "hps": "by unfold ToRadixStepL.pre; rw [if_neg (by rw [← hts]; exact hb4)] <;> omega", "hq": "rfl", "hrm": "by unfold ToRadixStepL.pre; rw [if_neg (by rw [← hts]; exact hb4)]; omega", "pr": "start_pos hen hqi hb4"}]
+     ], "hb4"]
+   ]
+  },
+  "H": {
+   "pc": "2094",
+   "regs": "hd",
+   "vars": "M Mk F MT : Mem; tq i q rm ps : Nat; t : MpInt",
+   "mu": "1, maxlen - i, 1",
+   "kinds": {"nS": ".mpD tq t.alloc t.digit", "nQ": ".mpS (sp - 104) tq t", "nD": ".ram", "nT": ".frz MT", "nL": ".frz m", "nR .str": ".frz F"},
+   "state": [["st", "St (ρt p tq t.alloc) wX WX (κH z x) Mk M"], ["hp", "HP (ρt p tq t.alloc) wX hin ((tq, 4 * t.alloc) :: hin) Wr0 m Mk"]],
+   "prem": [["rf", "RF MT ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s7 s.s8 sp"], ["r6", "R6 MT s.s6 sp"], ["env", "Env a maxlen (radix : Int)"], ["hps", "ps = pstr + ToRadixStepL.pre a"], ["hq", "q = ps + i"], ["hrm", "rm + ToRadixStepL.pre a + 1 = maxlen"], ["pr", "LI a maxlen (radix : Int).toNat (bytesOf p.m0 pstr maxlen) t (bytesOf F pstr maxlen) i"]],
+   "prelude": ["have hil := pr.room; rw [room_eq] at hil; have hpre := pre_le a; have hnz := pr.nz; have := pr.acct.room", "have htv := pr.acct.valid; have := htv.used_le; have := htv.alloc_lt", "have hr2 : 2 ≤ radix := by have := env.rok; unfold radixOk at this; omega", "have hr64 : radix ≤ 64 := by have := env.rok; unfold radixOk at this; omega"],
+   "edge": [
+    ["if", "i = rm",
+     [
+      ["seg", "full", "0"],
+      ["call", "mpClear", "sp - 128, sp - 104, tq, t, hin", "_", {"site": "nS", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by om⟩"}],
+      ["seg", "ret", "0"],
+      ["exit", "fin", {"_E": "Tom.Radix.mpBuf", "_Q": "q_ok (@H.bytesOf (r := nR .str) rfl rfl) (LI.full env pr (by rw [room_eq]; omega))"}]
+     ],
+     [
+      ["seg", "dv", "0"],
+      ["call", "mpDivDI", "sp - 128, sp - 104, tq, sp - 108, t, radix, hin", "xd", {"hq": "hqd", "site": "nS", "res": "⟨⟨by om, by om, by om⟩, htv, by om, by unfold OffHeap; om, hr2, by om, by om, by om, by unfold OffHeap; om, by show radix < 268435456; om⟩"}],
+      ["cases", "xd", {
+       "none": [
+        ["set", {"e": "18446744073709551614"}],
+        ["seg", "dvm", "0"],
+        ["call", "mpClear", "sp - 128, sp - 104, tq, t, hin", "_", {"site": "nS", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by om⟩"}],
+        ["seg", "ret", "0"],
+        ["exit", "fin", {"_E": "Layout.mpMem", "_Q": "q_mem"}]
+       ],
+       "some ⟨tq2, t2⟩": [
+        ["jump", "D", {"vars": {"t2": "t2"}, "hb5": "hb5"}]
+       ]
+      }]
+     ], "hb5"]
+   ]
+  },
+  "D": {
+   "pc": "2068",
+   "regs": "dr",
+   "regs_over": {"e": "0"},
+   "vars": "M Mk F MT : Mem; tq2 i q rm ps : Nat; t t2 : MpInt",
+   "mu": "1, maxlen - i, 0",
+   "kinds": {"nS": ".mpD tq2 t2.alloc t2.digit", "nQ": ".mpS (sp - 104) tq2 t2", "nD": ".mpD (sp - 108) 1 (fun _ => t.mag % radix)", "nT": ".frz MT", "nL": ".frz m", "nR .str": ".frz F"},
+   "state": [["st", "St (ρt p tq2 t2.alloc) wX WX (κD z x) Mk M"], ["hp", "HP (ρt p tq2 t2.alloc) wX hin ((tq2, 4 * t2.alloc) :: hin) Wr0 m Mk"]],
+   "prem": [["rf", "RF MT ra s0 s.s1 s.s2 s.s3 s.s4 s.s5 s.s7 s.s8 sp"], ["r6", "R6 MT s.s6 sp"], ["env", "Env a maxlen (radix : Int)"], ["hps", "ps = pstr + ToRadixStepL.pre a"], ["hq", "q = ps + i"], ["hrm", "rm + ToRadixStepL.pre a + 1 = maxlen"], ["pr", "LI a maxlen (radix : Int).toNat (bytesOf p.m0 pstr maxlen) t (bytesOf F pstr maxlen) i"], ["hqd", "DivDQuot t radix t t2"], ["hb5", "¬ i = rm"]],
+   "prelude": ["have hil := pr.room; rw [room_eq] at hil; have hpre := pre_le a; have hnz := pr.nz; have := pr.acct.room", "have htv := pr.acct.valid; have := htv.used_le; have := htv.alloc_lt", "have hr2 : 2 ≤ radix := by have := env.rok; unfold radixOk at this; omega", "have hr64 : radix ≤ 64 := by have := env.rok; unfold radixOk at this; omega"],
+   "edge": [
+    ["have", "hrem", "Nat.mod_lt t.mag (show 0 < radix by omega)"],
+    ["have", "ht2", "xfer_divD (v := radix) pr.acct (Nat.le_refl 1) (by omega) hqd"],
+    ["tac", "have := ht2.valid.used_le; have := ht2.valid.alloc_lt; have := ht2.room"],
+    ["seg", "dvx", "0", {"d": "t.mag % radix", "tu": "t2.used"}],
+    ["if", "t2.used = 0",
+     [
+      ["seg", "dvl", "ws nR .str", {"c": "rmapAt (t.mag % radix)"}],
+      ["seg", "dvs", "ws nL"],
+      ["call", "sMpReverseH", "pstr, maxlen, ps, i + 1, writeLog F [(q, 1, BitVec.ofNat 64 (rmapAt (t.mag % radix)))], (tq2, 4 * t2.alloc) :: hin", "xr", {"hq": "hqr", "site": "nR .str", "res": "⟨by om, by om, by om⟩"}],
+      ["seg", "nul", "ws nR .str"],
+      ["call", "mpClear", "sp - 128, sp - 104, tq2, t2, hin", "_", {"site": "nS", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by om⟩"}],
+      ["seg", "ret", "0"],
+      ["exit", "fin", {"_E": "Layout.mpOkay", "_Q": "q_ok (@H.bytesOf (r := nR .str) rfl rfl) (Done.finE env (LI.lastE env pr (by rw [room_eq]; omega) hqd hb6 (bytesOf_store (by om) (by om) (rmapAt_lt _))) hqr (by om) (bytesOf_store (by om) (by om) (by decide)))"}]
+     ],
+     [
+      ["seg", "dvn", "ws nR .str", {"c": "rmapAt (t.mag % radix)"}],
+      ["unslot", "nD"],
+      ["jump", "H", {"vars": {"tq": "tq2", "t": "t2"}, "pr": "LI.stepE env pr (by rw [room_eq]; omega) hqd hb6 (bytesOf_store (by om) (by om) (rmapAt_lt _))"}]
+     ], "hb6"]
+   ]
+  }
+ },
+ "exits": {
+  "fin": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "exact Lbl.exit fun cf hat => ⟨(_E, _M), _M, hat.sub rfl rfl, _Q,", "  { wit := fun r hr hrs => by", "      cases r with", "      | stk => exact ⟨trivial, (hB .stk).2⟩", "      | str => exact absurd rfl hrs", "      | _ => simp [ws] at hr", "    wsite := ⟨trivial, (hB .str).2.1, fun _ _ => rfl⟩, place := .keep", "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .str }⟩"]
+ }
+}

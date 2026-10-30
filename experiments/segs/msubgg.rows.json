@@ -1,0 +1,28 @@
+{
+ "fn": "mp_sub", "mod": "MpSubGG", "src": "msubgg", "pfx": "msgg",
+ "bv": "ra s0 s1", "nat": "sp pa pb pc sa sb r e", "keep": "gp tp s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "h0": ["FF"],
+ "regs": {
+  "ent": "ra sp s0 s1 a0:pa a1:pb a2:pc",
+  "cm": "sp:sp-48 s0:pa s1:pb a0:pa a1:pb",
+  "cr": "sp:sp-48 s0:pa s1:pb a0:r",
+  "c2": "sp:sp-48 s0:pa s1:pb a0:r a2:pc a5:18446744073709551615 a7:sb",
+  "lz": "ra sp:sp-48 s0 s1:pb a0:r a1:pa a2:pc a5:18446744073709551615 a7:e",
+  "tb": "ra sp s0 s1 a0:pb a1:pa a2:pc"
+ },
+ "facts": {
+  "FF": ["rs: Ram (sp - 48) 48", "sp % 16 = 0", "48 ≤ sp", "sp ≤ mpSubBase ∨ mpSubBase + 140 ≤ sp - 48"],
+  "SA": ["bytesT4 M (pa + 8) = BitVec.ofNat 32 sa", "sa < 2 ^ 31", "Ram pa 24"],
+  "SB": ["bytesT4 M (pb + 8) = BitVec.ofNat 32 sb", "sb < 2 ^ 31", "Ram pb 24"],
+  "PC": ["Ram pc 24", "pc % 8 = 0", "pc + 24 ≤ sp - 48 ∨ sp ≤ pc", "pc + 24 ≤ mpSubBase ∨ mpSubBase + 140 ≤ pc"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "SPL": ["bytesT8 M (sp - 48) = BitVec.ofNat 64 pc", "bytesT8 M (sp - 40) = BitVec.ofNat 64 sb"]
+ },
+ "segs": [
+  {"n": "df", "at": "1ef4 F", "to": "219c", "pre": "ent", "post": "ent", "stu": ["sa"], "h": ["SA", "SB", "PC", "sa ≠ sb"], "doc": "Unequal signs: `c->sign := a->sign`; tail to `s_mp_add(a, b, c)`."},
+  {"n": "eq", "at": "1ef4 T", "pre": "ent", "post": "cm", "stu": ["sb"], "h": ["SA", "SB", "sa = sb"], "doc": "Equal signs: the frame, spill; `mp_cmp_mag(a, b)`."},
+  {"n": "rl", "at": "1f2c", "to": "1f38", "pre": "cr", "post": "c2", "h": ["SPL"], "doc": "Reload the spills."},
+  {"n": "ge", "at": "1f38 F", "to": "4564", "pre": "c2", "post": "ent", "h": ["RF", "PC", "r ≠ 18446744073709551615", "r < 2 ^ 64"], "doc": "`|a| ≥ |b|`: `c->sign := b->sign` (`= a->sign`); tail to `s_mp_sub(a, b, c)`."},
+  {"n": "lt", "at": "1f38 T", "to": "1f68", "pre": "c2{r:=18446744073709551615}", "post": "lz{r:=18446744073709551615, e:=sb}", "h": ["RF"], "doc": "`|a| < |b|`: swap the operands, restore `s0`, `ra`."},
+  {"n": "z", "at": "1f68", "alu": "seqz", "pre": "lz{r:=18446744073709551615, e:=sb}", "post": "lz{r:=18446744073709551615, e:=if sb = 0 then 1 else 0}", "h": ["sb < 2 ^ 31"], "doc": "`seqz a7, a7`: the flipped sign (one step)."},
+  {"n": "lt2", "at": "1f6c", "to": "4564", "pre": "lz{r:=18446744073709551615, e:=if sb = 0 then 1 else 0}", "post": "tb", "h": ["RF", "PC"], "doc": "`c->sign := !b->sign`; tail to `s_mp_sub(b, a, c)`."}
+ ]}

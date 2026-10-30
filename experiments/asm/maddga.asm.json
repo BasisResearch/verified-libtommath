@@ -1,0 +1,12 @@
+{"extends": "maddg.asm.json",
+ "subst": {"c": "a", "pc": "pa", "cdp": "adp", "cS": "aS", "cD": "aD", "hsc": "hsa", "cpos": "apos"},
+ "fn": "mp_add(a, b, a) (growing)",
+ "R": ["stk", "aS", "aD", "bS", "bD", "code"], "rowdef": {"pc": "pa"}, "pos": ["hres.apos", "hres.bpos"],
+ "let": {"API": "MpAddGA", "CPRE": [], "HPC": ["simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hpb hco"]},
+ "families": {"br": {
+   "same": {"TC": "sAddGA", "TF": "SAddGA", "TA": "sp, pa, adp, pb, bdp, (a.withSign a.sign), b, H",
+            "TR": "⟨hres.stk, hva.toShape.withSign _, hvb.toShape, hsz, hres.apos, hres.bpos, hres.coff⟩"},
+   "lt": {"TC": "sSubGB", "TF": "SSubGB", "TA": "sp, pb, bdp, pa, adp, b, (a.withSign b.sign), H",
+          "TR": "⟨{STK}, hvb.toShape, hva.toShape.withSign _, by dsimp only [MpInt.withSign]; omega, hres.bpos, hres.apos, hres.coff, {LE_LT}⟩"},
+   "ge": {"TC": "sSubGA", "TF": "SSubGA", "TA": "sp, pa, adp, pb, bdp, (a.withSign a.sign), b, H",
+          "TR": "⟨{STK}, hva.toShape.withSign _, hvb.toShape, by dsimp only [MpInt.withSign]; omega, hres.apos, hres.bpos, hres.coff, {LE_GE}⟩"}}}}

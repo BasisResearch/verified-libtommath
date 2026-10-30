@@ -1,0 +1,323 @@
+{
+ "extends": "mfastg.asm.json",
+ "subst": {
+  "c": "a",
+  "pc": "pa",
+  "cdp": "adp",
+  "q": "adp",
+  "cS": "aS",
+  "cD": "aD",
+  "layE_cS": "layE_aS",
+  "layE_cD": "layE_aD",
+  "hres.sc": "hres.sa",
+  "hres.csign": "hres.asign",
+  "hres.cpos": "hres.apos",
+  "hres.coff": "hres.aoff",
+  "A.digit": "a.digit",
+  "A.used": "ua",
+  ".mpS pc q A": ".mpS pa adp { A with used := ua }",
+  "digBlk cdp c": "digBlk p.adp a",
+  "MulFastH": "MulFastHA",
+  "have hgu := hg.used; have := hg.alloc": "have hgu := hg.used; have := hg.alloc; have hcp := hg.digit",
+  "exact fill_cn": "rw [← hcp]; exact fill_cn",
+  "exact fill_cm": "rw [← hcp, ← hgu]; exact fill_cm",
+  "exact fill_zn": "rw [← hcp]; exact fill_zn",
+  "exact fill_zm": "rw [← hcp, ← hgu]; exact fill_zm",
+  "Dig m adp a.alloc a.digit": "Dig m p.adp a.alloc a.digit"
+ },
+ "#": "s_mp_mul_digs_fast(a, b, a, digs) growing a (Api/SMpMulDigsA.lean, MulFastHA): after mp_grow the source a is read at the destination's block (cut variable adp, the rows' a->dp), as a.digit (G's reK by GrownOf.digit) with a->used as ua (the struct's kind {A with used := ua}); the copy loop writes the block only after the columns are done.",
+ "fn": "s_mp_mul_digs_fast(a, b, a) (growing)",
+ "mod": "MulFastGAMainG",
+ "ns": "Tom.Machine.Fn.MulFastGAG5",
+ "api": "MulFastHA",
+ "imports": [
+  "Tom.Machine.Api.SMpMulDigsA",
+  "Tom.Machine.Api.Std_grow6G",
+  "Tom.Machine.Fn.MulFastGG",
+  "Tom.Machine.Kit.Run",
+  "Tom.Machine.Kit.Grow",
+  "Tom.Machine.Kit.Buf",
+  "Tom.Machine.Fn.MulFastG5K"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.MulFastGG Tom.MulFastGStep Tom.Machine.Fn.MulFastG5K",
+  "open Tom.Machine.Api.SMpMulDigsA (R P kind isW ws)",
+  "open Tom.Machine.Api.MulFastH (lay Res)"
+ ],
+ "R": [
+  "stk",
+  "aS",
+  "aD",
+  "bS",
+  "bD",
+  "code"
+ ],
+ "Rk": {
+  "cS": null,
+  "cD": null
+ },
+ "refs": {
+  "nR .cS": null,
+  "nR .cD": null
+ },
+ "pos": [
+  "hres.apos",
+  "hres.bpos"
+ ],
+ "cuts": {
+  "E": {
+   "edge": [
+    [
+     "seg",
+     "p1",
+     "ws nT"
+    ],
+    [
+     "seg",
+     "p2",
+     "ws nT nL"
+    ],
+    [
+     "if",
+     "dg ≤ al",
+     [
+      [
+       "seg",
+       "pr",
+       "0"
+      ],
+      [
+       "jump",
+       "G",
+       {
+        "vars": {
+         "Mk": "z.m",
+         "adp": "cdp",
+         "A": "c"
+        },
+        "st": "(@H.congrL (Iv.upd_eq_self _ _ rfl)).congrK (by krfl)",
+        "hp": "@HP.congrL (Iv.upd_eq_self _ _ rfl)",
+        "rx": "⟨by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log⟩",
+        "cp": "⟨by rd_log⟩",
+        "pl": ".keep",
+        "hA": "by unfold mfIn; rw [if_neg (by omega)]"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "pg",
+       "0"
+      ],
+      [
+       "call",
+       "mpGrowF",
+       "sp - 2192, pc, cdp, c, dg, H",
+       "xr",
+       {
+        "hq": "hq",
+        "res": "⟨⟨by om, by om, by om⟩, hres.coff, hsc, hres.cpos, by om⟩"
+       }
+      ],
+      [
+       "cases",
+       "xr",
+       {
+        "none": [
+         [
+          "exit",
+          "absurd"
+         ]
+        ],
+        "mem": [
+         [
+          "set",
+          {
+           "e": "18446744073709551614"
+          }
+         ],
+         [
+          "seg",
+          "gm",
+          "0"
+         ],
+         [
+          "exit",
+          "mem"
+         ]
+        ],
+        "some ⟨q1,c1⟩": [
+         [
+          "tac",
+          "obtain ⟨hlt, hgr, hfr⟩ := hq; obtain rfl := GrowPost.eq_growTo hsc hgr"
+         ],
+         [
+          "bind",
+          {
+           "adp": "q1"
+          }
+         ],
+         [
+          "set",
+          {
+           "e": "0"
+          }
+         ],
+         [
+          "seg",
+          "go",
+          "0"
+         ],
+         [
+          "jump",
+          "G",
+          {
+           "vars": {
+            "adp": "q",
+            "A": "c.growTo dg"
+           },
+           "rx": "⟨by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log, by rd_log⟩",
+           "cp": "⟨by rd_log⟩",
+           "pl": ".regrow hfr (by simp only [MpInt.growTo, MpInt.ofDigits]; omega) rfl",
+           "hA": "by unfold mfIn; rw [if_pos (by omega)]"
+          }
+         ]
+        ]
+       }
+      ]
+     ],
+     "hr"
+    ]
+   ]
+  },
+  "G": {
+   "kinds": {
+    "nR .cD": ".mpD q A.alloc (MpInt.digit A)"
+   },
+   "edge": [
+    [
+     "reK",
+     "nR .cD",
+     ".mpD q A.alloc (MpInt.digit A)",
+     "(show Kind.mpD q A.alloc a.digit = Kind.mpD q A.alloc (MpInt.digit A) from by rw [hcp])"
+    ],
+    [
+     "if",
+     "ua + ub ≤ dg",
+     [
+      [
+       "if",
+       "ua + ub = 0",
+       [
+        [
+         "seg",
+         "z1",
+         "0"
+        ],
+        [
+         "seg",
+         "zst",
+         "u nR .cS"
+        ],
+        [
+         "jump",
+         "Z",
+         {}
+        ]
+       ],
+       [
+        [
+         "seg",
+         "s1",
+         "ws nL"
+        ],
+        [
+         "jump",
+         "O",
+         {
+          "vars": {
+           "g": "rdD @M (sp - 2160)"
+          },
+          "st": "(St.ramDig (@H.forget nW rfl) nW (by simp [Kind.set]) (dp := sp - 2160) (n := 512) (by simp [ρg, Iv.upd, ρX, Site.lay, ρ3, Split.lay, layE_stk]; omega) (by simp [ρg, Iv.upd, ρX, Site.lay, ρ3, Split.lay, layE_stk]) (by om)).congrK (by krfl)",
+          "lf": "⟨by rd_log, by rd_log, by rd_log⟩",
+          "cp": "⟨by rd_out⟩",
+          "inv": "OF.zero _"
+         }
+        ]
+       ],
+       "hz"
+      ]
+     ],
+     [
+      [
+       "if",
+       "dg = 0",
+       [
+        [
+         "seg",
+         "z2",
+         "0"
+        ],
+        [
+         "seg",
+         "zst",
+         "u nR .cS"
+        ],
+        [
+         "jump",
+         "Z",
+         {}
+        ]
+       ],
+       [
+        [
+         "seg",
+         "s2",
+         "ws nL"
+        ],
+        [
+         "jump",
+         "O",
+         {
+          "vars": {
+           "g": "rdD @M (sp - 2160)"
+          },
+          "st": "(St.ramDig (@H.forget nW rfl) nW (by simp [Kind.set]) (dp := sp - 2160) (n := 512) (by simp [ρg, Iv.upd, ρX, Site.lay, ρ3, Split.lay, layE_stk]; omega) (by simp [ρg, Iv.upd, ρX, Site.lay, ρ3, Split.lay, layE_stk]) (by om)).congrK (by krfl)",
+          "lf": "⟨by rd_log, by rd_log, by rd_log⟩",
+          "cp": "⟨by rd_out⟩",
+          "inv": "OF.zero _"
+         }
+        ]
+       ],
+       "hz"
+      ]
+     ],
+     "hd"
+    ]
+   ]
+  }
+ },
+ "rowdef": {
+  "q": "adp"
+ },
+ "prelude": [
+  "have hsa := hres.sa.toShapeU; have hsb := hres.sb.toShapeU; have hsc := hres.sc; have hda := hsa.digit_lt; have hdb := hsb.digit_lt",
+  "have := hsa.used_le; have := hsa.alloc_lt; have := hsb.used_le; have := hsb.alloc_lt; have := hsc.used_le; have := hsc.alloc_lt",
+  "have hcd := hres.cond; have := hcd.dg_w; have := hcd.uab; have := hres.apos; have := hres.bpos; have := hres.cpos",
+  "have eR : radix = 268435456 := rfl; have eF : Api.MulFastH.F = 2736 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi",
+  "have eB : sMpMulDigsFastBase = 0x800042f0 := rfl; have eG : MpGrow.F = 544 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl",
+  "have hR : RamH (sp - 2192) 2192 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩",
+  "have hn1 : NN p ≤ dg := Nat.min_le_left _ _; have hn2 : NN p ≤ ua + ub := Nat.min_le_right _ _",
+  "have hadg := (show Dig m adp a.alloc a.digit from (hB .aD).2).ram; have := hadg.lo_ge; have := hadg.hi_le",
+  "have hbdg := (show Dig m bdp b.alloc b.digit from (hB .bD).2).ram; have := hbdg.lo_ge; have := hbdg.hi_le",
+  "have hpa := hS .aS .stk (by decide); have hpb := hS .bS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "have hcc := hS .cS .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_bS, layE_code, textIv] at hpa hpb hco hcc",
+  "have hpaF : pa + 24 ≤ sp - 2192 ∨ sp ≤ pa := by rcases hpa with h | h <;> omega",
+  "have hpbF : pb + 24 ≤ sp - 2192 ∨ sp ≤ pb := by rcases hpb with h | h <;> omega",
+  "have hpcF : pc + 24 ≤ sp - 2192 ∨ sp ≤ pc := hpaF",
+  "have hccF : pc + 24 ≤ sMpMulDigsFastBase ∨ sMpMulDigsFastBase + 568 ≤ pc := by rcases hcc with h | h <;> omega"
+ ]
+}

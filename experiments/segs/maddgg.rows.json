@@ -1,0 +1,25 @@
+{
+ "fn": "mp_add", "mod": "MpAddGG", "src": "maddgg", "pfx": "magg",
+ "bv": "ra s0 s1", "nat": "sp pa pb pc sa sb r", "keep": "gp tp s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "h0": ["FF"],
+ "regs": {
+  "ent": "ra sp s0 s1 a0:pa a1:pb a2:pc",
+  "cm": "sp:sp-64 s0:pa s1:pb a0:pa a1:pb",
+  "cr": "sp:sp-64 s0:pa s1:pb a0:r",
+  "c2": "sp:sp-64 s0:pa s1:pb a0:r a2:pc a5:18446744073709551615 a6:sa a7:sb",
+  "tb": "ra sp s0 s1 a0:pb a1:pa a2:pc"
+ },
+ "facts": {
+  "FF": ["rs: Ram (sp - 64) 64", "sp % 16 = 0", "64 ≤ sp", "sp ≤ mpAddBase ∨ mpAddBase + 144 ≤ sp - 64"],
+  "SA": ["bytesT4 M (pa + 8) = BitVec.ofNat 32 sa", "sa < 2 ^ 31", "Ram pa 24"],
+  "SB": ["bytesT4 M (pb + 8) = BitVec.ofNat 32 sb", "sb < 2 ^ 31", "Ram pb 24"],
+  "PC": ["Ram pc 24", "pc % 8 = 0", "pc + 24 ≤ sp - 64 ∨ sp ≤ pc", "pc + 24 ≤ mpAddBase ∨ mpAddBase + 144 ≤ pc"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "SPL": ["bytesT8 M (sp - 56) = BitVec.ofNat 64 pc", "bytesT8 M (sp - 48) = BitVec.ofNat 64 sa", "bytesT8 M (sp - 40) = BitVec.ofNat 64 sb"]
+ },
+ "segs": [
+  {"n": "eq", "at": "0608 T", "to": "219c", "pre": "ent", "post": "ent", "stu": ["sa"], "h": ["SA", "SB", "PC", "sa = sb"], "doc": "Equal signs: `c->sign := a->sign`; tail to `s_mp_add(a, b, c)`."},
+  {"n": "ne", "at": "0608 F", "pre": "ent", "post": "cm", "stu": ["sb", "sa"], "h": ["SA", "SB", "sa ≠ sb"], "doc": "Unequal signs: the frame, spill; `mp_cmp_mag(a, b)`."},
+  {"n": "rl", "at": "063c", "to": "064c", "pre": "cr", "post": "c2", "h": ["SPL"], "doc": "Reload the spills."},
+  {"n": "lt", "at": "064c T", "to": "4564", "pre": "c2{r:=18446744073709551615}", "post": "tb", "h": ["RF", "PC"], "doc": "`|a| < |b|`: `c->sign := b->sign`; tail to `s_mp_sub(b, a, c)`."},
+  {"n": "ge", "at": "064c F", "to": "4564", "pre": "c2", "post": "ent", "h": ["RF", "PC", "r ≠ 18446744073709551615", "r < 2 ^ 64"], "doc": "`|a| ≥ |b|`: `c->sign := a->sign`; tail to `s_mp_sub(a, b, c)`."}
+ ]}

@@ -1,0 +1,45 @@
+{
+ "fn": "mp_lshd", "mod": "MpLshdGG", "src": "mlshdgg", "pfx": "lsgg",
+ "bv": "ra", "nat": "sp pa u al k dp t e y i j", "keep": "gp tp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "h0": ["FF"],
+ "regs": {
+  "ent": "ra sp a0:pa a1:k",
+  "rt": "ra sp a0:e",
+  "g": "sp:sp-32 a1:u+k a2:k a4:pa a5:u",
+  "gc": "sp:sp-32 a0:pa a1:u+k",
+  "m0": "sp:sp-32 a0:e",
+  "gr": "sp:sp-32 a2:k a4:pa",
+  "e1": "sp:sp-32 a0:dp a1:u+k a2:k a5:u",
+  "e2": "sp:sp-32 a0:dp a2:k a6:4*(u+k)-4 a3:u-1 a4:(u-1)*4294967296 a5:u",
+  "e3": "sp:sp-32 a0:dp a2:k a6:dp+4*(u+k-1) a3:4*(u-1) a4:dp+4*(u+k-1)-4 a5:dp+4*(u-1)",
+  "lh": "sp:sp-32 a0:dp a2:k a3:dp+4*k-4 a4:dp+4*(u+k-1-t)-4 a5:dp+4*(u-1-t) a6:dp+4*(u+k-1-t)",
+  "ms": "sp:sp-32 a0:dp a1:0 a2:4*k",
+  "mr": "sp:sp-32"
+ },
+ "facts": {
+  "FF": ["rs: Ram (sp - 32) 32", "sp % 16 = 0", "32 ≤ sp", "sp ≤ mpLshdBase ∨ mpLshdBase + 200 ≤ sp - 32"],
+  "UA": ["bytesT4 M pa = BitVec.ofNat 32 u", "u < 2 ^ 31", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 32 ∨ sp ≤ pa"],
+  "AL": ["bytesT4 M (pa + 4) = BitVec.ofNat 32 al", "al < 2 ^ 31"],
+  "DP": ["bytesT8 M (pa + 16) = BitVec.ofNat 64 dp", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 32 ∨ sp ≤ pa",
+         "pa + 24 ≤ mpLshdBase ∨ mpLshdBase + 200 ≤ pa"],
+  "RF": ["bytesT8 M (sp - 8) = ra"],
+  "SP": ["bytesT8 M (sp - 24) = BitVec.ofNat 64 pa", "bytesT8 M (sp - 32) = BitVec.ofNat 64 k"],
+  "DG": ["bytesT4 M (dp + 4 * i) = BitVec.ofNat 32 y", "y < 268435456", "Ram (dp + 4 * i) 4"],
+  "SW": ["Ram (dp + 4 * j) 4", "(dp + 4 * j) % 4 = 0", "dp + 4 * j + 4 ≤ mpLshdBase ∨ mpLshdBase + 200 ≤ dp + 4 * j",
+         "dp + 4 * j + 4 ≤ sp - 32 ∨ sp ≤ dp + 4 * j"]
+ },
+ "segs": [
+  {"n": "n", "at": "15b8 T", "pre": "ent", "post": "rt{e:=0}", "h": ["k = 0"], "doc": "`b = 0`: return `MP_OKAY`."},
+  {"n": "z", "at": "15b8 F T", "pre": "ent", "post": "rt{e:=0}", "h": ["UA", "0 < k", "k < 2 ^ 31", "u = 0"], "doc": "`a->used = 0`: return `MP_OKAY`."},
+  {"n": "pr", "at": "15b8 F F F", "to": "15e0", "pre": "ent", "post": "g", "h": ["UA", "AL", "0 < k", "k < 2 ^ 31", "0 < u", "u + k ≤ al", "u + k < 2 ^ 31"], "doc": "Room: the frame, save `ra`; `a1 = used + b`."},
+  {"n": "pg", "at": "15b8 F F T", "pre": "ent", "post": "gc", "h": ["UA", "AL", "0 < k", "k < 2 ^ 31", "0 < u", "al < u + k", "u + k < 2 ^ 31"], "doc": "No room: the frame, save `ra`, spill `a`, `b`; `mp_grow(a, used + b)`."},
+  {"n": "gm", "at": "1668 T", "pre": "m0", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_grow` failed: return its error."},
+  {"n": "go", "at": "1668 F", "to": "1674", "pre": "m0{e:=0}", "post": "gr", "h": ["SP"], "doc": "Grown: reload `a`, `b`."},
+  {"n": "go2", "at": "1674", "to": "15e0", "pre": "gr", "post": "g", "h": ["UA", "k < 2 ^ 31", "u + k < 2 ^ 31"], "doc": "Reload `a->used`; back to the shift."},
+  {"n": "e", "at": "15e0 F", "to": "15ec", "pre": "g", "post": "e1", "h": ["DP", "0 < u", "u + k < 2 ^ 31"], "doc": "`a->used := used + b`, the digit pointer."},
+  {"n": "e2", "at": "15ec", "to": "1600", "pre": "e1", "post": "e2", "h": ["0 < k", "0 < u", "u + k < 2 ^ 31"], "doc": "The loop bounds."},
+  {"n": "e3", "at": "1600", "to": "1618", "pre": "e2", "post": "e3", "h": ["0 < k", "0 < u", "u + k < 2 ^ 31", "dp + 4 * (u + k) ≤ 2 ^ 32"], "doc": "The pointer arithmetic."},
+  {"n": "e4", "at": "1618", "to": "1624", "pre": "e3", "post": "lh{t:=0}", "h": ["0 < k", "0 < u", "u + k < 2 ^ 31", "dp + 4 * (u + k) ≤ 2 ^ 32"], "doc": "The end pointer `dp + 4 (b - 1)`, to the loop head."},
+  {"n": "lp", "at": "1624 T", "to": "1624", "pre": "lh", "post": "lh{t:=t+1}", "stu": ["y"], "h": ["DG{i:=u-1-t}", "SW{j:=u+k-1-t}", "0 < k", "t + 1 < u", "u + k < 2 ^ 31", "dp + 4 * (u + k) ≤ 2 ^ 32"], "doc": "The loop's back edge: `dp[used + b - 1 - t] := dp[used - 1 - t]`."},
+  {"n": "lx", "at": "1624 F", "pre": "lh", "post": "ms", "stu": ["y"], "h": ["DG{i:=u-1-t}", "SW{j:=u+k-1-t}", "0 < k", "t + 1 = u", "u + k < 2 ^ 31", "dp + 4 * (u + k) ≤ 2 ^ 32"], "doc": "The last iteration; `memset(dp, 0, 4 b)`."},
+  {"n": "r", "at": "1644", "pre": "mr", "post": "rt{e:=0}", "h": ["RF"], "doc": "Restore, return `MP_OKAY`."}
+ ]}

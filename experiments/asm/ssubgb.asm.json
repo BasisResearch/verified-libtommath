@@ -1,0 +1,7 @@
+{"extends": "ssubg.asm.json",
+ "subst": {"c": "b", "pc": "pb", "cdp": "bdp", "cS": "bS", "cD": "bD", "hsc": "hsb", "cpos": "bpos"},
+ "fn": "s_mp_sub(a, b, b) (growing)",
+ "R": ["stk", "aS", "aD", "bS", "bD", "code"], "rowdef": {"pc": "pb", "bdp": "q"}, "pos": ["hres.apos", "hres.bpos"],
+ "let": {"API": "SSubGB", "CPRE": [], "HPC": ["simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hpb hco"],
+         "Y": "SSubG.ov a b A.digit i i", "HY": "(SSubG.ov_self a b hg.digit i)",
+         "HDO": ["have hdo : SSubG.ov a b A.digit i i < 268435456 := by rw [SSubG.ov_self a b hg.digit i]; exact hsb.digit_lt i"]}}

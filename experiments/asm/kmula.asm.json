@@ -1,0 +1,15 @@
+{
+ "region": {"api": "Api.MpMulA", "gpre": {"res": "KMulA.Res p", "isW": "MpMulA.isW"}},
+"extends": "kmul.asm.json",
+ "subst": {"c": "a", "pc": "pa", "cdp": "adp", "cS": "aS", "cD": "aD",
+           "hres.sc": "hres.va.toShape", "hres.cpos": "hres.apos", "hres.coff": "hres.aoff", "hP.res.cpos": "hP.res.apos",
+           "MulAlg.lay": "MulAlgA.lay", "MulAlg.Q": "MulAlgA.Q", "MulAlg.F": "MulAlgA.F",
+           "Api.MpMul.ws": "Api.MpMulA.ws", "Api.MpMul.hin": "Api.MpMulA.hin", "Api.MpMul.lay": "Api.MpMulA.lay", "Api.MpMul.R": "Api.MpMulA.R",
+           "Api.MpMul.rets": "Api.MpMulA.rets", "Api.MpMul.out": "Api.MpMulA.out", "Api.MpMul.hout": "Api.MpMulA.hout",
+           "Api.MpMul.site'": "Api.MpMulA.site'", "Api.MpMul (P kind)": "Api.MpMulA (P kind)", "KMulG5K": "KMulAG5K"},
+ "#": "s_mp_karatsuba_mul(a, b, a) (Api/MulAlgA.lean): a is read only by the copies into x0, x1 at the start and written only by the last mp_add(&t1, &x1y1, a); the region type is Fn/KMulAG5K.lean's.",
+ "fn": "s_mp_karatsuba_mul (in place)", "mod": "KMulAMainG", "ns": "Tom.Machine.Fn.KMulAG5", "api": "KMulA",
+ "R": ["stk", "aS", "aD", "bS", "bD", "kc", "tc", "code", "dX", "dY", "dZ", "dW", "dT", "dU", "dV"],
+ "wit": {"cS": null, "cD": null},
+ "ctx_vocab": {"pc": "z.p.pa", "cdp": "z.p.adp", "c": "z.p.a"},
+ "let": {"SOUNDG": "soundG hS hB"}}

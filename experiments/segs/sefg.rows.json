@@ -1,0 +1,1635 @@
+{
+ "fn": "s_mp_exptmod_fast",
+ "mod": "SExptFastG",
+ "src": "sefg",
+ "pfx": "sef",
+ "imports": [
+  "Tom.Machine.Kit.GenX_seg5a",
+  "Tom.Machine.Kit.Alu1S",
+  "Tom.Machine.Kit.WinVal"
+ ],
+ "opens": [
+  "Tom.Machine.WV.Win"
+ ],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "nat": "sp pg px pn py md e cb al w pu h x y k re mpv sl ep yp xp bm bm2 bc dv dv2 dvs d px xdp xu cp bb bb2 mo y y2 yo xk py u0 u4 x7 x8 u6 v4 v5 v7 v8 v9 f4 f5 f7 f9 r7",
+ "keep": "gp tp",
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pg a1:px a2:pn a3:py a4:md",
+  "pr1": "ra sp:sp-2032 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pg a1:px a2:pn a3:py a4:md t0:18446744073709547328",
+  "pr2": "@pr1 sp:sp-6320 -t0",
+  "cb0": "sp:sp-6320 s0 s1:pn s2 s3 s4 s5 s6 s7 s8 s9 s10:md s11 a0:px",
+  "cb1": "@cb0 a0:cb",
+  "wa": "@cb1 s3:3529 a5:1303",
+  "wb": "@cb1 s3:sl a5:1303",
+  "wz": "sp:sp-6320 s0 s1:pn s2 s3:w s4 s5 s6 s7 s8 s9 s10:md s11",
+  "i1": "@wz s5:sp-6256 a0:sp-6232 a1:al",
+  "i1r": "@wz s5:sp-6256 a0:e",
+  "L1": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s4:sp-6256+24*h s5:sp-6256 s6:0 s7:x s8:sp-6256+24*x s9:w-1 s10:md s11:2*h",
+  "l1i": "@L1 a0:sp-6256+24*x a1:al",
+  "l1r": "@L1 a0:e",
+  "C1": "sp:sp-6320 s0:ep s1:pn s2:h s3:w s4:yp s5:sp-6256 s6:e s7:x s8:sp-6256+24*x s9:w-1 s10:md s11:2*h",
+  "c1i": "@C1 s4:yp+24 a0:yp",
+  "cm": "sp:sp-6320 s0:u0 s1:pn s2:h s3:w s4:u4 s5:sp-6256 s6:e s7:x s8:sp-6256+24*x s9:w-1 s10:md s11:2*h a0:sp-6232",
+  "xe": "sp:sp-6320 s6:e",
+  "xe1": "@xe t0:4288",
+  "xe2": "sp:sp-2032 s6:e",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e",
+  "D0": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s4:sp-6256+24*h s5:sp-6256 s6:0 s7:x7 s8:x8 s9:w-1 s10:md s11:2*h",
+  "ms": "@D0 a0:pn a1:sp-6284",
+  "dr0": "@D0 a0:0",
+  "ri": "@D0 s6:0 s8:re a0:sp-6280 a1:al",
+  "ri0": "@D0 s6:0 s8:re a0:e",
+  "mn": "@D0 s8:re a0:sp-6280 a1:pn",
+  "mm": "@D0 s8:re a0:pg a1:sp-6280 a2:pn a3:sp-6232",
+  "rs": "@D0 s8:re a0:e",
+  "st1": "@D0 s8:re a0:sp-6280 a1:1",
+  "md1": "@D0 s8:re a0:pg a1:pn a2:sp-6232",
+  "LR": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s4:v4 s5:v5 s6:e s7:v7 s8:v8 s9:v9 s10:md s11:2*h",
+  "lr": "@LR a0:sp-6280",
+  "LM": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s4:v4 s5:v5 s6:e s7:v7 s8:v8 s9:v9 s10:md s11:2*h",
+  "lm": "@LM s3:sp-6256 a0:sp-6232",
+  "lmr": "@LM s3:sp-6256",
+  "CL": "sp:sp-6320 s0:yp s1:ep s2:h s3:sp-6256 s4:v4 s5:v5 s6:e s7:v7 s8:v8 s9:v9 s10:md s11:2*h",
+  "cli": "@CL s0:yp+24 a0:yp",
+  "T0": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s4:sp-6256+24*h s5:sp-6256 s6:0 s7:x7 s8:re s9:w-1 s10:md s11:2*h",
+  "cpy": "@T0 s4:sp-6256+24*h a0:sp-6232 a1:sp-6256+24*h",
+  "cpyr": "@T0 s4:sp-6256+24*h a0:0",
+  "S": "@T0 s4:sp-6256+24*h s6:k",
+  "sqi": "@S a0:sp-6256+24*h a1:sp-6256+24*h",
+  "sqr": "@S a0:e",
+  "rx": "@S s6:k+1 a0:sp-6256+24*h a1:pn a2:mpv",
+  "rxr": "@S s6:k+1 a0:e",
+  "U": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s4:ep s5:sp-6256 s6:u6 s7:xp s8:re s9:sp-6232 s10:md s11:2*h",
+  "ui": "@U s7:xp+24 a0:xp a1:sp-6232 a2:xp+24",
+  "uir": "@U s7:xp+24 a0:e",
+  "ur": "@U s6:0 s7:xp+24 a0:xp+24 a1:pn a2:mpv",
+  "urr": "@U s7:xp+24 a0:e",
+  "WL": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s6:0 s8:re s10:md s11:2*h",
+  "W1": "@WL s5:0 s9:0 a5:px",
+  "RGa": "@WL s5:bb s9:cp a3:mo a2:4*dv a4:dv2 a5:px",
+  "RGb": "@WL s5:bb s7:28 s9:cp a3:mo a4:dv2 a5:xdp+4*dv",
+  "K0": "@WL s4:bm s5:0 s7:bc s9:0 a4:dv",
+  "Q": "@WL s4:bm s5:0 s7:bc s9:0 a4:dv a5:bm*68719476736",
+  "RG": "@WL s5:bb s9:cp a3:mo a4:dv",
+  "RG2": "@WL s4:d s5:bb s7:28 s9:cp a3:mo a4:dv2",
+  "RG3": "@RG2 a2:yo a4:y a5:y",
+  "Z1": "@WL s4:d s5:0 s7:28 s9:0 a5:d*137438953472",
+  "B": "@WL s4:bm s5:bb s7:bc s9:cp a3:mo a4:y a5:y",
+  "bsq": "@B a3:0 a0:sp-6280 a1:sp-6280",
+  "bsr": "@WL s4:bm s5:bb s7:bc s9:cp a0:sp-6280 a1:pn a2:mpv",
+  "Br": "@WL s4:bm s5:bb s7:bc s9:cp a0:e",
+  "K2": "@WL s4:bm s5:bb s7:bc s9:cp a4:y",
+  "R": "@WL s4:bm s5:bb s7:r7 s9:cp a3:mo a4:dv",
+  "F": "@WL s4:bm s5:bb s7:bc s9:cp",
+  "Fr": "@F a0:e",
+  "fsq": "@F a0:sp-6280 a1:sp-6280",
+  "fsr": "@F a0:sp-6280 a1:pn a2:mpv",
+  "fmu": "@F a0:sp-6280 a1:sp-6256+24*bb a2:sp-6280",
+  "TL": "@WL s4:sp-8304 s5:bb s7:sp-6280 s9:cp",
+  "TLr": "@TL a0:e",
+  "tsq": "@TL a0:sp-6280 a1:sp-6280",
+  "TL2": "@WL s4:sp-8304 s5:2*bb s7:sp-6280 s9:cp",
+  "TL2r": "@TL2 a0:e",
+  "trr": "@TL2 a0:sp-6280 a1:pn a2:mpv",
+  "tmu": "@TL2 a0:sp-6280 a1:sp-6232 a2:sp-6280",
+  "FIN": "@WL s4:f4 s5:f5 s7:f7 s9:f9",
+  "FINr": "@FIN a0:e",
+  "fnr": "@FIN a0:sp-6280 a1:pn a2:mpv",
+  "fnx": "@FIN a0:sp-6280 a1:py",
+  "W0": "sp:sp-6320 s0:2*h s1:pn s2:h s3:w s5:sp-6256 s6:0 s8:re s10:md s11:2*h",
+  "st1r": "@D0 s8:re"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 6320) 6320",
+   "sp % 16 = 0",
+   "6320 ≤ sp",
+   "sp ≤ sMpExptmodFastBase ∨ sMpExptmodFastBase + 1756 ≤ sp - 6320"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = s1",
+   "bytesT8 M (sp - 32) = s2",
+   "bytesT8 M (sp - 40) = s3",
+   "bytesT8 M (sp - 48) = s4",
+   "bytesT8 M (sp - 56) = s5",
+   "bytesT8 M (sp - 64) = s6",
+   "bytesT8 M (sp - 72) = s7",
+   "bytesT8 M (sp - 80) = s8",
+   "bytesT8 M (sp - 88) = s9",
+   "bytesT8 M (sp - 96) = s10",
+   "bytesT8 M (sp - 104) = s11"
+  ],
+  "AL": [
+   "bytesT4 M (pn + 4) = BitVec.ofNat 32 al",
+   "al < 2 ^ 31",
+   "Ram pn 24"
+  ],
+  "PU": [
+   "bytesT4 M pn = BitVec.ofNat 32 pu",
+   "pu < 2 ^ 30",
+   "Ram pn 24"
+  ],
+  "GS": [
+   "bytesT8 M (sp - 6320) = BitVec.ofNat 64 pg"
+  ],
+  "MP": [
+   "bytesT4 M (sp - 6284) = BitVec.ofNat 32 mpv",
+   "mpv < 2 ^ 31"
+  ],
+  "XS": [
+   "bytesT8 M (sp - 6312) = BitVec.ofNat 64 px"
+  ],
+  "XU": [
+   "bytesT4 M px = BitVec.ofNat 32 xu",
+   "xu < 2 ^ 30",
+   "Ram px 24"
+  ],
+  "XD": [
+   "bytesT8 M (px + 16) = BitVec.ofNat 64 xdp",
+   "Ram px 24"
+  ],
+  "DG": [
+   "bytesT4 M (xdp + 4 * dv) = BitVec.ofNat 32 d",
+   "d < 268435456",
+   "Ram (xdp + 4 * dv) 4"
+  ],
+  "DI": [
+   "bytesT8 M (sp - 6296) = BitVec.ofNat 64 dv"
+  ],
+  "XK": [
+   "bytesT8 M (sp - 6320) = BitVec.ofNat 64 xk",
+   "xk < 8"
+  ],
+  "YS": [
+   "bytesT8 M (sp - 6304) = BitVec.ofNat 64 py"
+  ],
+  "HW": [
+   "2 ≤ w",
+   "w ≤ 8",
+   "h = 2 ^ (w - 1)",
+   "2 * h = 2 ^ w",
+   "h ≤ 128",
+   "2 ≤ h"
+  ]
+ },
+ "segs": [
+  {
+   "n": "pro",
+   "at": "2c5c",
+   "to": "2c9c",
+   "pre": "ent",
+   "post": "pr1",
+   "doc": "Save `ra`, `s0`–`s11` in the frame's first 2032 bytes."
+  },
+  {
+   "n": "prs",
+   "at": "2c9c",
+   "to": "2ca0",
+   "pre": "pr1",
+   "post": "pr2",
+   "doc": "The rest of the 6320-byte frame (`add sp, sp, t0`)."
+  },
+  {
+   "n": "prx",
+   "at": "2ca0",
+   "pre": "pr2",
+   "post": "cb0",
+   "doc": "Spill `G`, `X`, `Y`; `mp_count_bits(X)`."
+  },
+  {
+   "n": "w2",
+   "at": "2cbc T",
+   "to": "2cd4",
+   "pre": "cb1",
+   "post": "wz{w:=2}",
+   "h": [
+    "cb ≤ 7",
+    "cb < 2 ^ 31"
+   ],
+   "doc": "`x ≤ 7`: `winsize = 2`."
+  },
+  {
+   "n": "w3",
+   "at": "2cbc F F",
+   "to": "2cd4",
+   "pre": "cb1",
+   "post": "wz{w:=3}",
+   "h": [
+    "7 < cb",
+    "cb ≤ 36",
+    "cb < 2 ^ 31"
+   ],
+   "doc": "`winsize = 3`."
+  },
+  {
+   "n": "w4",
+   "at": "2cbc F T T",
+   "to": "2cd4",
+   "pre": "cb1",
+   "post": "wz{w:=4}",
+   "h": [
+    "36 < cb",
+    "cb ≤ 140",
+    "cb < 2 ^ 31"
+   ],
+   "doc": "`winsize = 4`."
+  },
+  {
+   "n": "w5",
+   "at": "2cbc F T F T",
+   "to": "2cd4",
+   "pre": "cb1",
+   "post": "wz{w:=5}",
+   "h": [
+    "140 < cb",
+    "cb ≤ 450",
+    "cb < 2 ^ 31"
+   ],
+   "doc": "`winsize = 5`."
+  },
+  {
+   "n": "w6",
+   "at": "2cbc F T F F T",
+   "to": "2cd4",
+   "pre": "cb1",
+   "post": "wz{w:=6}",
+   "h": [
+    "450 < cb",
+    "cb ≤ 1303",
+    "cb < 2 ^ 31"
+   ],
+   "doc": "`winsize = 6`."
+  },
+  {
+   "n": "wa",
+   "at": "2cbc F T F F F",
+   "to": "2df4",
+   "pre": "cb1",
+   "post": "wa",
+   "h": [
+    "1303 < cb",
+    "cb < 2 ^ 31"
+   ],
+   "doc": "`x > 1303`: `3529 < x`?"
+  },
+  {
+   "n": "ws",
+   "alu": "slt",
+   "at": "2df4",
+   "pre": "wa",
+   "post": "wb",
+   "h": [
+    "cb < 2 ^ 31",
+    "sl = if 3529 < cb then 1 else 0"
+   ],
+   "eqs": [
+    "slt_ofNat (a := 3529) (b := cb) (by decide) (by omega)",
+    "h1"
+   ],
+   "doc": "`slt s3, s3, a0`."
+  },
+  {
+   "n": "wj",
+   "at": "2df8",
+   "to": "2cd4",
+   "pre": "wb",
+   "post": "wz{w:=sl+7}",
+   "doc": "`winsize = 7 + (3529 < x)`."
+  },
+  {
+   "n": "i1",
+   "at": "2cd4",
+   "pre": "wz",
+   "post": "i1",
+   "h": [
+    "AL"
+   ],
+   "doc": "`mp_init_size(&M[1], P->alloc)`."
+  },
+  {
+   "n": "if1",
+   "at": "2ce4 T",
+   "to": "2d7c",
+   "pre": "i1r",
+   "post": "xe",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "Failed: return."
+  },
+  {
+   "n": "i2",
+   "at": "2ce4 F",
+   "to": "2d2c",
+   "pre": "i1r{e:=0}",
+   "post": "L1{x:=h}",
+   "h": [
+    "HW"
+   ],
+   "doc": "The upper half's `mp_init_size` loop from `x = 2^(w-1)`."
+  },
+  {
+   "n": "l1c",
+   "at": "2d2c",
+   "pre": "L1",
+   "post": "l1i",
+   "h": [
+    "AL"
+   ],
+   "doc": "`mp_init_size(&M[x], P->alloc)`."
+  },
+  {
+   "n": "l1n",
+   "at": "2d38 T F",
+   "to": "2d2c",
+   "pre": "l1r{e:=0}",
+   "post": "L1{x:=x+1}",
+   "h": [
+    "x + 1 ≠ 2 * h",
+    "x < 2 * h",
+    "h ≤ 128"
+   ],
+   "doc": "The next `x`."
+  },
+  {
+   "n": "l1d",
+   "at": "2d38 T T",
+   "to": "2e00",
+   "pre": "l1r{e:=0}",
+   "post": "D0{x7:=x+1, x8:=sp-6256+24*x+24}",
+   "h": [
+    "x + 1 = 2 * h",
+    "h ≤ 128"
+   ],
+   "doc": "The table's blocks are placed."
+  },
+  {
+   "n": "l1f0",
+   "at": "2d38 F T",
+   "pre": "l1r",
+   "post": "cm{u0:=2*h, u4:=sp-6256+24*h}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "x = h",
+    "h ≤ 128"
+   ],
+   "doc": "`M[x]` failed, `x = 2^(w-1)`: `mp_clear(&M[1])`."
+  },
+  {
+   "n": "l1f1",
+   "at": "2d38 F F",
+   "to": "2d64",
+   "pre": "l1r",
+   "post": "C1{ep:=sp-6256+24*x, yp:=sp-6256+24*h}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64",
+    "h < x",
+    "x < 2 * h",
+    "h ≤ 128"
+   ],
+   "doc": "`M[x]` failed: clear `M[2^(w-1)], …, M[x-1]`."
+  },
+  {
+   "n": "c1c",
+   "at": "2d64",
+   "pre": "C1",
+   "post": "c1i",
+   "doc": "`mp_clear(&M[y])`."
+  },
+  {
+   "n": "c1n",
+   "at": "2d70 T",
+   "to": "2d64",
+   "pre": "C1{yp:=yp+24}",
+   "post": "C1{yp:=yp+24}",
+   "h": [
+    "yp + 24 ≠ ep",
+    "yp + 24 < 2 ^ 64",
+    "ep < 2 ^ 64"
+   ],
+   "doc": "The next `y`."
+  },
+  {
+   "n": "c1d",
+   "at": "2d70 F",
+   "pre": "C1{yp:=yp+24}",
+   "post": "cm{u0:=ep, u4:=yp+24}",
+   "h": [
+    "yp + 24 = ep"
+   ],
+   "doc": "`mp_clear(&M[1])`."
+  },
+  {
+   "n": "ex1",
+   "at": "2d7c",
+   "to": "2d84",
+   "pre": "xe",
+   "post": "xe1",
+   "doc": "Return `err`: the frame's last 4288 bytes."
+  },
+  {
+   "n": "ex2",
+   "at": "2d84",
+   "to": "2d88",
+   "pre": "xe1",
+   "post": "xe2",
+   "doc": "`add sp, sp, t0`."
+  },
+  {
+   "n": "ex3",
+   "at": "2d88",
+   "pre": "xe2",
+   "post": "rt",
+   "h": [
+    "RF"
+   ],
+   "doc": "Restore `ra`, `s0`–`s11`; return `err`."
+  },
+  {
+   "n": "dm",
+   "at": "2e00 T",
+   "pre": "D0",
+   "post": "ms",
+   "h": [
+    "md = 0"
+   ],
+   "doc": "Montgomery: `mp_montgomery_setup(P, &mp)`."
+  },
+  {
+   "n": "dd",
+   "at": "2e00 F T",
+   "pre": "D0",
+   "post": "ms",
+   "h": [
+    "md = 1"
+   ],
+   "doc": "DR: `mp_dr_setup(P, &mp)`."
+  },
+  {
+   "n": "dk",
+   "at": "2e00 F F",
+   "pre": "D0",
+   "post": "ms",
+   "h": [
+    "md ≠ 0",
+    "md ≠ 1",
+    "md < 2 ^ 31"
+   ],
+   "doc": "`2^k`: `mp_reduce_2k_setup(P, &mp)`."
+  },
+  {
+   "n": "m1",
+   "at": "2fbc F T",
+   "pre": "dr0",
+   "post": "ri{re:=x8}",
+   "h": [
+    "AL",
+    "PU",
+    "2 * pu ≤ 510"
+   ],
+   "doc": "Montgomery's comba path; `mp_init_size(&res, P->alloc)`."
+  },
+  {
+   "n": "m2",
+   "at": "3028 T",
+   "pre": "ri0{re:=x8,e:=0}",
+   "post": "mn{re:=2147499420}",
+   "doc": "`redux = s_mp_montgomery_reduce_fast`; `mp_montgomery_calc_normalization(&res, P)`."
+  },
+  {
+   "n": "m2f",
+   "at": "3028 F",
+   "to": "2f3c",
+   "pre": "ri0{re:=x8}",
+   "post": "LM{e:=e, v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=2147499420}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&res)` failed: `LBL_M`."
+  },
+  {
+   "n": "m3",
+   "at": "2ffc F",
+   "pre": "rs{e:=0}",
+   "post": "mm",
+   "h": [
+    "GS"
+   ],
+   "doc": "`mp_mulmod(G, &res, P, &M[1])`."
+  },
+  {
+   "n": "m4",
+   "at": "3018 T",
+   "to": "2e60",
+   "pre": "rs{e:=0}",
+   "post": "T0",
+   "doc": "To the table."
+  },
+  {
+   "n": "m4f",
+   "at": "3018 F",
+   "to": "2f34",
+   "pre": "rs",
+   "post": "LR{v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mulmod` failed: `LBL_RES`."
+  },
+  {
+   "n": "d1",
+   "at": "2f90",
+   "pre": "D0",
+   "post": "ri{re:=2147505636}",
+   "h": [
+    "AL"
+   ],
+   "doc": "`redux = mp_dr_reduce`; `mp_init_size(&res, P->alloc)`."
+  },
+  {
+   "n": "d2",
+   "at": "2fa4 T",
+   "pre": "ri0{e:=0}",
+   "post": "st1",
+   "doc": "`mp_set(&res, 1)`."
+  },
+  {
+   "n": "d2f",
+   "at": "2fa4 F",
+   "to": "2f3c",
+   "pre": "ri0",
+   "post": "LM{e:=e, v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&res)` failed: `LBL_M`."
+  },
+  {
+   "n": "k1",
+   "at": "2e18 F",
+   "pre": "rs{re:=x8,e:=0}",
+   "post": "ri{re:=2147507784}",
+   "h": [
+    "AL"
+   ],
+   "doc": "`redux = mp_reduce_2k`; `mp_init_size(&res, P->alloc)`."
+  },
+  {
+   "n": "k1f",
+   "at": "2e18 T",
+   "to": "2f3c",
+   "pre": "rs{re:=x8}",
+   "post": "LM{e:=e, v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=x8}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_reduce_2k_setup` failed: `LBL_M`."
+  },
+  {
+   "n": "k2",
+   "at": "2e34 F",
+   "pre": "ri0{e:=0}",
+   "post": "st1",
+   "doc": "`mp_set(&res, 1)`."
+  },
+  {
+   "n": "k2f",
+   "at": "2e34 T",
+   "to": "2f3c",
+   "pre": "ri0",
+   "post": "LM{e:=e, v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&res)` failed: `LBL_M`."
+  },
+  {
+   "n": "s1",
+   "at": "2e48",
+   "pre": "st1r",
+   "post": "md1",
+   "h": [
+    "GS"
+   ],
+   "doc": "`mp_mod(G, P, &M[1])`."
+  },
+  {
+   "n": "s2",
+   "at": "2e58 F",
+   "to": "2e60",
+   "pre": "rs{e:=0}",
+   "post": "T0",
+   "doc": "To the table."
+  },
+  {
+   "n": "s2f",
+   "at": "2e58 T",
+   "to": "2f34",
+   "pre": "rs",
+   "post": "LR{v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mod` failed: `LBL_RES`."
+  },
+  {
+   "n": "lr1",
+   "at": "2f34",
+   "pre": "LR",
+   "post": "lr",
+   "doc": "`LBL_RES`: `mp_clear(&res)`."
+  },
+  {
+   "n": "lm1",
+   "at": "2f3c",
+   "pre": "LM",
+   "post": "lm",
+   "doc": "`LBL_M`: `mp_clear(&M[1])`."
+  },
+  {
+   "n": "lm2",
+   "at": "2f48 F",
+   "to": "2f78",
+   "pre": "lmr",
+   "post": "CL{yp:=sp-6256+24*h, ep:=sp-6256+48*h}",
+   "h": [
+    "h ≤ 128",
+    "1 ≤ h"
+   ],
+   "by": "first | (congr 1; omega) | (apply BitVec.eq_of_toNat_eq; simp only [BitVec.toNat_ofNat]; omega)",
+   "doc": "The upper half's `mp_clear` loop."
+  },
+  {
+   "n": "cl1",
+   "at": "2f78",
+   "pre": "CL",
+   "post": "cli",
+   "doc": "`mp_clear(&M[y])`."
+  },
+  {
+   "n": "cl2",
+   "at": "2f84 T",
+   "to": "2f78",
+   "pre": "CL{yp:=yp+24}",
+   "post": "CL{yp:=yp+24}",
+   "h": [
+    "yp + 24 ≠ ep",
+    "yp + 24 < 2 ^ 64",
+    "ep < 2 ^ 64"
+   ],
+   "doc": "The next `y`."
+  },
+  {
+   "n": "cl3",
+   "at": "2f84 F",
+   "to": "2d7c",
+   "pre": "CL{yp:=yp+24}",
+   "post": "xe",
+   "h": [
+    "yp + 24 = ep"
+   ],
+   "doc": "Return `err`."
+  },
+  {
+   "n": "t0",
+   "at": "2e60",
+   "pre": "T0",
+   "post": "cpy",
+   "h": [
+    "HW"
+   ],
+   "by": "first | (congr 1; omega) | (apply BitVec.eq_of_toNat_eq; simp only [BitVec.toNat_ofNat]; omega)",
+   "doc": "`mp_copy(&M[1], &M[2^(w-1)])`."
+  },
+  {
+   "n": "t1",
+   "at": "2e7c F",
+   "to": "2e84",
+   "pre": "cpyr",
+   "post": "S{k:=0}",
+   "doc": "The squarings of `M[2^(w-1)]`."
+  },
+  {
+   "n": "sq",
+   "at": "2e84",
+   "pre": "S",
+   "post": "sqi",
+   "doc": "`mp_sqr(&M[2^(w-1)], &M[2^(w-1)])`."
+  },
+  {
+   "n": "sq1",
+   "at": "2e90 F",
+   "to": "2ea8",
+   "pre": "sqr{e:=0}",
+   "post": "rx",
+   "h": [
+    "MP",
+    "k < 8"
+   ],
+   "doc": "`redux(&M[2^(w-1)], P, mp)`."
+  },
+  {
+   "n": "sq1f",
+   "at": "2e90 T",
+   "to": "2f34",
+   "pre": "sqr",
+   "post": "LR{v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr` failed: `LBL_RES`."
+  },
+  {
+   "n": "sq2",
+   "at": "2eac F T",
+   "to": "2e84",
+   "pre": "rxr{e:=0}",
+   "post": "S{k:=k+1}",
+   "h": [
+    "k + 1 ≠ w - 1",
+    "w ≤ 8",
+    "k < 8"
+   ],
+   "doc": "The next squaring."
+  },
+  {
+   "n": "sq2d",
+   "at": "2eac F F F",
+   "to": "2f10",
+   "pre": "rxr{e:=0}",
+   "post": "U{xp:=sp-6256+24*h, ep:=sp-6256+24*(2*h-1), u6:=k+1}",
+   "h": [
+    "HW",
+    "k + 1 = w - 1",
+    "k < 8"
+   ],
+   "by": "first | (congr 1; omega) | (apply BitVec.eq_of_toNat_eq; simp only [BitVec.toNat_ofNat]; omega)",
+   "doc": "The upper half from `x = 2^(w-1) + 1`."
+  },
+  {
+   "n": "sq2f",
+   "at": "2eac T",
+   "to": "2f34",
+   "pre": "rxr",
+   "post": "LR{v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed: `LBL_RES`."
+  },
+  {
+   "n": "u1",
+   "at": "2f10",
+   "pre": "U",
+   "post": "ui",
+   "doc": "`mp_mul(&M[x-1], &M[1], &M[x])`."
+  },
+  {
+   "n": "u2",
+   "at": "2f24 T",
+   "to": "2f00",
+   "pre": "uir{e:=0}",
+   "post": "ur",
+   "h": [
+    "MP"
+   ],
+   "doc": "`redux(&M[x], P, mp)`."
+  },
+  {
+   "n": "u2f",
+   "at": "2f24 F",
+   "to": "2f34",
+   "pre": "uir",
+   "post": "LR{v4:=ep, v5:=sp-6256, v7:=xp+24, v8:=re, v9:=sp-6232}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul` failed: `LBL_RES`."
+  },
+  {
+   "n": "u3",
+   "at": "2f04 F F",
+   "to": "2f10",
+   "pre": "urr{e:=0}",
+   "post": "U{xp:=xp+24, u6:=0}",
+   "h": [
+    "xp + 24 ≠ ep",
+    "xp + 24 < 2 ^ 64",
+    "ep < 2 ^ 64"
+   ],
+   "doc": "The next `x`."
+  },
+  {
+   "n": "u3d",
+   "at": "2f04 F T",
+   "to": "3058",
+   "pre": "urr{e:=0}",
+   "post": "W1",
+   "h": [
+    "xp + 24 = ep",
+    "XS"
+   ],
+   "doc": "The table is built; `X`."
+  },
+  {
+   "n": "w1",
+   "at": "3058",
+   "to": "3068",
+   "pre": "W1",
+   "post": "K0{bm:=0, bc:=1, dv:=dv2}",
+   "h": [
+    "XU",
+    "dv2 = (xu + 18446744073709551615) % 18446744073709551616"
+   ],
+   "doc": "The table is built."
+  },
+  {
+   "n": "u3f",
+   "at": "2f04 T",
+   "to": "2f34",
+   "pre": "urr",
+   "post": "LR{v4:=ep, v5:=sp-6256, v7:=xp+24, v8:=re, v9:=sp-6232}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed: `LBL_RES`."
+  },
+  {
+   "n": "k0n",
+   "at": "3068 T",
+   "to": "31ec",
+   "pre": "K0",
+   "post": "Q{bc:=bc-1}",
+   "h": [
+    "1 < bc",
+    "bc ≤ 28"
+   ],
+   "doc": "Mode 0, `--bitcnt != 0`: test the next bit."
+  },
+  {
+   "n": "k0x",
+   "at": "3068 F T T",
+   "to": "3308",
+   "pre": "K0",
+   "post": "FIN{f4:=bm, f5:=0, f7:=bc, f9:=0}",
+   "h": [
+    "bc = 1",
+    "dv = 18446744073709551615"
+   ],
+   "doc": "Mode 0, out of digits: done."
+  },
+  {
+   "n": "k0l",
+   "at": "3068 F F",
+   "to": "307c",
+   "pre": "K0",
+   "post": "RG{mo:=0, bb:=0, cp:=0}",
+   "h": [
+    "bc = 1",
+    "dv ≠ 18446744073709551615",
+    "dv < 2 ^ 31"
+   ],
+   "doc": "Mode 0, `bitcnt == 0`: the next digit."
+  },
+  {
+   "n": "qy",
+   "at": "31ec T",
+   "to": "30b0",
+   "pre": "Q",
+   "post": "B{mo:=0, y:=1, bb:=0, cp:=0}",
+   "h": [
+    "2 ^ 63 ≤ bm * 68719476736 % 2 ^ 64"
+   ],
+   "doc": "A one bit in mode 0."
+  },
+  {
+   "n": "qn",
+   "at": "31ec F",
+   "to": "3068",
+   "pre": "Q",
+   "post": "K0{bm:=bm2}",
+   "h": [
+    "bm * 68719476736 % 2 ^ 64 < 2 ^ 63",
+    "bm2 = sx (bm * 2 % 4294967296)"
+   ],
+   "doc": "A leading zero bit: `continue`."
+  },
+  {
+   "n": "rf1",
+   "at": "307c",
+   "to": "3088",
+   "pre": "RG",
+   "post": "RGa",
+   "h": [
+    "XS",
+    "dv < 2 ^ 31",
+    "dv2 = (dv + 18446744073709551615) % 18446744073709551616"
+   ],
+   "doc": "`X`; `digidx--`."
+  },
+  {
+   "n": "rf1b",
+   "at": "3088",
+   "to": "3098",
+   "pre": "RGa",
+   "post": "RGb",
+   "h": [
+    "XD"
+   ],
+   "doc": "`X->dp`; spill `digidx`; `bitcnt = MP_DIGIT_BIT`."
+  },
+  {
+   "n": "rf1c",
+   "at": "3098",
+   "to": "309c",
+   "pre": "RGb",
+   "post": "RG2",
+   "h": [
+    "DG"
+   ],
+   "doc": "`buf = X->dp[digidx]`."
+  },
+  {
+   "n": "rf2",
+   "at": "309c",
+   "to": "30ac",
+   "pre": "RG2",
+   "post": "RG3",
+   "by": "first | (congr 1; omega) | (rw [or_ofNat _ _ (Nat.lt_of_le_of_lt Nat.and_le_right (by decide)) (by omega)]; congr 1; omega)",
+   "h": [
+    "d < 268435456",
+    "y = d % 4294967296 / 134217728 % 4294967296 &&& 1",
+    "yo = (d % 4294967296 / 134217728 % 4294967296 &&& 1) ||| mo",
+    "mo < 4"
+   ],
+   "doc": "`y = (buf >> 27) & 1`."
+  },
+  {
+   "n": "rf3a",
+   "at": "30ac T",
+   "to": "31d8",
+   "pre": "RG3{mo:=0, bb:=0, cp:=0}",
+   "post": "Z1",
+   "h": [
+    "yo = 0",
+    "d < 268435456"
+   ],
+   "doc": "Mode 0, a zero bit: test the next."
+  },
+  {
+   "n": "rf3b",
+   "at": "30ac F",
+   "to": "30b0",
+   "pre": "RG3",
+   "post": "B{bm:=d, bc:=28}",
+   "h": [
+    "yo ≠ 0",
+    "yo < 4"
+   ],
+   "doc": "To the bit's processing."
+  },
+  {
+   "n": "z1t",
+   "at": "31d8 T",
+   "to": "30b0",
+   "pre": "Z1",
+   "post": "B{bm:=2*d, bc:=27, mo:=0, y:=1, bb:=0, cp:=0}",
+   "h": [
+    "2 ^ 63 ≤ d * 137438953472 % 2 ^ 64",
+    "d < 268435456"
+   ],
+   "doc": "Bit 26 set."
+  },
+  {
+   "n": "z1f",
+   "at": "31d8 F",
+   "to": "31ec",
+   "pre": "Z1",
+   "post": "Q{bm:=4*d, bc:=26, dv:=dv2}",
+   "h": [
+    "d * 137438953472 % 2 ^ 64 < 2 ^ 63",
+    "d < 268435456",
+    "DI{dv:=dv2}"
+   ],
+   "doc": "Bit 26 clear: test bit 25."
+  },
+  {
+   "n": "bw",
+   "at": "30b0 T",
+   "to": "31a0",
+   "pre": "B",
+   "post": "K2",
+   "h": [
+    "mo ≠ 1",
+    "mo < 4"
+   ],
+   "doc": "Not mode 1: the bit into the window."
+  },
+  {
+   "n": "bw1",
+   "at": "30b0 F T",
+   "to": "31a0",
+   "pre": "B",
+   "post": "K2",
+   "h": [
+    "mo = 1",
+    "y ≠ 0",
+    "y < 2"
+   ],
+   "doc": "Mode 1, a one bit: into the window."
+  },
+  {
+   "n": "bs",
+   "at": "30b0 F F",
+   "pre": "B",
+   "post": "bsq",
+   "h": [
+    "mo = 1",
+    "y = 0"
+   ],
+   "doc": "Mode 1, a zero bit: `mp_sqr(&res, &res)`."
+  },
+  {
+   "n": "bs1",
+   "at": "30c8 F",
+   "to": "30dc",
+   "pre": "Br{e:=0}",
+   "post": "bsr",
+   "h": [
+    "MP"
+   ],
+   "doc": "`redux(&res, P, mp)`."
+  },
+  {
+   "n": "bs1f",
+   "at": "30c8 T",
+   "to": "2f34",
+   "pre": "Br",
+   "post": "LR{v4:=bm, v5:=bb, v7:=bc, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr` failed."
+  },
+  {
+   "n": "bs2",
+   "by": "apply BitVec.eq_of_toNat_eq; simp only [BitVec.toNat_and, BitVec.toNat_ofNat, Nat.reducePow, Nat.reduceMod]; simp only [Nat.and_one_is_mod]; omega",
+   "at": "30e0 F T",
+   "to": "30b0",
+   "pre": "Br{e:=0}",
+   "post": "B{bm:=bm2, bc:=bc-1, mo:=1, y:=y2}",
+   "h": [
+    "1 < bc",
+    "bc ≤ 28",
+    "bm2 = sx (bm * 2 % 4294967296)",
+    "y2 = sx (bm * 2 % 4294967296) % 4294967296 / 134217728 % 2"
+   ],
+   "doc": "`--bitcnt != 0`: the next bit."
+  },
+  {
+   "n": "bs2r",
+   "at": "30e0 F F T",
+   "to": "307c",
+   "pre": "Br{e:=0}",
+   "post": "RG{mo:=1, dv:=dvs}",
+   "h": [
+    "bc = 1",
+    "DI{dv:=dvs}",
+    "dvs ≠ 18446744073709551615",
+    "dvs < 2 ^ 64"
+   ],
+   "doc": "`bitcnt == 0`: the next digit."
+  },
+  {
+   "n": "bs2x",
+   "at": "30e0 F F F T",
+   "to": "3308",
+   "pre": "Br{e:=0}",
+   "post": "FIN{f4:=bm, f5:=bb, f7:=bc-1, f9:=cp}",
+   "h": [
+    "bc = 1",
+    "DI{dv:=18446744073709551615}"
+   ],
+   "doc": "Out of digits."
+  },
+  {
+   "n": "bs2f",
+   "at": "30e0 T",
+   "to": "2f34",
+   "pre": "Br",
+   "post": "LR{v4:=bm, v5:=bb, v7:=bc, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed."
+  },
+  {
+   "n": "wf",
+   "by": "rw [show (4294967296 - (cp + 1) % 4294967296 + w % 4294967296) % 4294967296 = w - (cp + 1) by omega, sllw_ofNat _ _ (by omega) (by omega), or_ofNat _ _ (by omega) (by omega)]; congr 1; omega",
+   "at": "31a0 T",
+   "to": "320c",
+   "pre": "K2",
+   "post": "F{bb:=bb2}",
+   "h": [
+    "cp + 1 = w",
+    "w ≤ 8",
+    "y < 2",
+    "bb2 = bb ||| y * 2 ^ (w - (cp + 1))",
+    "bb < 256",
+    "y * 2 ^ (w - (cp + 1)) < 256"
+   ],
+   "doc": "`bitbuf |= y << (winsize - ++bitcpy)`; the window is full."
+  },
+  {
+   "n": "wn",
+   "by": "first | (rw [show (4294967296 - (cp + 1) % 4294967296 + w % 4294967296) % 4294967296 = w - (cp + 1) by omega, sllw_ofNat _ _ (by omega) (by omega), or_ofNat _ _ (by omega) (by omega)]; congr 1; omega) | (apply BitVec.eq_of_toNat_eq; simp only [BitVec.toNat_and, BitVec.toNat_ofNat, Nat.reducePow, Nat.reduceMod]; simp only [Nat.and_one_is_mod]; omega)",
+   "at": "31a0 F T",
+   "to": "31a0",
+   "pre": "K2",
+   "post": "K2{bm:=bm2, bc:=bc-1, cp:=cp+1, bb:=bb2, y:=y2}",
+   "h": [
+    "cp + 1 < w",
+    "w ≤ 8",
+    "y < 2",
+    "bb2 = bb ||| y * 2 ^ (w - (cp + 1))",
+    "bb < 256",
+    "y * 2 ^ (w - (cp + 1)) < 256",
+    "1 < bc",
+    "bc ≤ 28",
+    "bm2 = sx (bm * 2 % 4294967296)",
+    "y2 = sx (bm * 2 % 4294967296) % 4294967296 / 134217728 % 2"
+   ],
+   "doc": "The bit into the window; the next bit (mode 2)."
+  },
+  {
+   "n": "wr",
+   "by": "rw [show (4294967296 - (cp + 1) % 4294967296 + w % 4294967296) % 4294967296 = w - (cp + 1) by omega, sllw_ofNat _ _ (by omega) (by omega), or_ofNat _ _ (by omega) (by omega)]; congr 1; omega",
+   "at": "31a0 F F",
+   "to": "3074",
+   "pre": "K2",
+   "post": "R{bm:=bm2, bb:=bb2, cp:=cp+1, mo:=2, dv:=dvs, r7:=bc-1}",
+   "h": [
+    "cp + 1 < w",
+    "w ≤ 8",
+    "y < 2",
+    "bb2 = bb ||| y * 2 ^ (w - (cp + 1))",
+    "bb < 256",
+    "y * 2 ^ (w - (cp + 1)) < 256",
+    "bc = 1",
+    "bm2 = sx (bm * 2 % 4294967296)",
+    "DI{dv:=dvs}"
+   ],
+   "doc": "The bit into the window; `bitcnt == 0`."
+  },
+  {
+   "n": "rx1",
+   "at": "3074 T T",
+   "to": "3308",
+   "pre": "R",
+   "post": "FIN{f4:=bm, f5:=bb, f7:=r7, f9:=cp}",
+   "h": [
+    "dv = 18446744073709551615",
+    "mo ≠ 2",
+    "mo < 4"
+   ],
+   "doc": "Out of digits, not mode 2: done."
+  },
+  {
+   "n": "rx3",
+   "at": "3074 T F F",
+   "to": "312c",
+   "pre": "R",
+   "post": "TL",
+   "h": [
+    "dv = 18446744073709551615",
+    "mo = 2",
+    "cp ≠ 0",
+    "cp < 8",
+    "8304 ≤ sp"
+   ],
+   "doc": "Out of digits in mode 2: the tail (`x = 0`)."
+  },
+  {
+   "n": "rl",
+   "at": "3074 F",
+   "to": "307c",
+   "pre": "R",
+   "post": "RG",
+   "h": [
+    "dv ≠ 18446744073709551615",
+    "dv < 2 ^ 64"
+   ],
+   "doc": "The next digit."
+  },
+  {
+   "n": "fs",
+   "at": "320c",
+   "pre": "F",
+   "post": "fsq",
+   "doc": "The window's squarings: `mp_sqr(&res, &res)`."
+  },
+  {
+   "n": "fr",
+   "at": "3218 F",
+   "to": "322c",
+   "pre": "Fr{e:=0}",
+   "post": "fsr",
+   "h": [
+    "MP"
+   ],
+   "doc": "`redux(&res, P, mp)`."
+  },
+  {
+   "n": "frf",
+   "at": "3218 T",
+   "to": "2f34",
+   "pre": "Fr",
+   "post": "LR{v4:=bm, v5:=bb, v7:=bc, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr` failed."
+  },
+  {
+   "n": "fl",
+   "stu": [
+    "xk + 1"
+   ],
+   "at": "3230 F T",
+   "to": "320c",
+   "pre": "Fr{e:=0}",
+   "post": "F",
+   "h": [
+    "XK",
+    "xk ≠ cp",
+    "cp < 8"
+   ],
+   "doc": "`x++`: the next squaring."
+  },
+  {
+   "n": "fm",
+   "at": "3230 F F",
+   "pre": "Fr{e:=0}",
+   "post": "fmu",
+   "h": [
+    "XK",
+    "xk = cp",
+    "bb < 256"
+   ],
+   "doc": "`mp_mul(&res, &M[bitbuf], &res)`."
+  },
+  {
+   "n": "flf",
+   "at": "3230 T",
+   "to": "2f34",
+   "pre": "Fr",
+   "post": "LR{v4:=bm, v5:=bb, v7:=bc, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed."
+  },
+  {
+   "n": "fm2",
+   "at": "3260 F",
+   "to": "3274",
+   "pre": "Fr{e:=0}",
+   "post": "fsr",
+   "h": [
+    "MP"
+   ],
+   "doc": "`redux(&res, P, mp)`."
+  },
+  {
+   "n": "fm2f",
+   "at": "3260 T",
+   "to": "2f34",
+   "pre": "Fr",
+   "post": "LR{v4:=bm, v5:=bb, v7:=bc, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul` failed."
+  },
+  {
+   "n": "fm3a",
+   "by": "apply BitVec.eq_of_toNat_eq; simp only [BitVec.toNat_and, BitVec.toNat_ofNat, Nat.reducePow, Nat.reduceMod]; simp only [Nat.and_one_is_mod]; omega",
+   "at": "3278 F T",
+   "to": "30b0",
+   "pre": "Fr{e:=0}",
+   "post": "B{bm:=bm2, bc:=bc-1, mo:=1, cp:=0, bb:=0, y:=y2}",
+   "h": [
+    "1 < bc",
+    "bc ≤ 28",
+    "bm2 = sx (bm * 2 % 4294967296)",
+    "y2 = sx (bm * 2 % 4294967296) % 4294967296 / 134217728 % 2"
+   ],
+   "doc": "Mode 1; `--bitcnt != 0`: the next bit."
+  },
+  {
+   "n": "fm3b",
+   "at": "3278 F F",
+   "to": "3074",
+   "pre": "Fr{e:=0}",
+   "post": "R{mo:=1, cp:=0, bb:=0, dv:=dvs, r7:=bc}",
+   "h": [
+    "bc = 1",
+    "DI{dv:=dvs}"
+   ],
+   "doc": "Mode 1; `bitcnt == 0`."
+  },
+  {
+   "n": "fm3f",
+   "at": "3278 T",
+   "to": "2f34",
+   "pre": "Fr",
+   "post": "LR{v4:=bm, v5:=bb, v7:=bc, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed."
+  },
+  {
+   "n": "ts",
+   "at": "312c",
+   "pre": "TL",
+   "post": "tsq",
+   "doc": "The tail: `mp_sqr(&res, &res)`."
+  },
+  {
+   "n": "tr",
+   "at": "3138 F",
+   "to": "3150",
+   "pre": "TLr{e:=0}",
+   "post": "trr",
+   "h": [
+    "MP",
+    "bb < 65536",
+    "8304 ≤ sp"
+   ],
+   "doc": "`redux(&res, P, mp)`; `bitbuf <<= 1`."
+  },
+  {
+   "n": "trf",
+   "at": "3138 T",
+   "to": "2f34",
+   "pre": "TLr",
+   "post": "LR{v4:=sp-8304, v5:=bb, v7:=sp-6280, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr` failed."
+  },
+  {
+   "n": "tm0",
+   "stu": [
+    "xk + 1"
+   ],
+   "at": "3154 F T T",
+   "to": "3308",
+   "pre": "TL2r{e:=0}",
+   "post": "FIN{f4:=sp-8304, f5:=2*bb, f7:=sp-6280, f9:=cp}",
+   "h": [
+    "2 * bb &&& 2 * h = 0",
+    "XK",
+    "cp ≤ xk + 1",
+    "cp < 8",
+    "bb < 65536",
+    "h ≤ 128"
+   ],
+   "doc": "No multiplication; the last round."
+  },
+  {
+   "n": "tm1",
+   "stu": [
+    "xk + 1"
+   ],
+   "at": "3154 F T F",
+   "to": "312c",
+   "pre": "TL2r{e:=0}",
+   "post": "TL{bb:=2*bb}",
+   "h": [
+    "2 * bb &&& 2 * h = 0",
+    "XK",
+    "xk + 1 < cp",
+    "cp < 8",
+    "bb < 65536",
+    "h ≤ 128"
+   ],
+   "doc": "No multiplication; the next round."
+  },
+  {
+   "n": "tmm",
+   "at": "3154 F F",
+   "pre": "TL2r{e:=0}",
+   "post": "tmu",
+   "h": [
+    "2 * bb &&& 2 * h ≠ 0",
+    "2 * bb &&& 2 * h ≤ 2 * h",
+    "bb < 65536",
+    "h ≤ 128"
+   ],
+   "doc": "`mp_mul(&res, &M[1], &res)`."
+  },
+  {
+   "n": "tmf",
+   "at": "3154 T",
+   "to": "2f34",
+   "pre": "TL2r",
+   "post": "LR{v4:=sp-8304, v5:=2*bb, v7:=sp-6280, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed."
+  },
+  {
+   "n": "tm2",
+   "at": "3174 F",
+   "to": "3188",
+   "pre": "TL2r{e:=0}",
+   "post": "trr",
+   "h": [
+    "MP",
+    "8304 ≤ sp"
+   ],
+   "doc": "`redux(&res, P, mp)`."
+  },
+  {
+   "n": "tm2f",
+   "at": "3174 T",
+   "to": "2f34",
+   "pre": "TL2r",
+   "post": "LR{v4:=sp-8304, v5:=2*bb, v7:=sp-6280, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul` failed."
+  },
+  {
+   "n": "tm3a",
+   "stu": [
+    "xk + 1"
+   ],
+   "at": "318c T T",
+   "to": "3308",
+   "pre": "TL2r{e:=0}",
+   "post": "FIN{f4:=sp-8304, f5:=2*bb, f7:=sp-6280, f9:=cp}",
+   "h": [
+    "XK",
+    "cp ≤ xk + 1",
+    "cp < 8"
+   ],
+   "doc": "The last round."
+  },
+  {
+   "n": "tm3b",
+   "stu": [
+    "xk + 1"
+   ],
+   "at": "318c T F",
+   "to": "312c",
+   "pre": "TL2r{e:=0}",
+   "post": "TL{bb:=2*bb}",
+   "h": [
+    "XK",
+    "xk + 1 < cp",
+    "cp < 8"
+   ],
+   "doc": "The next round."
+  },
+  {
+   "n": "tm3f",
+   "at": "318c F",
+   "to": "2f34",
+   "pre": "TL2r",
+   "post": "LR{v4:=sp-8304, v5:=2*bb, v7:=sp-6280, v8:=re, v9:=cp}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed."
+  },
+  {
+   "n": "fn0",
+   "at": "3308 F",
+   "to": "3318",
+   "pre": "FIN",
+   "post": "fnr",
+   "h": [
+    "md = 0",
+    "MP"
+   ],
+   "doc": "Montgomery: one more `redux(&res, P, mp)`."
+  },
+  {
+   "n": "fn1",
+   "at": "3308 T",
+   "pre": "FIN",
+   "post": "fnx",
+   "h": [
+    "md ≠ 0",
+    "md < 2 ^ 31",
+    "YS"
+   ],
+   "doc": "`mp_exch(&res, Y)`."
+  },
+  {
+   "n": "fn2",
+   "at": "331c F",
+   "pre": "FINr{e:=0}",
+   "post": "fnx",
+   "h": [
+    "YS"
+   ],
+   "doc": "`mp_exch(&res, Y)`."
+  },
+  {
+   "n": "fn2f",
+   "at": "331c T",
+   "to": "2f34",
+   "pre": "FINr",
+   "post": "LR{v4:=f4, v5:=f5, v7:=f7, v8:=re, v9:=f9}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`redux` failed."
+  },
+  {
+   "n": "fn3",
+   "at": "3334",
+   "to": "2f34",
+   "pre": "FIN",
+   "post": "LR{e:=0, v4:=f4, v5:=f5, v7:=f7, v8:=re, v9:=f9}",
+   "doc": "`err = MP_OKAY`; `LBL_RES`."
+  },
+  {
+   "n": "m1s",
+   "at": "2fbc F F",
+   "pre": "dr0",
+   "post": "ri{re:=x8}",
+   "h": [
+    "AL",
+    "PU",
+    "¬ 2 * pu ≤ 510"
+   ],
+   "doc": "Montgomery's general path (`2 P->used > 510`); `mp_init_size(&res, P->alloc)`."
+  },
+  {
+   "n": "m2s",
+   "at": "2fe0 F",
+   "pre": "ri0{re:=x8,e:=0}",
+   "post": "mn{re:=2147506656}",
+   "doc": "`redux = mp_montgomery_reduce`; `mp_montgomery_calc_normalization(&res, P)`."
+  },
+  {
+   "n": "m2sf",
+   "at": "2fe0 T",
+   "to": "2f3c",
+   "pre": "ri0{re:=x8}",
+   "post": "LM{e:=e, v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=2147506656}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&res)` failed: `LBL_M`."
+  },
+  {
+   "n": "m3f",
+   "at": "2ffc T",
+   "to": "2f34",
+   "pre": "rs",
+   "post": "LR{v4:=sp-6256+24*h, v5:=sp-6256, v7:=x7, v9:=w-1, v8:=re}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_montgomery_calc_normalization` failed (it grows `res`): `LBL_RES`."
+  }
+ ]
+}

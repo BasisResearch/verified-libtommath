@@ -1,0 +1,5 @@
+c/build/
+.lake/
+**/.lake/
+__pycache__/
+build/

@@ -1,0 +1,6889 @@
+{
+ "#": "s_mp_exptmod_fast: the table M[] as the region families tS/tD (Kit/Tab.lean, Api/SMpExptmodFastR.lean), redux through s8 (call_heapR, Std.reduxG (Std.rk md P->used)), mp_mul/mp_sqr at any size (Std.mpMulG, mpMulAG, mpSqrAG); mp_montgomery_calc_normalization(&res, P) growing res (Std.montNormG, cuts MN/MX re-place res, its MP_MEM to LBL_RES by row m3f).",
+ "fn": "s_mp_exptmod_fast",
+ "mod": "SExptFastMainG",
+ "ns": "Tom.Machine.Fn.SExptFastG5",
+ "api": "SMpExptmodFast",
+ "style": "pre",
+ "hdig": false,
+ "jump_mk": true,
+ "dsimp_q": true,
+ "rows": "experiments/segs/sefg.rows.json",
+ "let": {
+  "WS": "by rw [← winsize_eq hvx]; unfold Window.winSize; (repeat' split) <;> omega",
+  "TI": "tabV true Q (fun _ => MpInt.zeroN nI0) h x",
+  "H1": "((Q 1, 4 * (MpInt.zeroN nI0).alloc) :: hin)",
+  "WFS": "have wf := WF.of hw; have := wf.two; have := wf.le8; have := wf.h2; have := wf.h128; have := wf.dbl",
+  "CLR": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by show 0 < nI0; om⟩",
+  "INI": "⟨⟨by om, by om, by om⟩, by om, by om, by unfold OffHeap; om⟩",
+  "TD": "tabV true Q (fun _ => MpInt.zeroN nI0) h (2 * h)",
+  "H2": "tabBlks ({TD}) h (2 * h - h) ++ {H1}",
+  "Z0": "(MpInt.zeroN nI0)",
+  "TV": "tabV true Q V h (2 * h)",
+  "HV": "tabBlks ({TV}) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: hin)",
+  "RESNONE": [
+   [
+    "tac",
+    "resc @H' @H none none"
+   ],
+   [
+    "tac",
+    "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ none); clear @HP",
+    {
+     "lay": {}
+    }
+   ]
+  ],
+  "RESSOME": [
+   [
+    "tac",
+    "resc @H' @H none (some (q, {Z0}))"
+   ],
+   [
+    "tac",
+    "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q, {Z0}))); clear @HP",
+    {
+     "lay": {}
+    }
+   ]
+  ],
+  "INIRES": [
+   [
+    "call",
+    "mpInitSize",
+    "sp - 6320, sp - 6280, al, {H2}",
+    "xr",
+    {
+     "hq": "hq",
+     "sig": {
+      "aS": "nE",
+      "site": "nR .rD"
+     },
+     "res": "{INI}"
+    }
+   ]
+  ],
+  "TOLM": [
+   [
+    "unslot",
+    "nP"
+   ],
+   [
+    "forget",
+    "nV"
+   ],
+   [
+    "forget",
+    "nI"
+   ],
+   [
+    "jump",
+    "LMe",
+    {
+     "vars": {
+      "V": "fun _ => {Z0}"
+     },
+     "hVa": "fun _ => by show 0 < nI0; om"
+    }
+   ]
+  ],
+  "SET1": [
+   [
+    "call",
+    "mpSet",
+    "sp - 6280, q, {Z0}, 1",
+    "r1",
+    {
+     "hq": "hs",
+     "sig": {
+      "S": "nE",
+      "D": "nR .rD"
+     },
+     "res": "⟨(MpInt.zeroN_valid hN31).toShape, by show 1 ≤ nI0; om⟩"
+    }
+   ]
+  ],
+  "KPR": [
+   [
+    "tac",
+    "ress @H' @H (some (q, {Z0})) q r1"
+   ]
+  ],
+  "MBLK": "List.mem_cons_of_mem _ (List.mem_append_right _ (List.mem_cons_of_mem _ hres.nblk))",
+  "GBLK": "List.mem_cons_of_mem _ (List.mem_append_right _ (List.mem_cons_of_mem _ hres.gblk))",
+  "TPP": [
+   [
+    "hw",
+    "w = Exptmod.wsize Xv"
+   ],
+   [
+    "hh",
+    "h = 2 ^ (w - 1)"
+   ],
+   [
+    "hcd",
+    "Cond N md mpv"
+   ],
+   [
+    "hre",
+    "BitVec.ofNat 64 re = Std.reduxGE (Std.rk md N.used)"
+   ],
+   [
+    "fr",
+    "Fresh hin qr (4 * vr.alloc)"
+   ],
+   [
+    "hres0",
+    "Rs N.mag N.used vr (res0F N md)"
+   ],
+   [
+    "hm1",
+    "Rs N.mag N.used (V 1) (m1F G N md)"
+   ],
+   [
+    "hVa",
+    "∀ j, 0 < (V j).alloc"
+   ],
+   [
+    "hvra",
+    "0 < vr.alloc"
+   ]
+  ],
+  "TPPRE": [
+   "{WFS}",
+   "have hmpv := Cond.d_lt hcd (fun h1 => (har.dr h1).2); have : mpv < 2 ^ 31 := Nat.lt_of_lt_of_le hmpv (by decide); have := hm1.used; have := hres0.used; have := hm1.valid.used_le; have := hres0.valid.used_le"
+  ],
+  "VAP": "vset_posP (P := fun t => 0 < t.alloc) hsq.pos hVa",
+  "KSL": "Std.mpInitSize, Std.Is.out, Std.IsP.n, Std.mpClear, Api.Un.ws, Un.kind, Std.mpSet, Std.montNormG, Api.MontNormG.kind, Api.MontNormG.out, Api.MontNormG.ws, Api.BinA.wsA, Std.Ob.kind, Tom.Machine.BinA.kind, Kind.isRam, TSx, Std.mpMulmodH, MpMulmod.kind, MpMulmod.out, MpMulmod.ws, Std.mpModPos, Std.mpModH, Api.MpMod.kind, Api.MpMod.out, Api.MpMod.ws, Std.mpCopyH, Std.mpCopy, Std.CopyHP.toP, Tom.Machine.Two.kind, Api.Two.ws, Std.mpSqrAG, Std.mpSqrAF, MpSqrA.kind, MpSqrA.out, MpSqrA.ws, Std.reduxG, MpReduce2k.kind, Api.ReduxG.out, MpReduce2k.ws, Std.mpMulG, Std.mpMulG0, Std.mpMulF0, HContract.withPlace, Std.MulFP.toP, MpMul.kind, MpMul.out, MpMul.ws, qset, vset, Std.mpMulAG, Std.mpMulAG0, Std.mpMulAF0, Std.MulAFP.toP, MpMulA.kind, MpMulA.out, MpMulA.ws",
+  "RR": "(runF G Xv N md)",
+  "LPP": [
+   [
+    "hw",
+    "w = Exptmod.wsize Xv"
+   ],
+   [
+    "hh",
+    "h = 2 ^ (w - 1)"
+   ],
+   [
+    "hcd",
+    "Cond N md mpv"
+   ],
+   [
+    "hre",
+    "BitVec.ofNat 64 re = Std.reduxGE (Std.rk md N.used)"
+   ],
+   [
+    "hVa",
+    "∀ j, 0 < (V j).alloc"
+   ],
+   [
+    "hvra",
+    "0 < vr.alloc"
+   ],
+   [
+    "henv",
+    "Env (fun u1 u2 => redRel md u1 N mpv u2) {RR} N.mag N.used V"
+   ],
+   [
+    "hXS",
+    "bytesT8 Mv (sp - 6312) = BitVec.ofNat 64 px"
+   ],
+   [
+    "hYS",
+    "bytesT8 Mv (sp - 6304) = BitVec.ofNat 64 py"
+   ]
+  ],
+  "LPRE": [
+   "{WFS}",
+   "have hmpv := Cond.d_lt hcd (fun h1 => (har.dr h1).2); have : mpv < 2 ^ 31 := Nat.lt_of_lt_of_le hmpv (by decide); have hrw : (runF G Xv N md).w = w := hw.symm; have hdvd : ∀ k, DV k = (k + 18446744073709551615) % 18446744073709551616 := fun _ => rfl"
+  ],
+  "RED": "Std.reduxG_res rfl hcd (fun h1 => (har.dr h1).2) har.r2k ⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + 4800 ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩ hsb.1 hsb.2.1 hsb.2.2 hvra har.bits (by unfold OffHeap; om) hres.noff",
+  "KSL0": "Std.mpInitSize, Std.Is.out, Std.IsP.n, Std.mpClear, Api.Un.ws, Un.kind, Std.mpSet, Std.montNormC, Api.BinA.wsA, Std.Ob.kind, Tom.Machine.BinA.kind, Kind.isRam, TSx, Std.mpMulmodH, MpMulmod.kind, MpMulmod.out, MpMulmod.ws, Std.mpModPos, Std.mpModH, Api.MpMod.kind, Api.MpMod.out, Api.MpMod.ws, Std.mpCopyH, Std.mpCopy, Std.CopyHP.toP, Tom.Machine.Two.kind, Api.Two.ws, MpSqrA.kind, MpSqrA.out, MpSqrA.ws, MpReduce2k.kind, MpReduce2k.ws, Std.mpMulF0, HContract.withPlace, Std.MulFP.toP, MpMul.kind, MpMul.out, MpMul.ws, qset, vset, Std.mpMulAF0, Std.MulAFP.toP, MpMulA.kind, MpMulA.out, MpMulA.ws",
+  "NRM": [
+   [
+    "call",
+    "montNormG",
+    "sp - 6320, sp - 6280, qr, pn, ndp, {Z0}, N, {H2}",
+    "xn",
+    {
+     "hq": "hn",
+     "sig": {
+      "aS": "nE",
+      "aD": "nR .rD"
+     },
+     "res": "⟨⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + 656 ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩, (MpInt.zeroN_valid hN31).toShape, hvn, har.mont hmd, har.gt1, hres.nbits, by show 0 < nI0; om, by unfold OffHeap; om⟩"
+    }
+   ],
+   [
+    "cases",
+    "xn",
+    {
+     "pair ⟨ok, q1, r1⟩": [
+      [
+       "tac",
+       "have hra1 := hn.pos"
+      ],
+      [
+       "tac",
+       "resc @H' @H (some (qr, {Z0})) (some (q1, r1))"
+      ],
+      [
+       "tac",
+       "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q1, r1))); clear @HP",
+       {
+        "lay": {}
+       }
+      ],
+      [
+       "cases",
+       "ok",
+       {
+        "false": [
+         [
+          "set",
+          {
+           "e": "18446744073709551614"
+          }
+         ],
+         [
+          "seg",
+          "m3f",
+          "0"
+         ],
+         [
+          "forget",
+          "nV"
+         ],
+         [
+          "forget",
+          "nI"
+         ],
+         [
+          "jump",
+          "LRe",
+          {
+           "vars": {
+            "qr": "q1",
+            "vr": "r1",
+            "V": "fun _ => {Z0}"
+           },
+           "hVa": "fun _ => by show 0 < nI0; om",
+           "hrva": "hra1"
+          }
+         ]
+        ],
+        "true": [
+         [
+          "tac",
+          "have fr : Fresh hin q1 (4 * r1.alloc) := (Heap.fresh_front @HP.heap.heap).mono fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he)"
+         ],
+         [
+          "have",
+          "hr1 : Rs N.mag N.used r1 (res0F N md)",
+          "by rw [hmd]; exact res_mont hvn (har.mont hmd) har.gt1 (hn.post rfl)"
+         ],
+         [
+          "tac",
+          "have := hr1.used; have := hr1.valid.used_le; have := hr1.valid.alloc_lt"
+         ],
+         [
+          "jump",
+          "MM",
+          {
+           "vars": {
+            "qr": "q1",
+            "r1": "r1"
+           },
+           "hre": "by rw [hmd]; first | (rw [Std.rk_fast (by assumption)]; rfl) | (rw [Std.rk_slow (by assumption)]; rfl)"
+          }
+         ]
+        ]
+       }
+      ]
+     ]
+    }
+   ]
+  ]
+ },
+ "code": "sMpExptmodFast",
+ "F": "(11120 + 8 * (p.g.used + 2 * p.n.used))",
+ "chunk_min": 0,
+ "chunk_lines": 300,
+ "imports": [
+  "Tom.Machine.Api.SMpExptmodFastR",
+  "Tom.Machine.Kit.CallR",
+  "Tom.Machine.Api.StdNorm",
+  "Tom.Machine.Kit.Sites",
+  "Tom.Machine.Kit.ByteBuf",
+  "Tom.Machine.Fn.SExptFastG",
+  "Tom.Machine.Kit.TabState",
+  "Tom.Machine.Fn.MulGroupB",
+  "Tom.Machine.Api.Std_inv",
+  "Tom.Machine.Api.ReduxK",
+  "Tom.Machine.Kit.WinLoop",
+  "Tom.Machine.Api.Std_cap",
+  "Tom.Machine.Api.ReduxGF",
+  "Tom.Machine.Api.Std_capf4",
+  "Tom.Machine.Api.Std_norm"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.SExptFastG Tom Tom.SMpExptmodFastStep Tom.WindowStep",
+  "open Tom.Machine.Api.Exptmod (P)",
+  "open Tom.Machine.Api.SMpExptmodFastR (R layG kindG isWG emb GPre soundG layG_stk)",
+  "open Tom.Machine.Api.ReduxK Tom.Machine.WinLoop",
+  "open Tom.Machine.WV.Win"
+ ],
+ "head_defs": [
+  "instance decO1 : DecidableEq (Option R) := inferInstance",
+  "instance decO2 : DecidableEq (Option (Option R)) := inferInstance",
+  "instance decO3 : DecidableEq (Option (Option (Option R))) := inferInstance",
+  "instance decO4 : DecidableEq (Option (Option (Option (Option R)))) := inferInstance",
+  "instance decO5 : DecidableEq (Option (Option (Option (Option (Option R))))) := inferInstance",
+  "instance decO6 : DecidableEq (Option (Option (Option (Option (Option (Option R)))))) := inferInstance",
+  "instance decO7 : DecidableEq (Option (Option (Option (Option (Option (Option (Option R))))))) := inferInstance"
+ ],
+ "lay_t": "layG",
+ "kind_t": "kindG p m",
+ "kind_rest": "kindG z.p z.m r",
+ "isW": "isWG",
+ "frame_len_tac": [
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega",
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega",
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega",
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega",
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega",
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega",
+  "simp [Split.lay, layG_stk, SMpExptmodFast.Ff] <;> omega"
+ ],
+ "R": [
+  "stk",
+  "gS",
+  "gD",
+  "xS",
+  "xD",
+  "nS",
+  "nD",
+  "yS",
+  "yD",
+  "ks",
+  "ts",
+  "kc",
+  "tc",
+  "code",
+  "rD"
+ ],
+ "fam": [
+  [
+   "tS",
+   "trivial",
+   "Ram.nil"
+  ],
+  [
+   "tD",
+   "trivial",
+   "Ram.nil"
+  ]
+ ],
+ "written": [
+  "stk",
+  "yS",
+  "yD",
+  "rD"
+ ],
+ "fits": {
+  "stk": "trivial",
+  "rD": "trivial"
+ },
+ "wit": {
+  "stk": "(hP.bund .stk).2",
+  "gS": "(hP.bund .gS).2",
+  "gD": "(hP.bund .gD).2",
+  "xS": "(hP.bund .xS).2",
+  "xD": "(hP.bund .xD).2",
+  "nS": "(hP.bund .nS).2",
+  "nD": "(hP.bund .nD).2",
+  "yS": "(hP.bund .yS).2",
+  "yD": "(hP.bund .yD).2",
+  "ks": "(hP.bund .ks).2",
+  "ts": "(hP.bund .ts).2",
+  "kc": "(hP.bund .kc).2",
+  "tc": "(hP.bund .tc).2",
+  "code": "(hP.bund .code).2",
+  "rD": "Ram.nil"
+ },
+ "frame": [
+  [
+   "nT",
+   112
+  ],
+  [
+   "nM",
+   6144
+  ],
+  [
+   "nE",
+   24
+  ],
+  [
+   "nP",
+   4
+  ],
+  [
+   "nQ",
+   4
+  ],
+  [
+   "nI",
+   8
+  ],
+  [
+   "nV",
+   24
+  ]
+ ],
+ "refs": {
+  "nE": "S sp - 6280",
+  "nP": "D sp - 6284",
+  "nR .gS": "S pg",
+  "nR .gD": "D gdp",
+  "nR .xS": "S px",
+  "nR .xD": "D xdp",
+  "nR .nS": "S pn",
+  "nR .nD": "D ndp",
+  "nR .yS": "S py",
+  "nR .yD": "D ydp",
+  "nR .ks": "D 2147587320",
+  "nR .ts": "D 2147587312",
+  "nR .kc": "D 2147587324",
+  "nR .tc": "D 2147587316"
+ },
+ "ctx_vocab": {
+  "sp": "z.p.sp",
+  "pg": "z.p.pg",
+  "gdp": "z.p.gdp",
+  "px": "z.p.px",
+  "xdp": "z.p.xdp",
+  "pn": "z.p.pn",
+  "ndp": "z.p.ndp",
+  "py": "z.p.py",
+  "ydp": "z.p.ydp",
+  "G": "z.p.g",
+  "Xv": "z.p.x",
+  "N": "z.p.n",
+  "Yv": "z.p.y",
+  "md": "z.p.mode",
+  "H": "z.p.H",
+  "al": "z.p.n.alloc",
+  "pu": "z.p.n.used",
+  "xu": "z.p.x.used",
+  "cb": "(countBits z.p.x)",
+  "hin": "(Api.Exptmod.hin z.p)",
+  "Wr0": "(InAny (Api.Exptmod.lay (SMpExptmodFast.F z.p) z.p) Api.Exptmod.ws)",
+  "nI0": "(initPrec z.p.n.alloc)"
+ },
+ "cx": [
+  [
+   "pre",
+   "GPre p m ra"
+  ]
+ ],
+ "intro": "intro p m v outp ra hra hres hS hB hH hoff c hc; obtain ⟨vsp, gp, tp, s0, s⟩ := v; have hsp := At.sp_eq hc (x := BitVec.ofNat 64 p.sp) rfl; have hgp := At.gp_eq hc (x := gpV) rfl; simp only at hsp hgp; subst hsp hgp; revert c hc; have hP : GPre p m ra := ⟨hra, hres, hS, hB, hH, hoff, soundG hS (fun c => (hoff c).lo)⟩",
+ "fxmk": "⟨p, m, tp, s0, s, outp, ra⟩",
+ "post": "fun cf => ∃ x M, At ra (Api.Exptmod.rets p x ra) M v.keep o cf ∧ SMpExptmodFast.Q p x ∧ HPost (Api.Exptmod.lay (SMpExptmodFast.F p) p) Api.Exptmod.ws .yD (Api.Exptmod.out p x) (Api.Exptmod.site' (SMpExptmodFast.F p) p x) hin (Api.Exptmod.hout p x) m M",
+ "snaps": {
+  "F1": "W(m, pro)",
+  "F2": "W(m, prx)"
+ },
+ "static": [
+  [
+   "/-- The table's struct slots: `nR (.tS j)` is entry `j`. -/",
+   "def famS : X → Option Nat",
+   "  | some (some (some (some (some (some (some (R.tS j))))))) => some j",
+   "  | _ => none",
+   "",
+   "theorem famS_some {r : X} {j : Nat} (h : famS r = some j) : r = nR (.tS j) := by",
+   "  rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> simp [famS] at h",
+   "  cases r <;> simp [famS] at h",
+   "  subst h; rfl",
+   "",
+   "/-- The table's digit arrays: `nR (.tD j)` is entry `j`. -/",
+   "def famD : X → Option Nat",
+   "  | some (some (some (some (some (some (some (R.tD j))))))) => some j",
+   "  | _ => none",
+   "",
+   "theorem famD_some {r : X} {j : Nat} (h : famD r = some j) : r = nR (.tD j) := by",
+   "  rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> simp [famD] at h",
+   "  cases r <;> simp [famD] at h",
+   "  subst h; rfl",
+   "",
+   "/-- The table and `res` (`Kit/TabState.lean`). -/",
+   "def TSx : TabSig X := ⟨fun j => nR (.tS j), fun j => nR (.tD j), nE, nR .rD, famS, famD⟩",
+   "",
+   "theorem TSok : TSx.Ok where",
+   "  sS _ := rfl",
+   "  dD _ := rfl",
+   "  sInv _ _ h := famS_some h",
+   "  dInv _ _ h := famD_some h",
+   "  sD _ := rfl",
+   "  dS _ := rfl",
+   "  sRS := rfl",
+   "  dRS := rfl",
+   "  sRD := rfl",
+   "  dRD := rfl",
+   "  rSD := by decide",
+   "",
+   "/-- `tLay`/`tKind` at our names (simp lemmas of the table calls' checks). -/",
+   "theorem kS (κ : X → Kind) (b pr : Nat) (T : Nat → Option (Nat × MpInt)) (rS rI : Option (Nat × MpInt)) (j : Nat) :",
+   "    tKind TSx κ b pr T rS rI (nR (.tS j)) = entS (b + 24 * j) (T j) := tKind_tS TSok j",
+   "theorem kD (κ : X → Kind) (b pr : Nat) (T : Nat → Option (Nat × MpInt)) (rS rI : Option (Nat × MpInt)) (j : Nat) :",
+   "    tKind TSx κ b pr T rS rI (nR (.tD j)) = entD (T j) := tKind_tD TSok j",
+   "theorem kRS (κ : X → Kind) (b pr : Nat) (T : Nat → Option (Nat × MpInt)) (rS rI : Option (Nat × MpInt)) :",
+   "    tKind TSx κ b pr T rS rI nE = entS pr rS := tKind_rS TSok",
+   "theorem kRD (κ : X → Kind) (b pr : Nat) (T : Nat → Option (Nat × MpInt)) (rS rI : Option (Nat × MpInt)) :",
+   "    tKind TSx κ b pr T rS rI (nR .rD) = entD rI := tKind_rD TSok",
+   "theorem lD (ρ : X → Iv) (T : Nat → Option (Nat × MpInt)) (rI : Option (Nat × MpInt)) (j : Nat) :",
+   "    tLay TSx ρ T rI (nR (.tD j)) = entIv (T j) := tLay_tD TSok j",
+   "theorem lRD (ρ : X → Iv) (T : Nat → Option (Nat × MpInt)) (rI : Option (Nat × MpInt)) :",
+   "    tLay TSx ρ T rI (nR .rD) = entIv rI := tLay_rD TSok",
+   "",
+   "/-- The layout once the table's hole is spread over its slots. -/",
+   "abbrev ρS (pp : P) : X → Iv := Iv.spread (ρX pp) nM famS (pp.sp - 6256) 256",
+   "",
+   "/-- Entry `x`'s struct slot. -/",
+   "theorem slotT {pp : P} {T : Nat → Option (Nat × MpInt)} {rI : Option (Nat × MpInt)} {x : Nat} (hx : x < 256) :",
+   "    tLay TSx (ρS pp) T rI (nR (.tS x)) = ⟨pp.sp - 6256 + 24 * x, 24⟩ := by",
+   "  rw [tLay_other TSok rfl (by simp [TSx])]; simp [Iv.spread, famS, hx]",
+   "",
+   "/-- `mp`'s slot (the frame piece `nP`). -/",
+   "theorem layP {pp : P} {T : Nat → Option (Nat × MpInt)} {rI : Option (Nat × MpInt)} (hF : SMpExptmodFast.F pp ≤ pp.sp) :",
+   "    tLay TSx (ρS pp) T rI nP = ⟨pp.sp - 6284, 4⟩ := by",
+   "  rw [tLay_other TSok rfl (by simp [TSx])]",
+   "  simp [Iv.spread, famS, ρ3, Split.lay, layG_stk, SMpExptmodFast.Ff] at hF ⊢; omega",
+   "",
+   "theorem sub3 {pp : P} (hF : SMpExptmodFast.F pp ≤ pp.sp) (y : Y) : (ρ3 pp y).Sub (layG pp (proj y)) := by",
+   "  rcases y with _ | _ | _ | _ | _ | _ | _ | r; rotate_right",
+   "  · cases r <;> simp [ρ3, Split.lay, layG, emb, Api.Exptmod.lay, proj, Iv.Sub] <;> omega",
+   "  all_goals simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub, SMpExptmodFast.Ff] at hF ⊢ <;> omega",
+   "",
+   "theorem offG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (r : R) : Off (layG pp r) (Api.Exptmod.hin pp) := by",
+   "  cases r",
+   "  case rD => exact Off.nil _",
+   "  case tS => exact Off.nil _",
+   "  case tD => exact Off.nil _",
+   "  all_goals first | exact hP.off .stk | exact hP.off .gS | exact hP.off .gD | exact hP.off .xS | exact hP.off .xD | exact hP.off .nS | exact hP.off .nD | exact hP.off .yS | exact hP.off .yD | exact hP.off .ks | exact hP.off .ts | exact hP.off .kc | exact hP.off .tc | exact hP.off .code",
+   "",
+   "theorem posG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (hF : SMpExptmodFast.F pp ≤ pp.sp) (y : Y) :",
+   "    0 < (ρ3 pp y).len ∨ (ρ3 pp y).base < heapStart ∨ heapEnd ≤ (ρ3 pp y).base := by",
+   "  rcases y with _ | _ | _ | _ | _ | _ | _ | r; rotate_right",
+   "  · cases r",
+   "    case stk => left; simp [ρ3, Split.lay, layG_stk, SMpExptmodFast.Ff] at hF ⊢; omega",
+   "    case rD => right; left; show Iv.nil.base < heapStart; decide",
+   "    case tS => right; left; show Iv.nil.base < heapStart; decide",
+   "    case tD => right; left; show Iv.nil.base < heapStart; decide",
+   "    case gS => simpa [ρ3, Split.lay] using Off.pos (offG hP .gS)",
+   "    case gD => simpa [ρ3, Split.lay] using Off.pos (offG hP .gD)",
+   "    case xS => simpa [ρ3, Split.lay] using Off.pos (offG hP .xS)",
+   "    case xD => simpa [ρ3, Split.lay] using Off.pos (offG hP .xD)",
+   "    case nS => simpa [ρ3, Split.lay] using Off.pos (offG hP .nS)",
+   "    case nD => simpa [ρ3, Split.lay] using Off.pos (offG hP .nD)",
+   "    case yS => simpa [ρ3, Split.lay] using Off.pos (offG hP .yS)",
+   "    case yD => simpa [ρ3, Split.lay] using Off.pos (offG hP .yD)",
+   "    case ks => simpa [ρ3, Split.lay] using Off.pos (offG hP .ks)",
+   "    case ts => simpa [ρ3, Split.lay] using Off.pos (offG hP .ts)",
+   "    case kc => simpa [ρ3, Split.lay] using Off.pos (offG hP .kc)",
+   "    case tc => simpa [ρ3, Split.lay] using Off.pos (offG hP .tc)",
+   "    case code => simpa [ρ3, Split.lay] using Off.pos (offG hP .code)",
+   "  all_goals left; simp [ρ3, Split.lay, layG_stk]",
+   "",
+   "/-- The heap checkpoint at the entry. -/",
+   "theorem entry_hp {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) :",
+   "    HP (ρX pp) wX (Api.Exptmod.hin pp) (Api.Exptmod.hin pp) (InAny (Api.Exptmod.lay (SMpExptmodFast.F pp) pp) Api.Exptmod.ws) mm mm := by",
+   "  have hF : SMpExptmodFast.F pp ≤ pp.sp := by have h := hP.res.stk.lo; rw [show heapEnd = 0x87800000 from rfl] at h; omega",
+   "  have hstk : Ram (layG pp .stk).base (layG pp .stk).len := (hP.bund .stk).2",
+   "  refine HP.entry hP.heap (fun y => (offG hP (proj y)).sub (sub3 hF y) (posG hP hF y)) ?_ ?_",
+   "  · intro y hy q hq",
+   "    have hs := sub3 hF y",
+   "    have hq2 : (ρ3 pp y).In q := hq",
+   "    have hq' : (layG pp (proj y)).In q := by unfold Iv.Sub Iv.In at *; omega",
+   "    rcases y with _ | _ | _ | _ | _ | _ | _ | r; rotate_right",
+   "    · cases r <;> simp [wX, w3, Split.wr, isWG] at hy",
+   "      case stk => exact InAny.of_mem (w := Api.Exptmod.R.stk) (by decide) hq'",
+   "      case yS => exact InAny.of_mem (w := Api.Exptmod.R.yS) (by decide) hq'",
+   "      case yD => exact InAny.of_mem (w := Api.Exptmod.R.yD) (by decide) hq'",
+   "      all_goals simp [proj, layG, emb, Iv.nil, Iv.In] at hq'; omega",
+   "    all_goals exact InAny.of_mem (w := Api.Exptmod.R.stk) (by decide) hq'",
+   "  · intro y hy",
+   "    have hs := sub3 hF y",
+   "    rcases y with _ | _ | _ | _ | _ | _ | _ | r; rotate_right",
+   "    · cases r <;> simp [wX, w3, Split.wr, isWG] at hy",
+   "      case stk => exact Ram.sub hstk hs.1 hs.2",
+   "      case yS => simpa [ρ3, Split.lay, layG, emb, Api.Exptmod.lay, Layout.sizeofMpInt] using (Hdr.geom (show Hdr mm pp.py pp.ydp pp.y from (hP.bund .yS).2)).st",
+   "      case yD => simpa [ρ3, Split.lay, layG, emb, Api.Exptmod.lay] using (show Dig mm pp.ydp pp.y.alloc pp.y.digit from (hP.bund .yD).2).ram",
+   "      all_goals simpa [ρ3, Split.lay, layG, emb] using Ram.nil",
+   "    all_goals exact Ram.sub hstk hs.1 hs.2",
+   "",
+   "/-- The hole `nM` given to the slots: what `St.spread`/`HP.spread` need at the entry. -/",
+   "theorem spreadOk {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr)",
+   "    (hp : HP (ρX pp) wX (Api.Exptmod.hin pp) (Api.Exptmod.hin pp) (InAny (Api.Exptmod.lay (SMpExptmodFast.F pp) pp) Api.Exptmod.ws) mm mm) :",
+   "    SpreadOk (ρX pp) wX (κX pp mm) nM famS (pp.sp - 6256) 256 where",
+   "  inj r r' j h1 h2 := by rw [famS_some h1, famS_some h2]",
+   "  hole := rfl",
+   "  hlay := by",
+   "    have hF : SMpExptmodFast.F pp ≤ pp.sp := by have h := hP.res.stk.lo; rw [show heapEnd = 0x87800000 from rfl] at h; omega",
+   "    simp [ρX, ρ3, Split.lay, layG_stk, SMpExptmodFast.Ff] at hF ⊢; omega",
+   "  hw := rfl",
+   "  fw r j h _ := by rw [famS_some h]; rfl",
+   "  fk r j h _ := by rw [famS_some h]; rfl",
+   "  lo r := (hp.off r).lo",
+   ""
+  ],
+  [
+   "/-- Entry `x`'s struct slot once `Y`'s block is freed (the `mp_exch` exit). -/",
+   "theorem slotTU {pp : P} {T : Nat → Option (Nat × MpInt)} {rI : Option (Nat × MpInt)} {x : Nat} (hx : x < 256) :",
+   "    tLay TSx (Iv.upd (ρS pp) (nR .yD) Iv.nil) T rI (nR (.tS x)) = ⟨pp.sp - 6256 + 24 * x, 24⟩ := by",
+   "  rw [tLay_other TSok rfl (by simp [TSx])]; simp [Iv.upd, Iv.spread, famS, hx]"
+  ]
+ ],
+ "prelude": [
+  "have hP := hc.pre; have hres := hP.res; have hS := hP.sound; have hB := hP.bund; have hoff := hP.off; have hra := hP.ra4",
+  "have hvg := hres.vg; have hvx := hres.vx; have hvn := hres.vn; have hsy := hres.sy; have har := hres.arith",
+  "have := hvg.used_le; have := hvg.alloc_lt; have := hvx.used_le; have := hvx.alloc_lt; have := hvn.used_le; have := hvn.alloc_lt",
+  "have := hres.gu; have := hres.mode; have := hres.npos; have := hres.ypos; have := hres.xbits; have := hres.nbits; have := har.bits",
+  "have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi; have hFv : 11120 + 8 * (p.g.used + 2 * p.n.used) ≤ SMpExptmodFast.F p := Nat.le_refl _",
+  "have hR : RamH (sp - 6320) 6320 := ⟨Ram.sub (hB .stk).2 (by simp only [Api.Exptmod.lay]; omega) (by simp only [Api.Exptmod.lay]; omega)⟩",
+  "have eL : allocLo = 0x800188a0 := rfl; have eB : sMpExptmodFastBase = 0x80002c5c := rfl; have eI : MpInit.Fsize = 576 := rfl",
+  "have eC : MpClear.F = 544 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl",
+  "have hpx := hS .xS .stk (by decide); have hpn := hS .nS .stk (by decide); have hpy := hS .yS .stk (by decide); have hpg := hS .gS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "have hN0 : al ≤ nI0 := Nat.le_max_right _ _; have hN3 : 3 ≤ nI0 := by have := Nat.le_max_left minPrec al; rw [minPrec_eq] at this; exact this",
+  "have hN31 : nI0 < 2 ^ 31 := Nat.max_lt.2 ⟨by rw [minPrec_eq]; decide, by om⟩",
+  "have eCD : callocDepth = 544 := rfl",
+  "have eRF : Reduce2kSetup.F = 640 := rfl; have eRG : Api.Reduce2kSetupGr.F = 672 := rfl",
+  "have eMF : Api.MpMod.F = 976 := rfl"
+ ],
+ "cuts": {
+  "E": {
+   "pc": "2c5c",
+   "regs": "ent",
+   "mu": "30, 0, 0",
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κX p m) m m"
+    ]
+   ],
+   "prelude": [
+    "have hp := entry_hp hP"
+   ],
+   "edge": [
+    [
+     "tac",
+     "have @H := St.spread (spreadOk hP hp) (hp.ram nM rfl) @H"
+    ],
+    [
+     "tac",
+     "have @HP' := HP.spread (spreadOk hP hp) @HP; clear @HP"
+    ],
+    [
+     "forget",
+     "nE"
+    ],
+    [
+     "tac",
+     "have @H := (@H.congrL (tLay_nil (G := TSx) (fun r j h => by rw [famD_some h]; rfl) rfl)).congrK (tKind_nil (G := TSx) (b := sp - 6256) (pr := sp - 6280) (fun r j h => by rw [famS_some h]; rfl) (fun r j h => by rw [famD_some h]; rfl) rfl rfl)"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_nil (G := TSx) (fun r j h => by rw [famD_some h]; rfl) rfl); clear @HP"
+    ],
+    [
+     "seg",
+     "pro",
+     "ws nT"
+    ],
+    [
+     "seg",
+     "prs",
+     "0"
+    ],
+    [
+     "seg",
+     "prx",
+     "ws nV"
+    ],
+    [
+     "call",
+     "cntBits",
+     "px, xdp, Xv",
+     "_",
+     {
+      "res": "⟨hvx, hres.xbits⟩"
+     }
+    ],
+    [
+     "have",
+     "hcb : cb < 2 ^ 31",
+     "Nat.lt_of_le_of_lt (countBits_le hvx.toShape) hres.xbits"
+    ],
+    [
+     "if",
+     "cb ≤ 7",
+     [
+      [
+       "seg",
+       "w2",
+       "0"
+      ],
+      [
+       "jump",
+       "I",
+       {
+        "vars": {
+         "w": "2"
+        },
+        "hw": "{WS}"
+       }
+      ]
+     ],
+     [
+      [
+       "if",
+       "cb ≤ 36",
+       [
+        [
+         "seg",
+         "w3",
+         "0"
+        ],
+        [
+         "jump",
+         "I",
+         {
+          "vars": {
+           "w": "3"
+          },
+          "hw": "{WS}"
+         }
+        ]
+       ],
+       [
+        [
+         "if",
+         "cb ≤ 140",
+         [
+          [
+           "seg",
+           "w4",
+           "0"
+          ],
+          [
+           "jump",
+           "I",
+           {
+            "vars": {
+             "w": "4"
+            },
+            "hw": "{WS}"
+           }
+          ]
+         ],
+         [
+          [
+           "if",
+           "cb ≤ 450",
+           [
+            [
+             "seg",
+             "w5",
+             "0"
+            ],
+            [
+             "jump",
+             "I",
+             {
+              "vars": {
+               "w": "5"
+              },
+              "hw": "{WS}"
+             }
+            ]
+           ],
+           [
+            [
+             "if",
+             "cb ≤ 1303",
+             [
+              [
+               "seg",
+               "w6",
+               "0"
+              ],
+              [
+               "jump",
+               "I",
+               {
+                "vars": {
+                 "w": "6"
+                },
+                "hw": "{WS}"
+               }
+              ]
+             ],
+             [
+              [
+               "seg",
+               "wa",
+               "0"
+              ],
+              [
+               "seg",
+               "ws",
+               "0",
+               {
+                "sl": "if 3529 < cb then 1 else 0"
+               }
+              ],
+              [
+               "seg",
+               "wj",
+               "0",
+               {
+                "sl": "if 3529 < cb then 1 else 0"
+               }
+              ],
+              [
+               "jump",
+               "I",
+               {
+                "vars": {
+                 "w": "(if 3529 < cb then 1 else 0) + 7"
+                },
+                "hw": "{WS}"
+               }
+              ]
+             ],
+             "hb5"
+            ]
+           ],
+           "hb4"
+          ]
+         ],
+         "hb3"
+        ]
+       ],
+       "hb2"
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "I": {
+   "pc": "2cd4",
+   "regs": "wz",
+   "vars": "M : Mem; w : Nat",
+   "mu": "29, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".frz m",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) tnil none) wX WX (tKind TSx (κI z x) (sp - 6256) (sp - 6280) tnil none none) m M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) tnil none) wX hin hin Wr0 m m"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ]
+   ],
+   "edge": [
+    [
+     "tac",
+     "obtain ⟨hv, ehv⟩ : ∃ hv, hv = 2 ^ (w - 1) := ⟨_, rfl⟩"
+    ],
+    [
+     "seg",
+     "i1",
+     "0"
+    ],
+    [
+     "call",
+     "mpInitSize",
+     "sp - 6320, sp - 6232, al, hin",
+     "xr",
+     {
+      "hq": "hq",
+      "sig": {
+       "aS": "nR (.tS 1)",
+       "site": "nR (.tD 1)"
+      },
+      "res": "{INI}"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "none": [
+       [
+        "tac",
+        "entc @H' @H none none; rw [tset_nil] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ 1 none); clear @HP; rw [tset_nil] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "seg",
+        "if1",
+        "0"
+       ],
+       [
+        "forget",
+        "nV"
+       ],
+       [
+        "forget",
+        "nP"
+       ],
+       [
+        "forget",
+        "nQ"
+       ],
+       [
+        "forget",
+        "nI"
+       ],
+       [
+        "jump",
+        "XE",
+        {}
+       ]
+      ],
+      "some q": [
+       [
+        "tac",
+        "entc @H' @H none (some (q, MpInt.zeroN nI0)); rw [tabV_first q (MpInt.zeroN nI0) hv] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ 1 (some (q, MpInt.zeroN nI0))); clear @HP; rw [tabV_first q (MpInt.zeroN nI0) hv] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "seg",
+        "i2",
+        "0",
+        {
+         "h": "hv"
+        }
+       ],
+       [
+        "jump",
+        "L1",
+        {
+         "vars": {
+          "x": "hv",
+          "h": "hv",
+          "Q": "fun _ => q"
+         },
+         "hh": "ehv",
+         "hx1": "Nat.le_refl _",
+         "hx2": "by om",
+         "hp": "@HP.perm (heap_first _ _ _ _ _)"
+        }
+       ]
+      ]
+     }
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ]
+  },
+  "L1": {
+   "pc": "2d2c",
+   "regs": "L1",
+   "vars": "M Mk : Mem; w h x : Nat; Q : Nat → Nat",
+   "mu": "28, 256 - x, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".frz m",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TI}) none) wX WX (tKind TSx (κL1 z x) (sp - 6256) (sp - 6280) ({TI}) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TI}) none) wX hin (tabBlks ({TI}) h (x - h) ++ {H1}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hx1",
+     "h ≤ x"
+    ],
+    [
+     "hx2",
+     "x < 2 * h"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "l1c",
+     "0"
+    ],
+    [
+     "call",
+     "mpInitSize",
+     "sp - 6320, sp - 6256 + 24 * x, al, tabBlks ({TI}) h (x - h) ++ {H1}",
+     "xr",
+     {
+      "hq": "hq",
+      "sig": {
+       "aS": "nR (.tS x)",
+       "site": "nR (.tD x)"
+      },
+      "res": "{INI}",
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "none": [
+       [
+        "tac",
+        "entc @H' @H none none; rw [tabV_out true Q _ (by om) hx1] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ x none); clear @HP; rw [tabV_out true Q _ (by om) hx1] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "if",
+        "x = h",
+        [
+         [
+          "seg",
+          "l1f0",
+          "0"
+         ],
+         [
+          "call",
+          "mpClear",
+          "sp - 6320, sp - 6232, Q 1, MpInt.zeroN nI0, hin",
+          "_",
+          {
+           "sig": {
+            "aS": "nR (.tS 1)",
+            "aD": "nR (.tD 1)"
+           },
+           "res": "{CLR}",
+           "perm": "List.Perm.of_eq (heap_empty _ _ hb)",
+           "with": "tab1"
+          }
+         ],
+         [
+          "tac",
+          "entc @H' @H none none; rw [tabV_drop1 Q _ (by om), hb, tabV_empty] at @H'"
+         ],
+         [
+          "tac",
+          "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ 1 none); clear @HP; rw [tabV_drop1 Q _ (by om), hb, tabV_empty] at @HP'",
+          {
+           "lay": {}
+          }
+         ],
+         [
+          "forget",
+          "nV"
+         ],
+         [
+          "forget",
+          "nP"
+         ],
+         [
+          "forget",
+          "nQ"
+         ],
+         [
+          "forget",
+          "nI"
+         ],
+         [
+          "jump",
+          "XE",
+          {}
+         ]
+        ],
+        [
+         [
+          "seg",
+          "l1f1",
+          "0"
+         ],
+         [
+          "jump",
+          "C1",
+          {
+           "vars": {
+            "y": "h"
+           },
+           "hy1": "Nat.le_refl _",
+           "hy2": "by om",
+           "hyp": "rfl",
+           "hep": "rfl"
+          }
+         ]
+        ],
+        "hb"
+       ]
+      ],
+      "some q": [
+       [
+        "tac",
+        "entc @H' @H none (some (q, MpInt.zeroN nI0)); rw [tabV_snoc true Q _ q _ hx1, vset_const] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ x (some (q, MpInt.zeroN nI0)))).perm (heap_snoc true Q _ q (MpInt.zeroN nI0) _ hx1); clear @HP; rw [tabV_snoc true Q _ q _ hx1, vset_const, ← qset_ne Q q (show 1 ≠ x by om)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "if",
+        "x + 1 = 2 * h",
+        [
+         [
+          "seg",
+          "l1d",
+          "0"
+         ],
+         [
+          "jump",
+          "D",
+          {
+           "vars": {
+            "Q": "qset Q x q"
+           },
+           "st": "by rw [hb] at @H; exact @H.congrK (by krfl)",
+           "hp": "by rw [hb] at @HP; exact @HP"
+          }
+         ]
+        ],
+        [
+         [
+          "seg",
+          "l1n",
+          "0"
+         ],
+         [
+          "jump",
+          "L1",
+          {
+           "vars": {
+            "x": "x + 1",
+            "Q": "qset Q x q"
+           },
+           "hx1": "by om",
+           "hx2": "by om"
+          }
+         ]
+        ],
+        "hb"
+       ]
+      ]
+     }
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ]
+  },
+  "C1": {
+   "pc": "2d64",
+   "regs": "C1",
+   "vars": "M Mk : Mem; w h y x yp ep : Nat; Q : Nat → Nat",
+   "mu": "27, x - y, 0",
+   "regs_over": {
+    "e": "18446744073709551614"
+   },
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".frz m",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) (tabV true Q (fun _ => MpInt.zeroN nI0) y x) none) wX WX (tKind TSx (κC1 z x) (sp - 6256) (sp - 6280) (tabV true Q (fun _ => MpInt.zeroN nI0) y x) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) (tabV true Q (fun _ => MpInt.zeroN nI0) y x) none) wX hin (tabBlks (tabV true Q (fun _ => MpInt.zeroN nI0) y x) y (x - y) ++ {H1}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hy1",
+     "h ≤ y"
+    ],
+    [
+     "hy2",
+     "y < x"
+    ],
+    [
+     "hx2",
+     "x < 2 * h"
+    ],
+    [
+     "hyp",
+     "yp = sp - 6256 + 24 * y"
+    ],
+    [
+     "hep",
+     "ep = sp - 6256 + 24 * x"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "c1c",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, yp, Q y, MpInt.zeroN nI0, tabBlks (tabV true Q (fun _ => MpInt.zeroN nI0) (y + 1) x) (y + 1) (x - (y + 1)) ++ {H1}",
+     "_",
+     {
+      "sig": {
+       "aS": "nR (.tS y)",
+       "aD": "nR (.tD y)"
+      },
+      "res": "{CLR}",
+      "perm": "List.Perm.of_eq (heap_front true Q _ _ hy2)",
+      "with": "tab"
+     }
+    ],
+    [
+     "tac",
+     "entc @H' @H none none; rw [tabV_drop true Q _ (by om)] at @H'"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ y none); clear @HP; rw [tabV_drop true Q _ (by om)] at @HP'",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "if",
+     "yp + 24 = ep",
+     [
+      [
+       "seg",
+       "c1d",
+       "0"
+      ],
+      [
+       "call",
+       "mpClear",
+       "sp - 6320, sp - 6232, Q 1, MpInt.zeroN nI0, hin",
+       "_",
+       {
+        "sig": {
+         "aS": "nR (.tS 1)",
+         "aD": "nR (.tD 1)"
+        },
+        "res": "{CLR}",
+        "perm": "List.Perm.of_eq (heap_empty _ _ (by om))",
+        "with": "tab1"
+       }
+      ],
+      [
+       "tac",
+       "entc @H' @H none none; rw [tabV_drop1 Q _ (by om), show y + 1 = x by om, tabV_empty] at @H'"
+      ],
+      [
+       "tac",
+       "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ 1 none); clear @HP; rw [tabV_drop1 Q _ (by om), show y + 1 = x by om, tabV_empty] at @HP'",
+       {
+        "lay": {}
+       }
+      ],
+      [
+       "forget",
+       "nV"
+      ],
+      [
+       "forget",
+       "nP"
+      ],
+      [
+       "forget",
+       "nQ"
+      ],
+      [
+       "forget",
+       "nI"
+      ],
+      [
+       "jump",
+       "XE",
+       {}
+      ]
+     ],
+     [
+      [
+       "seg",
+       "c1n",
+       "0"
+      ],
+      [
+       "jump",
+       "C1",
+       {
+        "vars": {
+         "y": "y + 1"
+        },
+        "hy1": "by om",
+        "hy2": "by om",
+        "hyp": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "D": {
+   "pc": "2e00",
+   "regs": "D0",
+   "vars": "M Mk : Mem; w h x7 x8 : Nat; Q : Nat → Nat",
+   "mu": "26, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".frz m",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) (tabV true Q (fun _ => MpInt.zeroN nI0) h (2 * h)) none) wX WX (tKind TSx (κD z x) (sp - 6256) (sp - 6280) (tabV true Q (fun _ => MpInt.zeroN nI0) h (2 * h)) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) (tabV true Q (fun _ => MpInt.zeroN nI0) h (2 * h)) none) wX hin (tabBlks (tabV true Q (fun _ => MpInt.zeroN nI0) h (2 * h)) h (2 * h - h) ++ {H1}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "if",
+     "md = 0",
+     [
+      [
+       "forget",
+       "nP"
+      ],
+      [
+       "seg",
+       "dm",
+       "0"
+      ],
+      [
+       "call",
+       "montSetupC",
+       "sp - 6320, pn, ndp, sp - 6284, N",
+       "mpv",
+       {
+        "hq": "hmp",
+        "res": "⟨hvn.toShape, hres.npos, (digit0_odd hvn.toShape (har.mont hm0)), by om, by om, by om⟩"
+       }
+      ],
+      [
+       "jump",
+       "MS",
+       {}
+      ]
+     ],
+     [
+      [
+       "if",
+       "md = 1",
+       [
+        [
+         "forget",
+         "nP"
+        ],
+        [
+         "seg",
+         "dd",
+         "0"
+        ],
+        [
+         "call",
+         "drSetupC",
+         "pn, ndp, sp - 6284, N",
+         "_",
+         {
+          "res": "⟨hvn.toShape, hres.npos, by om⟩"
+         }
+        ],
+        [
+         "jump",
+         "DS",
+         {
+          "vars": {
+           "mpv": "drSetupDigit N"
+          },
+          "hmp": "rfl"
+         }
+        ]
+       ],
+       [
+        [
+         "forget",
+         "nP"
+        ],
+        [
+         "tac",
+         "have @H := @H.cell1 nP rfl (layP (by om)) (by om)"
+        ],
+        [
+         "seg",
+         "dk",
+         "0"
+        ],
+        [
+         "call",
+         "red2kSetupG",
+         "sp - 6320, pn, ndp, sp - 6284, N, ⟨(bytesT4 @M (sp - 6284)).toNat⟩, {H2}",
+         "xd",
+         {
+          "hq": "hd",
+          "res": "⟨⟨by om, by om, by om⟩, hvn, hres.nbits, hres.npos⟩",
+          "hsub": "by intro r; cases r <;> (try simp only [layP (pp := p) (by om)]) <;> iv_norm <;> (try simp only [Reduce2kSetup.Cell.alloc]) <;> omega"
+         }
+        ],
+        [
+         "tac",
+         "have @H := @H.congrL (fun r' => (Iv.upd_eq_self _ _ (layP (by om)) r').symm)"
+        ],
+        [
+         "tac",
+         "have @HP' := @HP.congrL (fun r' => (Iv.upd_eq_self _ _ (layP (by om)) r').symm); clear @HP",
+         {
+          "lay": {}
+         }
+        ],
+        [
+         "cases",
+         "xd",
+         {
+          "none": [
+           [
+            "set",
+            {
+             "e": "18446744073709551614"
+            }
+           ],
+           [
+            "seg",
+            "k1f",
+            "0"
+           ],
+           "{TOLM}"
+          ],
+          "some d": [
+           [
+            "set",
+            {
+             "e": "0"
+            }
+           ],
+           [
+            "jump",
+            "K1",
+            {
+             "vars": {
+              "mpv": "d"
+             },
+             "hmd2": "by om"
+            }
+           ]
+          ]
+         }
+        ]
+       ],
+       "hm1"
+      ]
+     ],
+     "hm0"
+    ]
+   ]
+  },
+  "MS": {
+   "vars": "M Mk : Mem; w h x7 x8 mpv : Nat; Q : Nat → Nat",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "prelude": [
+    "{WFS}"
+   ],
+   "pc": "2fbc",
+   "regs": "dr0",
+   "mu": "25, 3, 0",
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TD}) none) wX WX (tKind TSx (κMS z x) (sp - 6256) (sp - 6280) ({TD}) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TD}) none) wX hin ({H2}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hm0",
+     "md = 0"
+    ],
+    [
+     "hmp",
+     "mpv = Mont.setupRho (N.digit 0)"
+    ]
+   ],
+   "edge": [
+    [
+     "if",
+     "2 * pu ≤ 510",
+     [
+      [
+       "seg",
+       "m1",
+       "0"
+      ],
+      "{INIRES}",
+      [
+       "cases",
+       "xr",
+       {
+        "none": [
+         "{RESNONE}",
+         [
+          "set",
+          {
+           "e": "18446744073709551614"
+          }
+         ],
+         [
+          "seg",
+          "m2f",
+          "0"
+         ],
+         "{TOLM}"
+        ],
+        "some q": [
+         "{RESSOME}",
+         [
+          "jump",
+          "MN",
+          {
+           "vars": {
+            "qr": "q"
+           },
+           "fr": "hq.mono (fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he))",
+           "hcd": "⟨hvn, har.gt1, fun _ => ⟨har.mont hm0, hmp⟩, fun _ => (by om : False).elim, fun _ => (by om : False).elim⟩",
+           "hf5": "hb"
+          }
+         ]
+        ]
+       }
+      ]
+     ],
+     [
+      [
+       "jump",
+       "MSs",
+       {
+        "hs5": "hb"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "MSs": {
+   "from": "MS",
+   "pc": "2fbc",
+   "regs": "dr0",
+   "mu": "25, 2, 5",
+   "prem": [
+    [
+     "hs5",
+     "¬ 2 * pu ≤ 510"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "m1s",
+     "0"
+    ],
+    "{INIRES}",
+    [
+     "cases",
+     "xr",
+     {
+      "none": [
+       "{RESNONE}",
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "seg",
+        "m2sf",
+        "0"
+       ],
+       "{TOLM}"
+      ],
+      "some q": [
+       "{RESSOME}",
+       [
+        "jump",
+        "MX",
+        {
+         "vars": {
+          "qr": "q"
+         },
+         "fr": "hq.mono (fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he))",
+         "hcd": "⟨hvn, har.gt1, fun _ => ⟨har.mont hm0, hmp⟩, fun _ => (by om : False).elim, fun _ => (by om : False).elim⟩",
+         "hs5": "hs5"
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "DS": {
+   "vars": "M Mk : Mem; w h x7 x8 mpv : Nat; Q : Nat → Nat",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "prelude": [
+    "{WFS}"
+   ],
+   "pc": "2f90",
+   "regs": "D0",
+   "mu": "25, 2, 0",
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TD}) none) wX WX (tKind TSx (κDS z x) (sp - 6256) (sp - 6280) ({TD}) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TD}) none) wX hin ({H2}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hm1",
+     "md = 1"
+    ],
+    [
+     "hmp",
+     "mpv = drSetupDigit N"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "d1",
+     "0"
+    ],
+    "{INIRES}",
+    [
+     "cases",
+     "xr",
+     {
+      "none": [
+       "{RESNONE}",
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "seg",
+        "d2f",
+        "0"
+       ],
+       "{TOLM}"
+      ],
+      "some q": [
+       "{RESSOME}",
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "seg",
+        "d2",
+        "0"
+       ],
+       "{SET1}",
+       "{KPR}",
+       [
+        "jump",
+        "RS",
+        {
+         "vars": {
+          "qr": "q",
+          "vr": "r1",
+          "mpv": "mpv"
+         },
+         "fr": "by rw [hs.alloc]; exact hq.mono (fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he))",
+         "hcd": "⟨hvn, har.gt1, fun _ => (by om : False).elim, fun _ => ⟨(har.dr hm1).1, hmp⟩, fun _ => (by om : False).elim⟩",
+         "st": "(@H.congrL (tLay_res_alloc (G := TSx) _ _ q hs.alloc.symm)).congrK (by krfl)",
+         "hp": "(@HP.congrL (tLay_res_alloc (G := TSx) _ _ q hs.alloc.symm)).perm (List.Perm.of_eq (by rw [hs.alloc]; rfl))",
+         "hre": "by rw [hm1, Std.rk_one]; rfl"
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "K1": {
+   "pc": "2e18",
+   "regs": "rs",
+   "regs_over": {
+    "e": "0",
+    "re": "x8"
+   },
+   "vars": "M Mk : Mem; w h x7 x8 mpv : Nat; Q : Nat → Nat",
+   "mu": "25, 1, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TD}) none) wX WX (tKind TSx (κK1 z x) (sp - 6256) (sp - 6280) ({TD}) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TD}) none) wX hin ({H2}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hmd2",
+     "2 ≤ md"
+    ],
+    [
+     "hd",
+     "Reduce.Setup2kPost N mpv"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "k1",
+     "0"
+    ],
+    "{INIRES}",
+    [
+     "cases",
+     "xr",
+     {
+      "none": [
+       "{RESNONE}",
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "seg",
+        "k2f",
+        "0"
+       ],
+       "{TOLM}"
+      ],
+      "some q": [
+       "{RESSOME}",
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "seg",
+        "k2",
+        "0"
+       ],
+       "{SET1}",
+       "{KPR}",
+       [
+        "jump",
+        "RS",
+        {
+         "vars": {
+          "qr": "q",
+          "vr": "r1"
+         },
+         "fr": "by rw [hs.alloc]; exact hq.mono (fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he))",
+         "hcd": "⟨hvn, har.gt1, fun _ => (by om : False).elim, fun _ => (by om : False).elim, fun _ => hd⟩",
+         "st": "(@H.congrL (tLay_res_alloc (G := TSx) _ _ q hs.alloc.symm)).congrK (by krfl)",
+         "hp": "(@HP.congrL (tLay_res_alloc (G := TSx) _ _ q hs.alloc.symm)).perm (List.Perm.of_eq (by rw [hs.alloc]; rfl))",
+         "hre": "by rw [Std.rk_ge2 hmd2]; rfl"
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "MN": {
+   "pc": "3028",
+   "regs": "ri0",
+   "regs_over": {
+    "e": "0",
+    "re": "x8"
+   },
+   "vars": "M Mk : Mem; w h x7 x8 mpv qr : Nat; Q : Nat → Nat",
+   "mu": "25, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TD}) (some (qr, {Z0}))) wX WX (tKind TSx (κMN z x) (sp - 6256) (sp - 6280) ({TD}) (some (qr, {Z0})) (some (qr, {Z0}))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TD}) (some (qr, {Z0}))) wX hin ((qr, 4 * nI0) :: {H2}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hmd",
+     "md = 0"
+    ],
+    [
+     "hcd",
+     "Cond N md mpv"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * nI0)"
+    ],
+    [
+     "hf5",
+     "2 * pu ≤ 510"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "m2",
+     "0"
+    ],
+    "{NRM}"
+   ]
+  },
+  "MX": {
+   "from": "MN",
+   "pc": "2fe0",
+   "regs": "ri0",
+   "mu": "25, 0, 0",
+   "-prem": [
+    "hf5"
+   ],
+   "prem": [
+    [
+     "hs5",
+     "¬ 2 * pu ≤ 510"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "m2s",
+     "0"
+    ],
+    "{NRM}"
+   ]
+  },
+  "MM": {
+   "pc": "2ffc",
+   "regs": "rs",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h x7 mpv qr re : Nat; Q : Nat → Nat; r1 : MpInt",
+   "mu": "24, 9, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TD}) (some (qr, r1))) wX WX (tKind TSx (κMM z x) (sp - 6256) (sp - 6280) ({TD}) (some (qr, r1)) (some (qr, r1))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TD}) (some (qr, r1))) wX hin ((qr, 4 * r1.alloc) :: {H2}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hmd",
+     "md = 0"
+    ],
+    [
+     "hcd",
+     "Cond N md mpv"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * r1.alloc)"
+    ],
+    [
+     "hra1",
+     "0 < r1.alloc"
+    ],
+    [
+     "hr1",
+     "Rs N.mag N.used r1 (res0F N md)"
+    ],
+    [
+     "hre",
+     "BitVec.ofNat 64 re = Std.reduxGE (Std.rk md N.used)"
+    ]
+   ],
+   "prelude": [
+    "{WFS}",
+    "have := hr1.used; have := hr1.valid.used_le; have := hr1.valid.alloc_lt"
+   ],
+   "edge": [
+    [
+     "seg",
+     "m3",
+     "0"
+    ],
+    [
+     "call",
+     "mpMulmodH",
+     "sp - 6320, pg, gdp, sp - 6280, qr, pn, ndp, sp - 6232, Q 1, G, r1, N, {Z0}, (qr, 4 * r1.alloc) :: (tabBlks ({TD}) h (2 * h - h) ++ hin)",
+     "xm",
+     {
+      "hq": "hmm",
+      "with": "tab1",
+      "sig": {
+       "aS": "nR .gS",
+       "aD": "nR .gD",
+       "bS": "nE",
+       "bD": "nR .rD",
+       "cS": "nR .nS",
+       "cD": "nR .nD",
+       "dS": "nR (.tS 1)",
+       "dD": "nR (.tD 1)",
+       "kc": "nR .kc",
+       "tc": "nR .tc"
+      },
+      "perm": "tab_mid [(qr, 4 * r1.alloc)] _ [(Q 1, 4 * (MpInt.zeroN nI0).alloc)] hin",
+      "res": "⟨⟨by om, by om, by om⟩, Fn.MulGroupB.mulCorrect.1, hvg, hr1.valid, by om, hres.gpos, hra1, hvn, WindowStep.used_pos (by have := har.gt1; om), hres.nz, hres.nbits, (MpInt.zeroN_valid hN31).toShape, by show 0 < nI0; om, hres.goff, by unfold OffHeap; om, hres.noff, by unfold OffHeap; om, {MBLK}⟩"
+     }
+    ],
+    [
+     "cases",
+     "xm",
+     {
+      "mem d'": [
+       [
+        "tac",
+        "obtain ⟨s', rfl⟩ : ∃ s', d' = { (MpInt.zeroN nI0) with sign := s' } := ⟨_, hmm⟩"
+       ],
+       [
+        "tac",
+        "entc0 @H' @H (some (qr, r1)) (some (Q 1, { (MpInt.zeroN nI0) with sign := s' })); rw [tabV_set true Q _ (Q 1) _ (.inl ⟨rfl, rfl⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ 1 (some (Q 1, { (MpInt.zeroN nI0) with sign := s' })))).perm (heap_set1 Q _ (Q 1) _ { (MpInt.zeroN nI0) with sign := s' } (qr, 4 * r1.alloc) hin (by om) rfl); clear @HP; rw [tabV_set true Q _ (Q 1) _ (.inl ⟨rfl, rfl⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "seg",
+        "m4f",
+        "0"
+       ],
+       [
+        "forget",
+        "nV"
+       ],
+       [
+        "forget",
+        "nI"
+       ],
+       [
+        "jump",
+        "LRe",
+        {
+         "vars": {
+          "Q": "qset Q 1 (Q 1)",
+          "V": "vset (fun _ => {Z0}) 1 { (MpInt.zeroN nI0) with sign := s' }",
+          "vr": "r1"
+         },
+         "hp": "@HP.perm (List.Perm.of_eq (by rfl))",
+         "hVa": "vset_posP (P := fun t => 0 < t.alloc) (by show 0 < nI0; om) (fun _ => by show 0 < nI0; om)",
+         "hrva": "hra1"
+        }
+       ]
+      ],
+      "ok ⟨q1, d'⟩": [
+       [
+        "have",
+        "hd1 : 0 < d'.alloc",
+        "@HP.blkPos (nR (.tD 1)) rfl (List.mem_cons_self ..)"
+       ],
+       [
+        "tac",
+        "entc0 @H' @H (some (qr, r1)) (some (q1, d')); rw [tabV_set true Q _ q1 _ (.inl ⟨rfl, rfl⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ 1 (some (q1, d')))).perm (heap_set1 Q _ q1 _ d' (qr, 4 * r1.alloc) hin (by om) rfl); clear @HP; rw [tabV_set true Q _ q1 _ (.inl ⟨rfl, rfl⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "jump",
+        "MT",
+        {
+         "vars": {
+          "Q": "qset Q 1 q1",
+          "V": "vset (fun _ => {Z0}) 1 d'",
+          "vr": "r1"
+         },
+         "hp": "@HP.perm (List.Perm.of_eq (by rfl))",
+         "fr": "fr",
+         "hres0": "hr1",
+         "hm1": "by rw [vset_self (fun _ => (MpInt.zeroN nI0)) 1 d']; rw [hmd] at hr1 ⊢; exact m1_mont hvn hres.nz (by have := har.gt1; om) hr1 hmm",
+         "hVz": "fun j hj => by simp [vset, show j ≠ 1 by omega]",
+         "hVa": "vset_posP (P := fun t => 0 < t.alloc) hd1 (fun _ => by show 0 < nI0; om)",
+         "hvra": "hra1"
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "MT": {
+   "pc": "3018",
+   "regs": "rs",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h x7 mpv qr re : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "24, 5, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κMT z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    "{TPP}",
+    [
+     "hVz",
+     "∀ j, 2 ≤ j → V j = {Z0}"
+    ]
+   ],
+   "prelude": [
+    "{TPPRE}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "m4",
+     "0"
+    ],
+    [
+     "jump",
+     "T0",
+     {}
+    ]
+   ]
+  },
+  "RS": {
+   "pc": "2e48",
+   "regs": "st1r",
+   "vars": "M Mk : Mem; w h x7 mpv qr re : Nat; Q : Nat → Nat; vr : MpInt",
+   "mu": "25, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TD}) (some (qr, vr))) wX WX (tKind TSx (κRS z x) (sp - 6256) (sp - 6280) ({TD}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TD}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {H2}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hmd",
+     "md ≠ 0"
+    ],
+    [
+     "hcd",
+     "Cond N md mpv"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * vr.alloc)"
+    ],
+    [
+     "hs",
+     "SetPost {Z0} (1 % radix) vr"
+    ],
+    [
+     "hre",
+     "BitVec.ofNat 64 re = Std.reduxGE (Std.rk md N.used)"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "s1",
+     "0"
+    ],
+    [
+     "call",
+     "mpModPos",
+     "sp - 6320, pg, gdp, pn, ndp, sp - 6232, Q 1, G, N, {Z0}, (qr, 4 * vr.alloc) :: (tabBlks ({TD}) h (2 * h - h) ++ hin)",
+     "xm",
+     {
+      "hq": "hmo",
+      "with": "tab1",
+      "sig": {
+       "cS": "nR (.tS 1)",
+       "cD": "nR (.tD 1)"
+      },
+      "perm": "tab_mid [(qr, 4 * vr.alloc)] _ [(Q 1, 4 * (MpInt.zeroN nI0).alloc)] hin",
+      "res": "⟨⟨by om, by om, by om⟩, hvg, hvn, WindowStep.used_pos (by have := har.gt1; om), hres.nbits, by om, (MpInt.zeroN_valid hN31).toShape, by om, by show 0 < nI0; om, hres.goff, hres.noff, by unfold OffHeap; om, {GBLK}, hres.gpos, {MBLK}⟩"
+     }
+    ],
+    [
+     "cases",
+     "xm",
+     {
+      "mem c'": [
+       [
+        "tac",
+        "obtain ⟨s', rfl⟩ : ∃ s', c' = { (MpInt.zeroN nI0) with sign := s' } := ⟨_, hmo.1⟩"
+       ],
+       [
+        "tac",
+        "entc @H' @H (some (qr, vr)) (some (Q 1, { (MpInt.zeroN nI0) with sign := s' })); rw [tabV_set true Q _ (Q 1) _ (.inl ⟨rfl, rfl⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ 1 (some (Q 1, { (MpInt.zeroN nI0) with sign := s' })))).perm (heap_set1 Q _ (Q 1) _ { (MpInt.zeroN nI0) with sign := s' } (qr, 4 * vr.alloc) hin (by om) rfl); clear @HP; rw [tabV_set true Q _ (Q 1) _ (.inl ⟨rfl, rfl⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "18446744073709551614"
+        }
+       ],
+       [
+        "seg",
+        "s2f",
+        "0"
+       ],
+       [
+        "forget",
+        "nV"
+       ],
+       [
+        "forget",
+        "nI"
+       ],
+       [
+        "jump",
+        "LRe",
+        {
+         "vars": {
+          "Q": "qset Q 1 (Q 1)",
+          "V": "vset (fun _ => {Z0}) 1 { (MpInt.zeroN nI0) with sign := s' }"
+         },
+         "hVa": "vset_posP (P := fun t => 0 < t.alloc) (by show 0 < nI0; om) (fun _ => by show 0 < nI0; om)",
+         "hrva": "by rw [hs.alloc]; show 0 < nI0; om"
+        }
+       ]
+      ],
+      "ok ⟨q1, c'⟩": [
+       [
+        "have",
+        "hd1 : 0 < c'.alloc",
+        "hmo.2 q1 c' rfl"
+       ],
+       [
+        "tac",
+        "entc @H' @H (some (qr, vr)) (some (q1, c')); rw [tabV_set true Q _ q1 _ (.inl ⟨rfl, rfl⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ 1 (some (q1, c')))).perm (heap_set1 Q _ q1 _ c' (qr, 4 * vr.alloc) hin (by om) rfl); clear @HP; rw [tabV_set true Q _ q1 _ (.inl ⟨rfl, rfl⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "seg",
+        "s2",
+        "0"
+       ],
+       [
+        "jump",
+        "T0",
+        {
+         "vars": {
+          "Q": "qset Q 1 q1",
+          "V": "vset (fun _ => {Z0}) 1 c'"
+         },
+         "hres0": "by rw [res0F_ne hmd]; exact res_one (MpInt.zeroN_valid hN31).toShape (by show 0 < nI0; om) har.gt1 (fit hvn.toShape) hs",
+         "hm1": "by rw [vset_self (fun _ => (MpInt.zeroN nI0)) 1 c', m1F_ne hmd]; exact m1_mod hvg hvn hres.nz (by have := har.gt1; om) (Nat.le_refl _) (fit hvn.toShape) hmo.1",
+         "hVz": "fun j hj => by simp [vset, show j ≠ 1 by omega]",
+         "hVa": "vset_posP (P := fun t => 0 < t.alloc) hd1 (fun _ => by show 0 < nI0; om)",
+         "hvra": "by rw [hs.alloc]; show 0 < nI0; om"
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "T0": {
+   "pc": "2e60",
+   "regs": "T0",
+   "vars": "M Mk : Mem; w h x7 mpv qr re : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "24, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κT0 z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    "{TPP}",
+    [
+     "hVz",
+     "∀ j, 2 ≤ j → V j = {Z0}"
+    ]
+   ],
+   "prelude": [
+    "{TPPRE}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "t0",
+     "0"
+    ],
+    [
+     "call",
+     "mpCopyH",
+     "sp - 6320, sp - 6232, Q 1, sp - 6256 + 24 * h, Q h, V 1, V h, (qr, 4 * vr.alloc) :: {HV}",
+     "b1",
+     {
+      "hq": "hcp",
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS 1)",
+       "aD": "nR (.tD 1)",
+       "bS": "nR (.tS h)",
+       "bD": "nR (.tD h)"
+      },
+      "res": "⟨⟨hm1.valid.toShape, by rw [hVz h (by om)]; exact (MpInt.zeroN_valid hN31).toShape, hm1.valid.sign_ok, by show (V 1).used ≤ (V h).alloc; rw [hVz h (by om)]; show _ ≤ nI0; om, by show (sp - 6320) % 16 = 0; om, by show 32 ≤ sp - 6320; om⟩, hVa 1, hVa h⟩"
+     }
+    ],
+    [
+     "have",
+     "hcpp : CopyPost (V 1) (V h) b1",
+     "hcp.1"
+    ],
+    [
+     "have",
+     "hcpa : b1.alloc = (V h).alloc",
+     "hcpp.alloc"
+    ],
+    [
+     "tac",
+     "entcj @H' @H (some (qr, vr)) (some (Q h, b1)) (by show (⟨Q h, 4 * (V h).alloc⟩ : Iv) = _; simp [entIv, hcpa]); rw [tabV_set true Q V (Q h) b1 (.inr ⟨Nat.le_refl _, by om⟩), qset_id] at @H'"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updDJ TSok _ _ _ h (some (Q h, b1)) (by show (⟨Q h, 4 * (V h).alloc⟩ : Iv) = _; simp [entIv, hcpa])); clear @HP; rw [tabV_set true Q V (Q h) b1 (.inr ⟨Nat.le_refl _, by om⟩), qset_id] at @HP'",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "seg",
+     "t1",
+     "0"
+    ],
+    [
+     "jump",
+     "S",
+     {
+      "vars": {
+       "k": "0",
+       "V": "vset V h b1"
+      },
+      "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_conv h (2 * h) (2 * h - h) hin (Q := Q) (Q' := Q) (V := V) (V' := vset V h b1) (x := h) (fun _ _ => rfl) (fun j hj => vset_ne V b1 hj) rfl (by rw [vset_self V h b1, hcpa]) (by om)).symm))",
+      "hm1": "by rw [vset_ne V b1 (show 1 ≠ h by om)]; exact hm1",
+      "hVa": "vset_posP (P := fun t => 0 < t.alloc) (by rw [hcpa]; exact hVa h) hVa",
+      "hk": "by om",
+      "hVh": "by rw [vset_self V h b1]; exact tab_copy hm1 (by show _ ≤ nI0; om) hN31 (hVz h (by om) ▸ hcpp)",
+      "hVz2": "fun j hj => by rw [vset_ne V b1 (show j ≠ h by om)]; exact hVz j (by om)"
+     }
+    ]
+   ]
+  },
+  "S": {
+   "pc": "2e84",
+   "regs": "S",
+   "vars": "M Mk : Mem; w h x7 mpv qr re k : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "23, 8 - k, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κS z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    "{TPP}",
+    [
+     "hk",
+     "k < w - 1"
+    ],
+    [
+     "hVh",
+     "Rs N.mag N.used (V h) (Window.sqIter (redF N md) k (m1F G N md))"
+    ],
+    [
+     "hVz2",
+     "∀ j, h < j → V j = {Z0}"
+    ]
+   ],
+   "prelude": [
+    "{TPPRE}",
+    "have := hVh.used; have := hVh.valid.used_le; have := hVh.valid.alloc_lt"
+   ],
+   "edge": [
+    [
+     "seg",
+     "sq",
+     "0"
+    ],
+    [
+     "call",
+     "mpSqrAG",
+     "sp - 6320, sp - 6256 + 24 * h, Q h, V h, (qr, 4 * vr.alloc) :: (tabBlks (tset ({TV}) h none) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: hin))",
+     "xs",
+     {
+      "hq": "hsq",
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS h)",
+       "aD": "nR (.tD h)",
+       "ks": "nR .ks",
+       "ts": "nR .ts",
+       "km": "nR .kc",
+       "tm": "nR .tc"
+      },
+      "perm": "(tab_front [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) h (Nat.le_refl _) (by om)).trans (List.Perm.of_eq (by rw [tabV_live (Nat.le_refl _) (by om)]; try rfl))",
+      "res": "⟨⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + (2768 + 8 * (V h).used) ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩, hVh.valid, by show (V h).used < 2 ^ 29; om, hVa h, by show OffHeap (sp - 6256 + 24 * h) 24; unfold OffHeap; om⟩"
+     }
+    ],
+    [
+     "cases",
+     "xs",
+     {
+      "pair ⟨ok, q', a'⟩": [
+       [
+        "tac",
+        "have := hsq.pos"
+       ],
+       [
+        "tac",
+        "entc @H' @H (some (qr, vr)) (some (q', a')); rw [tabV_set true Q V q' a' (.inr ⟨Nat.le_refl _, by om⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ h (some (q', a')))).perm (tab_back [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) h (Nat.le_refl _) (by om) (some (q', a'))); clear @HP; rw [tabV_set true Q V q' a' (.inr ⟨Nat.le_refl _, by om⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "sq1f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "Q": "qset Q h q'",
+             "V": "vset V h a'"
+            },
+            "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q' a' _ _ (by om)).symm))",
+            "hVa": "{VAP}",
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "jump",
+           "SR",
+           {
+            "vars": {
+             "Q": "qset Q h q'",
+             "V": "vset V h a'",
+             "u": "V h"
+            },
+            "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q' a' _ _ (by om)).symm))",
+            "hm1": "by rw [vset_ne V a' (show 1 ≠ h by om)]; exact hm1",
+            "hVa": "{VAP}",
+            "hVu": "hVh",
+            "hsqp": "by rw [vset_self V h a']; exact hsq.post rfl",
+            "hVz2": "fun j hj => by rw [vset_ne V a' (show j ≠ h by om)]; exact hVz2 j hj"
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "SR": {
+   "pc": "2e90",
+   "regs": "sqr",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h x7 mpv qr re k : Nat; Q : Nat → Nat; V : Nat → MpInt; vr u : MpInt",
+   "mu": "23, 7 - k, 1",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κSR z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    "{TPP}",
+    [
+     "hk",
+     "k < w - 1"
+    ],
+    [
+     "hVu",
+     "Rs N.mag N.used u (Window.sqIter (redF N md) k (m1F G N md))"
+    ],
+    [
+     "hsqp",
+     "SqrPost u (V h)"
+    ],
+    [
+     "hVz2",
+     "∀ j, h < j → V j = {Z0}"
+    ]
+   ],
+   "prelude": [
+    "{TPPRE}",
+    "have hsb := sq_bounds (fit hvn.toShape) hVu hsqp"
+   ],
+   "edge": [
+    [
+     "seg",
+     "sq1",
+     "0"
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, sp - 6256 + 24 * h, Q h, pn, ndp, mpv, V h, N, (qr, 4 * vr.alloc) :: (tabBlks (tset ({TV}) h none) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: hin))",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS h)",
+       "aD": "nR (.tD h)"
+      },
+      "res": "Std.reduxG_res rfl hcd (fun h1 => (har.dr h1).2) har.r2k ⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + 4800 ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩ hsb.1 hsb.2.1 hsb.2.2 (hVa h) har.bits (by unfold OffHeap; om) hres.noff",
+      "named": {
+       "hrs": "by simp [keysG, rx]",
+       "hal": "Std.reduxG_al _"
+      },
+      "perm": "(tab_front [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) h (Nat.le_refl _) (by om)).trans (List.Perm.of_eq (by rw [tabV_live (Nat.le_refl _) (by om)]; try rfl))"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, a2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "entc @H' @H (some (qr, vr)) (some (q2, a2)); rw [tabV_set true Q V q2 a2 (.inr ⟨Nat.le_refl _, by om⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ h (some (q2, a2)))).perm (tab_back [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) h (Nat.le_refl _) (by om) (some (q2, a2))); clear @HP; rw [tabV_set true Q V q2 a2 (.inr ⟨Nat.le_refl _, by om⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "sq2f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "Q": "qset Q h q2",
+             "V": "vset V h a2"
+            },
+            "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q2 a2 _ _ (by om)).symm))",
+            "hVa": "vset_posP (P := fun t => 0 < t.alloc) hrq.pos hVa",
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "have",
+           "hVh2 : Rs N.mag N.used a2 (Window.sqIter (redF N md) (k + 1) (m1F G N md))",
+           "tab_sqr (rxF hcd) hVu hsqp (Std.rp_redG (hrq.post rfl))"
+          ],
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "if",
+           "k + 1 = w - 1",
+           [
+            [
+             "seg",
+             "sq2d",
+             "0"
+            ],
+            [
+             "jump",
+             "U",
+             {
+              "vars": {
+               "V": "vset V h a2",
+               "j": "h",
+               "Q": "qset Q h q2"
+              },
+              "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q2 a2 _ _ (by om)).symm))",
+              "hxp": "rfl",
+              "hep": "rfl",
+              "hj1": "Nat.le_refl _",
+              "hj2": "by om",
+              "hm1": "by rw [vset_ne V a2 (show 1 ≠ h by om)]; exact hm1",
+              "hVa": "vset_posP (P := fun t => 0 < t.alloc) hrq.pos hVa",
+              "hTU": "by rw [hh]; exact TUp.start wf.two (by rw [vset_ne V a2 (show 1 ≠ 2 ^ (w - 1) by om)]; exact hm1) (by rw [vset_self V (2 ^ (w - 1)) a2, show w - 1 = k + 1 by om]; exact hVh2)",
+              "hVz3": "fun i hi => by rw [vset_ne V a2 (show i ≠ h by om)]; exact hVz2 i (by om)"
+             }
+            ]
+           ],
+           [
+            [
+             "seg",
+             "sq2",
+             "0"
+            ],
+            [
+             "jump",
+             "S",
+             {
+              "vars": {
+               "V": "vset V h a2",
+               "k": "k + 1",
+               "Q": "qset Q h q2"
+              },
+              "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q2 a2 _ _ (by om)).symm))",
+              "hm1": "by rw [vset_ne V a2 (show 1 ≠ h by om)]; exact hm1",
+              "hVa": "vset_posP (P := fun t => 0 < t.alloc) hrq.pos hVa",
+              "hk": "by om",
+              "hVh": "by rw [vset_self V h a2]; exact hVh2",
+              "hVz2": "fun j hj => by rw [vset_ne V a2 (show j ≠ h by om)]; exact hVz2 j hj"
+             }
+            ]
+           ],
+           "hb"
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "U": {
+   "pc": "2f10",
+   "regs": "U",
+   "vars": "M Mk : Mem; w h j xp ep u6 mpv qr re : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "22, 2 * h - j, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κU z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    "{TPP}",
+    [
+     "hxp",
+     "xp = sp - 6256 + 24 * j"
+    ],
+    [
+     "hep",
+     "ep = sp - 6256 + 24 * (2 * h - 1)"
+    ],
+    [
+     "hj1",
+     "h ≤ j"
+    ],
+    [
+     "hj2",
+     "j + 1 < 2 * h"
+    ],
+    [
+     "hTU",
+     "TUp N.mag N.used w (m1F G N md) (redF N md) V (j + 1)"
+    ],
+    [
+     "hVz3",
+     "∀ i, j + 1 ≤ i → V i = {Z0}"
+    ]
+   ],
+   "prelude": [
+    "{TPPRE}",
+    "have hj := hTU.done j (by om) (by om); have := hj.used; have := hj.valid.used_le; have := hTU.one.used"
+   ],
+   "edge": [
+    [
+     "seg",
+     "u1",
+     "0"
+    ],
+    [
+     "call",
+     "mpMulG",
+     "sp - 6320, xp, Q j, sp - 6232, Q 1, xp + 24, Q (j + 1), V j, V 1, V (j + 1), (qr, 4 * vr.alloc) :: (tabBlks (tset ({TV}) (j + 1) none) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: hin)), 2147587324, 2147587316",
+     "xm",
+     {
+      "hq": "hmu",
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS j)",
+       "aD": "nR (.tD j)",
+       "bS": "nR (.tS 1)",
+       "bD": "nR (.tD 1)",
+       "cS": "nR (.tS (j + 1))",
+       "cD": "nR (.tD (j + 1))",
+       "kc": "nR .kc",
+       "tc": "nR .tc"
+      },
+      "perm": "(tab_front [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) (j + 1) (by om) (by om)).trans (List.Perm.of_eq (by rw [tabV_live (by om) (by om)]; try rfl))",
+      "res": "mulG_res (by om) (by om) (by om) hj.valid hm1.valid (by rw [hVz3 (j + 1) (Nat.le_refl _)]; exact (MpInt.zeroN_valid hN31).toShape) (by rw [hVz3 (j + 1) (Nat.le_refl _)]; exact .inl rfl) (by om) (hVa j) (hVa 1) (hVa (j + 1)) (by unfold OffHeap; om) (by unfold OffHeap; om) (by unfold OffHeap; om)"
+     }
+    ],
+    [
+     "cases",
+     "xm",
+     {
+      "pair ⟨ok, q', c'⟩": [
+       [
+        "tac",
+        "have := mulG_pos hmu.1"
+       ],
+       [
+        "tac",
+        "entc @H' @H (some (qr, vr)) (some (q', c')); rw [tabV_set true Q V q' c' (.inr ⟨by om, by om⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ (j + 1) (some (q', c')))).perm (tab_back [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) (j + 1) (by om) (by om) (some (q', c'))); clear @HP; rw [tabV_set true Q V q' c' (.inr ⟨by om, by om⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "u2f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "Q": "qset Q (j + 1) q'",
+             "V": "vset V (j + 1) c'"
+            },
+            "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q' c' _ _ (by om)).symm))",
+            "hVa": "vset_posP (P := fun t => 0 < t.alloc) (mulG_pos hmu.1) hVa",
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "jump",
+           "UR",
+           {
+            "vars": {
+             "Q": "qset Q (j + 1) q'",
+             "V": "vset V (j + 1) c'"
+            },
+            "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q' c' _ _ (by om)).symm))",
+            "hm1": "by rw [vset_ne V c' (show 1 ≠ j + 1 by om)]; exact hm1",
+            "hVa": "vset_posP (P := fun t => 0 < t.alloc) (mulG_pos hmu.1) hVa",
+            "hTU": "⟨by rw [vset_ne V c' (show 1 ≠ j + 1 by om)]; exact hTU.one, fun i h1 h2 => by rw [vset_ne V c' (show i ≠ j + 1 by om)]; exact hTU.done i h1 h2, hTU.lo, hTU.hi⟩",
+            "hmp": "by rw [vset_ne V c' (show j ≠ j + 1 by om), vset_ne V c' (show 1 ≠ j + 1 by om), vset_self V (j + 1) c']; exact mulG_post hmu.1",
+            "hVz3": "fun i hi => by rw [vset_ne V c' (show i ≠ j + 1 by om)]; exact hVz3 i (by om)"
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "UR": {
+   "pc": "2f24",
+   "regs": "uir",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h j xp ep u6 mpv qr re : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "22, 2 * h - j - 1, 1",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".frz F2",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κUR z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    "{TPP}",
+    [
+     "hxp",
+     "xp = sp - 6256 + 24 * j"
+    ],
+    [
+     "hep",
+     "ep = sp - 6256 + 24 * (2 * h - 1)"
+    ],
+    [
+     "hj1",
+     "h ≤ j"
+    ],
+    [
+     "hj2",
+     "j + 1 < 2 * h"
+    ],
+    [
+     "hTU",
+     "TUp N.mag N.used w (m1F G N md) (redF N md) V (j + 1)"
+    ],
+    [
+     "hmp",
+     "MulPost (V j) (V 1) (V (j + 1))"
+    ],
+    [
+     "hVz3",
+     "∀ i, j + 2 ≤ i → V i = {Z0}"
+    ]
+   ],
+   "prelude": [
+    "{TPPRE}",
+    "have hj := hTU.done j (by om) (by om); have := hj.used; have := hj.valid.used_le; have := hTU.one.used; have hpb := prod_bounds (fit hvn.toShape) hj hTU.one hmp"
+   ],
+   "edge": [
+    [
+     "seg",
+     "u2",
+     "0"
+    ],
+    [
+     "set",
+     {
+      "u6": "0"
+     }
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, xp + 24, Q (j + 1), pn, ndp, mpv, V (j + 1), N, (qr, 4 * vr.alloc) :: (tabBlks (tset ({TV}) (j + 1) none) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: hin))",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS (j + 1))",
+       "aD": "nR (.tD (j + 1))"
+      },
+      "res": "Std.reduxG_res rfl hcd (fun h1 => (har.dr h1).2) har.r2k ⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + 4800 ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩ hpb.1 hpb.2.1 hpb.2.2 (hVa (j + 1)) har.bits (by unfold OffHeap; om) hres.noff",
+      "named": {
+       "hrs": "by simp [keysG, ur]",
+       "hal": "Std.reduxG_al _"
+      },
+      "perm": "(tab_front [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) (j + 1) (by om) (by om)).trans (List.Perm.of_eq (by rw [tabV_live (by om) (by om)]; try rfl))"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, c2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "entc @H' @H (some (qr, vr)) (some (q2, c2)); rw [tabV_set true Q V q2 c2 (.inr ⟨by om, by om⟩)] at @H'"
+       ],
+       [
+        "tac",
+        "have @HP' := (@HP.congrL (tLay_updD TSok _ _ _ (j + 1) (some (q2, c2)))).perm (tab_back [(qr, 4 * vr.alloc)] _ _ h (2 * h - h) (j + 1) (by om) (by om) (some (q2, c2))); clear @HP; rw [tabV_set true Q V q2 c2 (.inr ⟨by om, by om⟩)] at @HP'",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "u3f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "Q": "qset Q (j + 1) q2",
+             "V": "vset V (j + 1) c2"
+            },
+            "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q2 c2 _ _ (by om)).symm))",
+            "hVa": "vset_posP (P := fun t => 0 < t.alloc) hrq.pos hVa",
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "have",
+           "hTU2 : TUp N.mag N.used w (m1F G N md) (redF N md) (vset V (j + 1) c2) (j + 1 + 1)",
+           "TUp.step (rxF hcd) wf.two hTU (by om) (by simpa using hmp) (Std.rp_redG (hrq.post rfl))"
+          ],
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "if",
+           "xp + 24 = ep",
+           [
+            [
+             "seg",
+             "u3d",
+             "0"
+            ],
+            [
+             "jump",
+             "W1",
+             {
+              "vars": {
+               "V": "vset V (j + 1) c2",
+               "Q": "qset Q (j + 1) q2"
+              },
+              "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q2 c2 _ _ (by om)).symm))",
+              "hVa": "vset_posP (P := fun t => 0 < t.alloc) hrq.pos hVa",
+              "henv": "env_of (rxF hcd) hvx.toShape (by rw [← hw]; exact TUp.fin hTU2 (by om))",
+              "hXS": "by rd_log",
+              "hYS": "by rd_log"
+             }
+            ]
+           ],
+           [
+            [
+             "seg",
+             "u3",
+             "0"
+            ],
+            [
+             "jump",
+             "U",
+             {
+              "vars": {
+               "V": "vset V (j + 1) c2",
+               "j": "j + 1",
+               "u6": "0",
+               "Q": "qset Q (j + 1) q2"
+              },
+              "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_m1set Q V q2 c2 _ _ (by om)).symm))",
+              "hxp": "by om",
+              "hj1": "by om",
+              "hj2": "by om",
+              "hm1": "by rw [vset_ne V c2 (show 1 ≠ j + 1 by om)]; exact hm1",
+              "hVa": "vset_posP (P := fun t => 0 < t.alloc) hrq.pos hVa",
+              "hTU": "hTU2",
+              "hVz3": "fun i hi => by rw [vset_ne V c2 (show i ≠ j + 1 by om)]; exact hVz3 i (by om)"
+             }
+            ]
+           ],
+           "hb"
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "W1": {
+   "pc": "3058",
+   "regs": "W1",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "21, 0, 0",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hres0",
+     "Rs N.mag N.used vr (res0F N md)"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have hxu30 : xu < 2 ^ 30 := by have h := hres.xbits; rw [show Layout.digitBits = 28 from rfl] at h; omega"
+   ],
+   "edge": [
+    [
+     "seg",
+     "w1",
+     "0",
+     {
+      "dv2": "(xu + 18446744073709551615) % 18446744073709551616"
+     }
+    ],
+    [
+     "jump",
+     "K0",
+     {
+      "vars": {
+       "di": "xu",
+       "tb": "28",
+       "sw": "Window.start (res0F N md)"
+      },
+      "hH": "Hd.start henv hres0",
+      "hs0": "rfl",
+      "hdv": "rfl",
+      "hbm": "by om"
+     }
+    ]
+   ]
+  },
+  "K0": {
+   "pc": "3068",
+   "regs": "K0",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re di tb bm bc dv : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "20, 28 * di + 28 - tb, 24",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hH",
+     "Hd {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32) sw vr"
+    ],
+    [
+     "hs0",
+     "sw.mode = 0"
+    ],
+    [
+     "hdv",
+     "dv = DV di"
+    ],
+    [
+     "hbm",
+     "bm < 2 ^ 64"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have := hH.t1; have := hH.t28; have := hH.cnt; have hiu : di ≤ xu := hH.iu; have hdvd : DV di = (di + 18446744073709551615) % 18446744073709551616 := rfl; have hid := md_idle hH.md hs0"
+   ],
+   "edge": [
+    [
+     "if",
+     "1 < bc",
+     [
+      [
+       "seg",
+       "k0n",
+       "0"
+      ],
+      [
+       "jump",
+       "Q",
+       {
+        "hBt": "hd_next0 hH hb"
+       }
+      ]
+     ],
+     [
+      [
+       "if",
+       "dv = 18446744073709551615",
+       [
+        [
+         "seg",
+         "k0x",
+         "0"
+        ],
+        [
+         "jump",
+         "FIN",
+         {
+          "hD": "hd_done henv hH (by om) (by om) (by om)"
+         }
+        ]
+       ],
+       [
+        [
+         "seg",
+         "k0l",
+         "0"
+        ],
+        [
+         "jump",
+         "RG",
+         {
+          "vars": {
+           "bf": "bm % 2 ^ 32"
+          },
+          "hH": "hd_28b hH (by om)",
+          "hi": "by om",
+          "hdv": "by om",
+          "hmo": "hs0.symm",
+          "hbb": "hid.2.symm",
+          "hcp": "hid.1.symm"
+         }
+        ]
+       ],
+       "hx"
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "Q": {
+   "from": "K0",
+   "pc": "31ec",
+   "regs": "Q",
+   "mu": "20, 28 * di + 28 - tb, 22",
+   "-prem": [
+    "hH"
+   ],
+   "prem": [
+    [
+     "hBt",
+     "Bt {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) ((bm % 2 ^ 32) >>> 27 &&& 1) sw vr"
+    ]
+   ],
+   "prelude!": [
+    "{LPRE}",
+    "have := hBt.pt.t27; have := hBt.pt.cnt; have hiu : di ≤ xu := Nat.le_of_lt hBt.pt.iu; have hdvd : DV di = (di + 18446744073709551615) % 18446744073709551616 := rfl; have hid := md_idle hBt.pt.md hs0"
+   ],
+   "edge": [
+    [
+     "if",
+     "2 ^ 63 ≤ bm * 68719476736 % 2 ^ 64",
+     [
+      [
+       "seg",
+       "qy",
+       "ws nI"
+      ],
+      [
+       "jump",
+       "B",
+       {
+        "hBt": "q_take hBt hb",
+        "hn0": "by om",
+        "hmo": "hs0.symm",
+        "hbb": "hid.2.symm",
+        "hcp": "hid.1.symm",
+        "hDI": "by rw [← hdv]; exact rd8_self"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "qn",
+       "0",
+       {
+        "bm2": "sx (bm * 2 % 4294967296)"
+       }
+      ],
+      [
+       "jump",
+       "K0",
+       {
+        "vars": {
+         "tb": "tb + 1"
+        },
+        "hH": "q_skip henv hBt hs0 (by om)",
+        "hbm": "sxl bm"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "RG": {
+   "pc": "307c",
+   "regs": "RG",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re di bf mo bb cp dv : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "20, 28 * di, 23",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hH",
+     "Hd {RR} N.mag N.used di 28 1 ((di : Int) - 1) bf sw vr"
+    ],
+    [
+     "hi",
+     "0 < di"
+    ],
+    [
+     "hdv",
+     "dv = di - 1"
+    ],
+    [
+     "hmo",
+     "mo = sw.mode"
+    ],
+    [
+     "hbb",
+     "bb = sw.bitbuf"
+    ],
+    [
+     "hcp",
+     "cp = sw.bitcpy"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have hiu : di ≤ xu := hH.iu; have hml := md_le hH.md; have hdl : Xv.digit dv < 268435456 := hvx.digit_lt _"
+   ],
+   "edge": [
+    [
+     "seg",
+     "rf1",
+     "0",
+     {
+      "dv2": "(di - 1 + 18446744073709551615) % 18446744073709551616"
+     }
+    ],
+    [
+     "seg",
+     "rf1b",
+     "ws nI",
+     {
+      "dv2": "(di - 1 + 18446744073709551615) % 18446744073709551616"
+     }
+    ],
+    [
+     "seg",
+     "rf1c",
+     "0",
+     {
+      "dv2": "(di - 1 + 18446744073709551615) % 18446744073709551616",
+      "d": "Xv.digit dv"
+     }
+    ],
+    [
+     "seg",
+     "rf2",
+     "0",
+     {
+      "dv2": "(di - 1 + 18446744073709551615) % 18446744073709551616",
+      "d": "Xv.digit dv",
+      "y": "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1)",
+      "yo": "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1) ||| mo"
+     }
+    ],
+    [
+     "have",
+     "hyo4 : (Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1) ||| mo < 4",
+     "Nat.or_lt_two_pow (n := 2) (Nat.lt_of_le_of_lt Nat.and_le_right (by decide)) (by om)"
+    ],
+    [
+     "if",
+     "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1) ||| mo = 0",
+     [
+      [
+       "tac",
+       "have hz := Nat.or_eq_zero_iff.1 hb"
+      ],
+      [
+       "seg",
+       "rf3a",
+       "0",
+       {
+        "d": "Xv.digit dv",
+        "y": "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1)",
+        "yo": "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1) ||| mo",
+        "_hL": "by rw [show mo = 0 by om, show bb = 0 by have := md_idle hH.md (by om); om, show cp = 0 by have := md_idle hH.md (by om); om]; exact rfl"
+       }
+      ],
+      [
+       "jump",
+       "Z1",
+       {
+        "vars": {
+         "di": "di - 1"
+        },
+        "hH": "rg_skip henv hH hi (by rw [hdv]; rfl) hdl (by om) hz.1",
+        "hs0": "by om",
+        "hd": "hdl",
+        "hDI": "rd8_self"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "rf3b",
+       "0",
+       {
+        "d": "Xv.digit dv",
+        "y": "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1)",
+        "yo": "(Xv.digit dv % 4294967296 / 134217728 % 4294967296 &&& 1) ||| mo"
+       }
+      ],
+      [
+       "jump",
+       "B",
+       {
+        "vars": {
+         "di": "di - 1",
+         "tb": "0"
+        },
+        "hBt": "rg_take henv hH hi (by rw [hdv]; rfl) hdl",
+        "hn0": "by intro h0; apply hb; rw [h0.2, hmo, h0.1]; rfl",
+        "hbm": "by om",
+        "hDI": "rd8_self"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "Z1": {
+   "pc": "31d8",
+   "regs": "Z1",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re di d : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "20, 28 * di + 27, 22",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hH",
+     "Hd {RR} N.mag N.used di 1 28 ((di : Int) - 1) (d * 2 % 2 ^ 32) sw vr"
+    ],
+    [
+     "hs0",
+     "sw.mode = 0"
+    ],
+    [
+     "hd",
+     "d < 268435456"
+    ],
+    [
+     "hDI",
+     "bytesT8 Mi (sp - 6296) = BitVec.ofNat 64 (DV di)"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have hiu : di ≤ xu := hH.iu; have hid := md_idle hH.md hs0"
+   ],
+   "edge": [
+    [
+     "if",
+     "2 ^ 63 ≤ d * 137438953472 % 2 ^ 64",
+     [
+      [
+       "seg",
+       "z1t",
+       "0"
+      ],
+      [
+       "jump",
+       "B",
+       {
+        "vars": {
+         "tb": "1"
+        },
+        "hBt": "z1_take hH hd hb",
+        "hn0": "by om",
+        "hmo": "hs0.symm",
+        "hbb": "hid.2.symm",
+        "hcp": "hid.1.symm",
+        "hbm": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "z1f",
+       "0",
+       {
+        "dv2": "DV di"
+       }
+      ],
+      [
+       "jump",
+       "Q",
+       {
+        "vars": {
+         "tb": "2"
+        },
+        "hBt": "z1_skip henv hH hd hs0 (by om)",
+        "hdv": "rfl",
+        "hbm": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "B": {
+   "pc": "30b0",
+   "regs": "B",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re di tb bm bc y bb cp mo : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "20, 28 * di + 28 - tb, 21",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hBt",
+     "Bt {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) y sw vr"
+    ],
+    [
+     "hn0",
+     "¬ (sw.mode = 0 ∧ y = 0)"
+    ],
+    [
+     "hmo",
+     "mo = sw.mode"
+    ],
+    [
+     "hbb",
+     "bb = sw.bitbuf"
+    ],
+    [
+     "hcp",
+     "cp = sw.bitcpy"
+    ],
+    [
+     "hbm",
+     "bm < 2 ^ 64"
+    ],
+    [
+     "hDI",
+     "bytesT8 Mi (sp - 6296) = BitVec.ofNat 64 (DV di)"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have := hBt.pt.t27; have := hBt.pt.cnt; have hiu : di ≤ xu := Nat.le_of_lt hBt.pt.iu; have hy1 := hBt.pt.y_le; have hml := md_le hBt.pt.md",
+    "have := hBt.acct.used; have := hBt.acct.valid.used_le; have := hBt.acct.valid.alloc_lt"
+   ],
+   "edge": [
+    [
+     "if",
+     "mo = 1 ∧ y = 0",
+     [
+      [
+       "seg",
+       "bs",
+       "0"
+      ],
+      [
+       "call",
+       "mpSqrAG",
+       "sp - 6320, sp - 6280, qr, vr, {HV}",
+       "xs",
+       {
+        "hq": "hsq",
+        "sig": {
+         "aS": "nE",
+         "aD": "nR .rD",
+         "ks": "nR .ks",
+         "ts": "nR .ts",
+         "km": "nR .kc",
+         "tm": "nR .tc"
+        },
+        "res": "⟨⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + (2768 + 8 * vr.used) ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩, hBt.acct.valid, by show vr.used < 2 ^ 29; om, hvra, by show OffHeap (sp - 6280) 24; unfold OffHeap; om⟩",
+        "with": "tab"
+       }
+      ],
+      [
+       "cases",
+       "xs",
+       {
+        "pair ⟨ok, q', a'⟩": [
+         [
+          "tac",
+          "have := hsq.pos"
+         ],
+         [
+          "tac",
+          "resc @H' @H (some (qr, vr)) (some (q', a'))"
+         ],
+         [
+          "tac",
+          "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q', a'))); clear @HP",
+          {
+           "lay": {}
+          }
+         ],
+         [
+          "cases",
+          "ok",
+          {
+           "false": [
+            [
+             "set",
+             {
+              "e": "18446744073709551614"
+             }
+            ],
+            [
+             "seg",
+             "bs1f",
+             "0"
+            ],
+            [
+             "forget",
+             "nV"
+            ],
+            [
+             "forget",
+             "nI"
+            ],
+            [
+             "jump",
+             "LRe",
+             {
+              "vars": {
+               "qr": "q'",
+               "vr": "a'"
+              },
+              "hrva": "by om"
+             }
+            ]
+           ],
+           "true": [
+            [
+             "set",
+             {
+              "e": "0"
+             }
+            ],
+            [
+             "jump",
+             "BR",
+             {
+              "vars": {
+               "qr": "q'",
+               "vr": "a'",
+               "u": "vr"
+              },
+              "hsq": "hsq.post rfl",
+              "hvra": "by om",
+              "hs1": "by om",
+              "hy0": "by om"
+             }
+            ]
+           ]
+          }
+         ]
+        ]
+       }
+      ]
+     ],
+     [
+      [
+       "if",
+       "mo = 1",
+       [
+        [
+         "seg",
+         "bw1",
+         "0"
+        ],
+        [
+         "jump",
+         "K2",
+         {
+          "hn1": "by om"
+         }
+        ]
+       ],
+       [
+        [
+         "seg",
+         "bw",
+         "0"
+        ],
+        [
+         "jump",
+         "K2",
+         {
+          "hn1": "by om"
+         }
+        ]
+       ],
+       "hb2"
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "BR": {
+   "from": "B",
+   "pc": "30c8",
+   "regs": "Br",
+   "regs_over": {
+    "e": "0"
+   },
+   "mu": "20, 28 * di + 28 - tb, 20",
+   "-vars": "mo",
+   "vars": "u : MpInt",
+   "-prem": [
+    "hmo",
+    "hn0"
+   ],
+   "prem": [
+    [
+     "hBt",
+     "Bt {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) y sw u"
+    ],
+    [
+     "hsq",
+     "SqrPost u vr"
+    ],
+    [
+     "hs1",
+     "sw.mode = 1"
+    ],
+    [
+     "hy0",
+     "y = 0"
+    ]
+   ],
+   "prelude": [
+    "have hsb := sq_bounds (fit hvn.toShape) hBt.acct hsq; have := hsb.2.2"
+   ],
+   "edge": [
+    [
+     "seg",
+     "bs1",
+     "0"
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, sp - 6280, qr, pn, ndp, mpv, vr, N, {HV}",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD"
+      },
+      "res": "{RED}",
+      "named": {
+       "hrs": "by simp [keysG, bsr]",
+       "hal": "Std.reduxG_al _"
+      },
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, r2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q2, r2))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q2, r2))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "bs2f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q2",
+             "vr": "r2"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "have",
+           "hH2",
+           "Bt.sqr henv hBt hs1 hy0 hsq (Std.rp_redG (hrq.post rfl))"
+          ],
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "if",
+           "1 < bc",
+           [
+            [
+             "seg",
+             "bs2",
+             "0",
+             {
+              "bm2": "sx (bm * 2 % 4294967296)",
+              "y2": "sx (bm * 2 % 4294967296) % 4294967296 / 134217728 % 2"
+             }
+            ],
+            [
+             "jump",
+             "B",
+             {
+              "vars": {
+               "vr": "r2",
+               "tb": "tb + 1",
+               "sw": "{ sw with res := redF N md (sw.res * sw.res) }",
+               "qr": "q2"
+              },
+              "hBt": "hd_next_sx hH2 hb",
+              "hn0": "by show ¬ (sw.mode = 0 ∧ _); om",
+              "hmo": "hs1.symm",
+              "hbm": "sxl bm",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           [
+            [
+             "if",
+             "DV di = 18446744073709551615",
+             [
+              [
+               "tac",
+               "rw [show DV di = 18446744073709551615 from hb2] at hDI"
+              ],
+              [
+               "seg",
+               "bs2x",
+               "0"
+              ],
+              [
+               "jump",
+               "FIN",
+               {
+                "vars": {
+                 "vr": "r2",
+                 "qr": "q2"
+                },
+                "hD": "hd_done henv hH2 (by om) (by have := hdvd di; om) (by show ¬ (sw.mode = 2 ∧ _); om)",
+                "hvra": "by om"
+               }
+              ]
+             ],
+             [
+              [
+               "have",
+               "hdvl : DV di < 2 ^ 64",
+               "Nat.mod_lt _ (by decide)"
+              ],
+              [
+               "seg",
+               "bs2r",
+               "0",
+               {
+                "dvs": "DV di"
+               }
+              ],
+              [
+               "jump",
+               "RG",
+               {
+                "vars": {
+                 "vr": "r2",
+                 "sw": "{ sw with res := redF N md (sw.res * sw.res) }",
+                 "bf": "bm % 2 ^ 32 * 2 % 2 ^ 32",
+                 "qr": "q2"
+                },
+                "hH": "hd_28b hH2 (by om)",
+                "hi": "by have := hdvd di; om",
+                "hdv": "by have := hdvd di; om",
+                "hmo": "hs1.symm",
+                "hvra": "by om"
+               }
+              ]
+             ],
+             "hb2"
+            ]
+           ],
+           "hb"
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "K2": {
+   "from": "B",
+   "pc": "31a0",
+   "regs": "K2",
+   "mu": "20, 28 * di + 28 - tb, 20",
+   "-vars": "mo",
+   "-prem": [
+    "hmo"
+   ],
+   "prem": [
+    [
+     "hn1",
+     "¬ (sw.mode = 1 ∧ y = 0)"
+    ]
+   ],
+   "edge": [
+    [
+     "if",
+     "cp + 1 = w",
+     [
+      [
+       "seg",
+       "wf",
+       "ws nV",
+       {
+        "bb2": "bb ||| y * 2 ^ (w - (cp + 1))"
+       }
+      ],
+      [
+       "jump",
+       "F",
+       {
+        "vars": {
+         "xk": "0"
+        },
+        "hF": "k2_fill hw hBt hn0 hn1 (by om)",
+        "hxk": "by om",
+        "hbb": "by rw [hbb, hcp]; exact k2_bb hw hBt (by om)",
+        "hXK": "rd8_self",
+        "hXS": "rd8_out hXS (by om)",
+        "hYS": "rd8_out hYS (by om)"
+       }
+      ]
+     ],
+     [
+      [
+       "if",
+       "1 < bc",
+       [
+        [
+         "seg",
+         "wn",
+         "0",
+         {
+          "bm2": "sx (bm * 2 % 4294967296)",
+          "y2": "sx (bm * 2 % 4294967296) % 4294967296 / 134217728 % 2",
+          "bb2": "bb ||| y * 2 ^ (w - (cp + 1))"
+         }
+        ],
+        [
+         "jump",
+         "K2",
+         {
+          "vars": {
+           "tb": "tb + 1",
+           "sw": "⟨2, sw.bitcpy + 1, sw.bitbuf + y * 2 ^ (w - (sw.bitcpy + 1)), sw.res⟩"
+          },
+          "hBt": "hd_next_sx (k2_add henv hw hBt hn0 hn1 (by om)) hb2",
+          "hn0": "by show ¬ (2 = 0 ∧ _); om",
+          "hn1": "by show ¬ (2 = 1 ∧ _); om",
+          "hbb": "by rw [hbb, hcp]; exact k2_bb hw hBt (by om)",
+          "hcp": "by rw [hcp]",
+          "hbm": "sxl bm"
+         }
+        ]
+       ],
+       [
+        [
+         "have",
+         "hdvl : DV di < 2 ^ 64",
+         "Nat.mod_lt _ (by decide)"
+        ],
+        [
+         "seg",
+         "wr",
+         "0",
+         {
+          "bm2": "sx (bm * 2 % 4294967296)",
+          "bb2": "bb ||| y * 2 ^ (w - (cp + 1))",
+          "dvs": "DV di"
+         }
+        ],
+        [
+         "jump",
+         "R",
+         {
+          "vars": {
+           "sw": "⟨2, sw.bitcpy + 1, sw.bitbuf + y * 2 ^ (w - (sw.bitcpy + 1)), sw.res⟩",
+           "bf": "bm % 2 ^ 32 * 2 % 2 ^ 32"
+          },
+          "hH": "hd_28b (k2_add henv hw hBt hn0 hn1 (by om)) (by om)",
+          "hdv": "rfl",
+          "hmo": "rfl",
+          "hbb": "by rw [hbb, hcp]; exact k2_bb hw hBt (by om)",
+          "hcp": "by rw [hcp]"
+         }
+        ]
+       ],
+       "hb2"
+      ]
+     ],
+     "hb"
+    ]
+   ],
+   "prelude": [
+    "have hcw : sw.bitcpy < w := by have h := md_cpy hBt.pt.md; rw [hrw] at h; omega",
+    "have hyb := ybit_le (w := w) (c := cp) hy1 wf.le8; have hbb8 := md_buf8 hBt.pt.md (by rw [hrw]; exact wf.le8)"
+   ]
+  },
+  "R": {
+   "pc": "3074",
+   "regs": "R",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re di bf bm r7 dv mo bb cp : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "20, 28 * di, 25",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hH",
+     "Hd {RR} N.mag N.used di 28 1 ((di : Int) - 1) bf sw vr"
+    ],
+    [
+     "hdv",
+     "dv = DV di"
+    ],
+    [
+     "hmo",
+     "mo = sw.mode"
+    ],
+    [
+     "hbb",
+     "bb = sw.bitbuf"
+    ],
+    [
+     "hcp",
+     "cp = sw.bitcpy"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have hiu : di ≤ xu := hH.iu; have hml := md_le hH.md",
+    "have hcw : sw.bitcpy < w ∨ sw.bitcpy = 0 := by have h := md_cpy hH.md; rw [hrw] at h; exact h",
+    "have hdvl : DV di < 2 ^ 64 := Nat.mod_lt _ (by decide)"
+   ],
+   "edge": [
+    [
+     "if",
+     "dv = 18446744073709551615",
+     [
+      [
+       "if",
+       "mo = 2",
+       [
+        [
+         "if",
+         "cp = 0",
+         [
+          [
+           "tac",
+           "exact absurd (md_win hH.md (by om)) (by om)"
+          ]
+         ],
+         [
+          [
+           "seg",
+           "rx3",
+           "ws nV"
+          ],
+          [
+           "jump",
+           "TL",
+           {
+            "vars": {
+             "xk": "0"
+            },
+            "hT": "by rw [hbb]; exact hd_tail henv hH rfl (by have := hdvd di; om) (by om)",
+            "hx": "by have := md_win hH.md (by om); om",
+            "hXK": "rd8_self",
+            "hXS": "rd8_out hXS (by om)",
+            "hYS": "rd8_out hYS (by om)"
+           }
+          ]
+         ],
+         "hb3"
+        ]
+       ],
+       [
+        [
+         "seg",
+         "rx1",
+         "0"
+        ],
+        [
+         "jump",
+         "FIN",
+         {
+          "hD": "hd_done henv hH rfl (by have := hdvd di; om) (by om)"
+         }
+        ]
+       ],
+       "hb2"
+      ]
+     ],
+     [
+      [
+       "seg",
+       "rl",
+       "0"
+      ],
+      [
+       "jump",
+       "RG",
+       {
+        "hi": "by have := hdvd di; om",
+        "hdv": "by have := hdvd di; om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "F": {
+   "pc": "320c",
+   "regs": "F",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re di tb bm bc y bb cp xk : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "20, 28 * di + 28 - tb, 2 * (8 - xk) + 3",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hF",
+     "Fw {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) y sw xk vr"
+    ],
+    [
+     "hxk",
+     "xk < w"
+    ],
+    [
+     "hbb",
+     "bb = sw.bitbuf + y * 2 ^ (w - (sw.bitcpy + 1))"
+    ],
+    [
+     "hcp",
+     "cp = sw.bitcpy"
+    ],
+    [
+     "hXK",
+     "bytesT8 Mv (sp - 6320) = BitVec.ofNat 64 xk"
+    ],
+    [
+     "hbm",
+     "bm < 2 ^ 64"
+    ],
+    [
+     "hDI",
+     "bytesT8 Mi (sp - 6296) = BitVec.ofNat 64 (DV di)"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have := hF.pt.t27; have := hF.pt.cnt; have hiu : di ≤ xu := Nat.le_of_lt hF.pt.iu; have hful : sw.bitcpy + 1 = w := by have h := hF.full; rw [hrw] at h; exact h",
+    "have := hF.acct.used; have := hF.acct.valid.used_le; have := hF.acct.valid.alloc_lt; have hy1 := hF.pt.y_le; have hft := fw_tab henv hw hF hbb"
+   ],
+   "edge": [
+    [
+     "seg",
+     "fs",
+     "0"
+    ],
+    [
+     "call",
+     "mpSqrAG",
+     "sp - 6320, sp - 6280, qr, vr, {HV}",
+     "xs",
+     {
+      "hq": "hsq",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD",
+       "ks": "nR .ks",
+       "ts": "nR .ts",
+       "km": "nR .kc",
+       "tm": "nR .tc"
+      },
+      "res": "⟨⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + (2768 + 8 * vr.used) ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩, hF.acct.valid, by show vr.used < 2 ^ 29; om, hvra, by show OffHeap (sp - 6280) 24; unfold OffHeap; om⟩",
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xs",
+     {
+      "pair ⟨ok, q', a'⟩": [
+       [
+        "tac",
+        "have := hsq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q', a'))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q', a'))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "frf",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q'",
+             "vr": "a'"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "jump",
+           "FR",
+           {
+            "vars": {
+             "qr": "q'",
+             "vr": "a'",
+             "u": "vr"
+            },
+            "hsq": "hsq.post rfl",
+            "hvra": "by om"
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "FR": {
+   "from": "F",
+   "pc": "3218",
+   "regs": "Fr",
+   "regs_over": {
+    "e": "0"
+   },
+   "mu": "20, 28 * di + 28 - tb, 2 * (8 - xk) + 2",
+   "vars": "u : MpInt",
+   "prem": [
+    [
+     "hF",
+     "Fw {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) y sw xk u"
+    ],
+    [
+     "hsq",
+     "SqrPost u vr"
+    ]
+   ],
+   "prelude": [
+    "have hsb := sq_bounds (fit hvn.toShape) hF.acct hsq; have := hsb.2.2"
+   ],
+   "edge": [
+    [
+     "seg",
+     "fr",
+     "0"
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, sp - 6280, qr, pn, ndp, mpv, vr, N, {HV}",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD"
+      },
+      "res": "{RED}",
+      "named": {
+       "hrs": "by simp [keysG, fsr]",
+       "hal": "Std.reduxG_al _"
+      },
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, r2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q2, r2))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q2, r2))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "flf",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q2",
+             "vr": "r2"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "have",
+           "hF2",
+           "Fw.sqr henv hF (by rw [hrw]; om) hsq (Std.rp_redG (hrq.post rfl))"
+          ],
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "if",
+           "xk = cp",
+           [
+            [
+             "seg",
+             "fm",
+             "0"
+            ],
+            [
+             "jump",
+             "FM0",
+             {
+              "vars": {
+               "vr": "r2",
+               "qr": "q2"
+              },
+              "hF": "by rw [show w = xk + 1 by om]; exact hF2",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           [
+            [
+             "seg",
+             "fl",
+             "ws nV"
+            ],
+            [
+             "jump",
+             "F",
+             {
+              "vars": {
+               "vr": "r2",
+               "xk": "xk + 1",
+               "qr": "q2"
+              },
+              "hF": "hF2",
+              "hxk": "by om",
+              "hXK": "rd8_self",
+              "hXS": "rd8_out hXS (by om)",
+              "hYS": "rd8_out hYS (by om)",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           "hb"
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "FM0": {
+   "from": "F",
+   "pc": "325c",
+   "regs": "fmu",
+   "mu": "20, 28 * di + 28 - tb, 1",
+   "-vars": "xk",
+   "-prem": [
+    "hxk",
+    "hXK"
+   ],
+   "prem": [
+    [
+     "hF",
+     "Fw {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) y sw w vr"
+    ]
+   ],
+   "prelude": [
+    "have := hft.1.used; have := hft.1.valid.used_le"
+   ],
+   "edge": [
+    [
+     "call",
+     "mpMulAG",
+     "sp - 6320, sp - 6280, qr, sp - 6256 + 24 * bb, Q bb, vr, V bb, {HV}, 2147587324, 2147587316",
+     "xm",
+     {
+      "hq": "hmu",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD",
+       "bS": "nR (.tS bb)",
+       "bD": "nR (.tD bb)",
+       "kc": "nR .kc",
+       "tc": "nR .tc"
+      },
+      "res": "mulAG_res (by om) (by om) (by om) hF.acct.valid hft.1.valid (by om) (by om) (hVa bb) (by unfold OffHeap; om) (by unfold OffHeap; om)",
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xm",
+     {
+      "pair ⟨ok, q', a'⟩": [
+       [
+        "tac",
+        "have := mulAG_pos hmu.1"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q', a'))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q', a'))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "fm2f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q'",
+             "vr": "a'"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "jump",
+           "FM",
+           {
+            "vars": {
+             "qr": "q'",
+             "vr": "a'",
+             "u": "vr"
+            },
+            "hmul": "mulAG_post hmu.1",
+            "hvra": "by om"
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "FM": {
+   "from": "FM0",
+   "pc": "3260",
+   "regs": "Fr",
+   "regs_over": {
+    "e": "0"
+   },
+   "mu": "20, 28 * di + 28 - tb, 0",
+   "vars": "u : MpInt",
+   "prem": [
+    [
+     "hF",
+     "Fw {RR} N.mag N.used di tb bc ((di : Int) - 1) (bm % 2 ^ 32 * 2 % 2 ^ 32) y sw w u"
+    ],
+    [
+     "hmul",
+     "MulPost u (V bb) vr"
+    ]
+   ],
+   "prelude": [
+    "have hsb := prod_bounds (fit hvn.toShape) hF.acct hft.1 hmul; have := hsb.2.2"
+   ],
+   "edge": [
+    [
+     "seg",
+     "fm2",
+     "0"
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, sp - 6280, qr, pn, ndp, mpv, vr, N, {HV}",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD"
+      },
+      "res": "{RED}",
+      "named": {
+       "hrs": "by simp [keysG, fsr]",
+       "hal": "Std.reduxG_al _"
+      },
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, r2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q2, r2))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q2, r2))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "fm3f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q2",
+             "vr": "r2"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "have",
+           "hH3",
+           "fw_mul henv hw hF (by om) hbb hmul (Std.rp_redG (hrq.post rfl))"
+          ],
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "if",
+           "1 < bc",
+           [
+            [
+             "seg",
+             "fm3a",
+             "0",
+             {
+              "bm2": "sx (bm * 2 % 4294967296)",
+              "y2": "sx (bm * 2 % 4294967296) % 4294967296 / 134217728 % 2"
+             }
+            ],
+            [
+             "jump",
+             "B",
+             {
+              "vars": {
+               "vr": "r2",
+               "tb": "tb + 1",
+               "sw": "⟨1, 0, 0, redF N md (Window.sqIter (redF N md) w sw.res * (runF G Xv N md).tab bb)⟩",
+               "qr": "q2"
+              },
+              "hBt": "hd_next_sx hH3 hb",
+              "hn0": "by show ¬ (1 = 0 ∧ _); om",
+              "hmo": "rfl",
+              "hbb": "rfl",
+              "hcp": "rfl",
+              "hbm": "sxl bm",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           [
+            [
+             "have",
+             "hdvl : DV di < 2 ^ 64",
+             "Nat.mod_lt _ (by decide)"
+            ],
+            [
+             "seg",
+             "fm3b",
+             "0",
+             {
+              "dvs": "DV di"
+             }
+            ],
+            [
+             "jump",
+             "R",
+             {
+              "vars": {
+               "vr": "r2",
+               "sw": "⟨1, 0, 0, redF N md (Window.sqIter (redF N md) w sw.res * (runF G Xv N md).tab bb)⟩",
+               "bf": "bm % 2 ^ 32 * 2 % 2 ^ 32",
+               "qr": "q2"
+              },
+              "hH": "hd_28b hH3 (by om)",
+              "hdv": "rfl",
+              "hmo": "rfl",
+              "hbb": "rfl",
+              "hcp": "rfl",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           "hb"
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "TL": {
+   "pc": "312c",
+   "regs": "TL",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re xk bb cp : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "19, 8 - xk, 3",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hT",
+     "TL {RR} N.mag N.used sw xk bb vr"
+    ],
+    [
+     "hx",
+     "xk < sw.bitcpy"
+    ],
+    [
+     "hcp",
+     "cp = sw.bitcpy"
+    ],
+    [
+     "hXK",
+     "bytesT8 Mv (sp - 6320) = BitVec.ofNat 64 xk"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have hbl := tl_buf16 hw wf.le8 hT; have hcw : sw.bitcpy < w := by have h := hT.win.cw; rw [hrw] at h; exact h",
+    "have := hT.acct.used; have := hT.acct.valid.used_le; have := hT.acct.valid.alloc_lt"
+   ],
+   "edge": [
+    [
+     "seg",
+     "ts",
+     "0"
+    ],
+    [
+     "call",
+     "mpSqrAG",
+     "sp - 6320, sp - 6280, qr, vr, {HV}",
+     "xs",
+     {
+      "hq": "hsq",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD",
+       "ks": "nR .ks",
+       "ts": "nR .ts",
+       "km": "nR .kc",
+       "tm": "nR .tc"
+      },
+      "res": "⟨⟨by show (sp - 6320) % 16 = 0; om, by show heapEnd + (2768 + 8 * vr.used) ≤ sp - 6320; om, by show sp - 6320 ≤ 4294967296; om⟩, hT.acct.valid, by show vr.used < 2 ^ 29; om, hvra, by show OffHeap (sp - 6280) 24; unfold OffHeap; om⟩",
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xs",
+     {
+      "pair ⟨ok, q', a'⟩": [
+       [
+        "tac",
+        "have := hsq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q', a'))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q', a'))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "trf",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q'",
+             "vr": "a'"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "jump",
+           "TLR",
+           {
+            "vars": {
+             "qr": "q'",
+             "vr": "a'",
+             "u": "vr"
+            },
+            "hsq": "hsq.post rfl",
+            "hvra": "by om"
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "TLR": {
+   "from": "TL",
+   "pc": "3138",
+   "regs": "TLr",
+   "regs_over": {
+    "e": "0"
+   },
+   "mu": "19, 8 - xk, 2",
+   "vars": "u : MpInt",
+   "prem": [
+    [
+     "hT",
+     "TL {RR} N.mag N.used sw xk bb u"
+    ],
+    [
+     "hsq",
+     "SqrPost u vr"
+    ]
+   ],
+   "prelude": [
+    "have hsb := sq_bounds (fit hvn.toShape) hT.acct hsq; have := hsb.2.2"
+   ],
+   "edge": [
+    [
+     "seg",
+     "tr",
+     "0"
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, sp - 6280, qr, pn, ndp, mpv, vr, N, {HV}",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD"
+      },
+      "res": "{RED}",
+      "named": {
+       "hrs": "by simp [keysG, trr]",
+       "hal": "Std.reduxG_al _"
+      },
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, r2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q2, r2))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q2, r2))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "tmf",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q2",
+             "vr": "r2"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "jump",
+           "TX",
+           {
+            "vars": {
+             "vr": "r2",
+             "qr": "q2"
+            },
+            "hM": "tl_sqr2 henv hT hx hsq (Std.rp_redG (hrq.post rfl))",
+            "hvra": "by om"
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "TX": {
+   "pc": "3154",
+   "regs": "TL2r",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re xk bb cp : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt; sw : Window.St",
+   "mu": "19, 8 - xk, 1",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hM",
+     "TM {RR} N.mag N.used sw xk (2 * bb) vr"
+    ],
+    [
+     "hcp",
+     "cp = sw.bitcpy"
+    ],
+    [
+     "hXK",
+     "bytesT8 Mv (sp - 6320) = BitVec.ofNat 64 xk"
+    ],
+    [
+     "hbl",
+     "bb < 65536"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have hx := hM.x_lt; have hcw : sw.bitcpy < w := by have h := hM.win.cw; rw [hrw] at h; exact h",
+    "have := hM.acct.used; have := hM.acct.valid.used_le; have := hM.acct.valid.alloc_lt; have h1 := henv.tab.one; have := h1.used; have := h1.valid.used_le"
+   ],
+   "edge": [
+    [
+     "if",
+     "2 * bb &&& 2 * h = 0",
+     [
+      [
+       "have",
+       "hT2",
+       "tm_skip2 hw (by rw [hh]; exact wf.dbl) hM hb"
+      ],
+      [
+       "if",
+       "cp ≤ xk + 1",
+       [
+        [
+         "seg",
+         "tm0",
+         "ws nV"
+        ],
+        [
+         "jump",
+         "FIN",
+         {
+          "hD": "hT2.fin (by om)",
+          "hXS": "rd8_out hXS (by om)",
+          "hYS": "rd8_out hYS (by om)"
+         }
+        ]
+       ],
+       [
+        [
+         "seg",
+         "tm1",
+         "ws nV"
+        ],
+        [
+         "jump",
+         "TL",
+         {
+          "vars": {
+           "xk": "xk + 1",
+           "bb": "2 * bb"
+          },
+          "hT": "hT2",
+          "hx": "by om",
+          "hXK": "rd8_self",
+          "hXS": "rd8_out hXS (by om)",
+          "hYS": "rd8_out hYS (by om)"
+         }
+        ]
+       ],
+       "hb2"
+      ]
+     ],
+     [
+      [
+       "have",
+       "h2b : 2 * bb &&& 2 * h ≤ 2 * h",
+       "Nat.and_le_right"
+      ],
+      [
+       "seg",
+       "tmm",
+       "0"
+      ],
+      [
+       "call",
+       "mpMulAG",
+       "sp - 6320, sp - 6280, qr, sp - 6232, Q 1, vr, V 1, {HV}, 2147587324, 2147587316",
+       "xm",
+       {
+        "hq": "hmu",
+        "sig": {
+         "aS": "nE",
+         "aD": "nR .rD",
+         "bS": "nR (.tS 1)",
+         "bD": "nR (.tD 1)",
+         "kc": "nR .kc",
+         "tc": "nR .tc"
+        },
+        "res": "mulAG_res (by om) (by om) (by om) hM.acct.valid h1.valid (by om) (by om) (hVa 1) (by unfold OffHeap; om) (by unfold OffHeap; om)",
+        "with": "tab"
+       }
+      ],
+      [
+       "cases",
+       "xm",
+       {
+        "pair ⟨ok, q', a'⟩": [
+         [
+          "tac",
+          "have := mulAG_pos hmu.1"
+         ],
+         [
+          "tac",
+          "resc @H' @H (some (qr, vr)) (some (q', a'))"
+         ],
+         [
+          "tac",
+          "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q', a'))); clear @HP",
+          {
+           "lay": {}
+          }
+         ],
+         [
+          "cases",
+          "ok",
+          {
+           "false": [
+            [
+             "set",
+             {
+              "e": "18446744073709551614"
+             }
+            ],
+            [
+             "seg",
+             "tm2f",
+             "0"
+            ],
+            [
+             "forget",
+             "nV"
+            ],
+            [
+             "forget",
+             "nI"
+            ],
+            [
+             "jump",
+             "LRe",
+             {
+              "vars": {
+               "qr": "q'",
+               "vr": "a'"
+              },
+              "hrva": "by om"
+             }
+            ]
+           ],
+           "true": [
+            [
+             "set",
+             {
+              "e": "0"
+             }
+            ],
+            [
+             "jump",
+             "TY",
+             {
+              "vars": {
+               "qr": "q'",
+               "vr": "a'",
+               "u": "vr"
+              },
+              "hmul": "mulAG_post hmu.1",
+              "hvra": "by om",
+              "hb1": "hb"
+             }
+            ]
+           ]
+          }
+         ]
+        ]
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "TY": {
+   "from": "TX",
+   "pc": "3174",
+   "regs": "TL2r",
+   "regs_over": {
+    "e": "0"
+   },
+   "mu": "19, 8 - xk, 0",
+   "vars": "u : MpInt",
+   "prem": [
+    [
+     "hM",
+     "TM {RR} N.mag N.used sw xk (2 * bb) u"
+    ],
+    [
+     "hmul",
+     "MulPost u (V 1) vr"
+    ],
+    [
+     "hb1",
+     "2 * bb &&& 2 * h ≠ 0"
+    ]
+   ],
+   "prelude": [
+    "have hsb := prod_bounds (fit hvn.toShape) hM.acct h1 hmul; have := hsb.2.2"
+   ],
+   "edge": [
+    [
+     "seg",
+     "tm2",
+     "0"
+    ],
+    [
+     "call",
+     "reduxG",
+     "sp - 6320, sp - 6280, qr, pn, ndp, mpv, vr, N, {HV}",
+     "xr",
+     {
+      "hq": "hrq",
+      "C": "(Std.reduxG (Std.rk md N.used))",
+      "jalr": "24",
+      "htgt": "Std.reduxG_tgt hre",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD"
+      },
+      "res": "{RED}",
+      "named": {
+       "hrs": "by simp [keysG, trr]",
+       "hal": "Std.reduxG_al _"
+      },
+      "with": "tab"
+     }
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "pair ⟨ok, q2, r2⟩": [
+       [
+        "tac",
+        "have := hrq.pos"
+       ],
+       [
+        "tac",
+        "resc @H' @H (some (qr, vr)) (some (q2, r2))"
+       ],
+       [
+        "tac",
+        "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q2, r2))); clear @HP",
+        {
+         "lay": {}
+        }
+       ],
+       [
+        "cases",
+        "ok",
+        {
+         "false": [
+          [
+           "set",
+           {
+            "e": "18446744073709551614"
+           }
+          ],
+          [
+           "seg",
+           "tm3f",
+           "0"
+          ],
+          [
+           "forget",
+           "nV"
+          ],
+          [
+           "forget",
+           "nI"
+          ],
+          [
+           "jump",
+           "LRe",
+           {
+            "vars": {
+             "qr": "q2",
+             "vr": "r2"
+            },
+            "hrva": "by om"
+           }
+          ]
+         ],
+         "true": [
+          [
+           "have",
+           "hT2",
+           "tm_mul2 henv hw (by rw [hh]; exact wf.dbl) hM hb1 hmul (Std.rp_redG (hrq.post rfl))"
+          ],
+          [
+           "set",
+           {
+            "e": "0"
+           }
+          ],
+          [
+           "if",
+           "cp ≤ xk + 1",
+           [
+            [
+             "seg",
+             "tm3a",
+             "ws nV"
+            ],
+            [
+             "jump",
+             "FIN",
+             {
+              "vars": {
+               "vr": "r2",
+               "qr": "q2"
+              },
+              "hD": "hT2.fin (by om)",
+              "hXS": "rd8_out hXS (by om)",
+              "hYS": "rd8_out hYS (by om)",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           [
+            [
+             "seg",
+             "tm3b",
+             "ws nV"
+            ],
+            [
+             "jump",
+             "TL",
+             {
+              "vars": {
+               "vr": "r2",
+               "xk": "xk + 1",
+               "bb": "2 * bb",
+               "qr": "q2"
+              },
+              "hT": "hT2",
+              "hx": "by om",
+              "hXK": "rd8_self",
+              "hXS": "rd8_out hXS (by om)",
+              "hYS": "rd8_out hYS (by om)",
+              "hvra": "by om"
+             }
+            ]
+           ],
+           "hb2"
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    ]
+   ]
+  },
+  "FIN": {
+   "pc": "3308",
+   "regs": "FIN",
+   "vars": "M Mk Mv Mi : Mem; w h mpv qr re f4 f5 f7 f9 : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "18, 0, 0",
+   "kinds": "@L",
+   "state": "@L",
+   "prem": [
+    "{LPP}",
+    [
+     "hD",
+     "Done {RR} N.mag N.used vr"
+    ]
+   ],
+   "prelude": [
+    "{LPRE}",
+    "have := hD.used; have := hD.valid.used_le; have := hD.valid.alloc_lt",
+    "have hsb := rs_sq hD har.gt1"
+   ],
+   "edge": [
+    [
+     "if",
+     "md = 0",
+     [
+      [
+       "seg",
+       "fn0",
+       "0"
+      ],
+      [
+       "call",
+       "reduxG",
+       "sp - 6320, sp - 6280, qr, pn, ndp, mpv, vr, N, {HV}",
+       "xr",
+       {
+        "hq": "hrq",
+        "C": "(Std.reduxG (Std.rk md N.used))",
+        "jalr": "24",
+        "htgt": "Std.reduxG_tgt hre",
+        "with": "tab",
+        "sig": {
+         "aS": "nE",
+         "aD": "nR .rD"
+        },
+        "res": "{RED}",
+        "named": {
+         "hrs": "by simp [keysG, fnr]",
+         "hal": "Std.reduxG_al _"
+        }
+       }
+      ],
+      [
+       "cases",
+       "xr",
+       {
+        "pair ⟨ok, q2, r2⟩": [
+         [
+          "tac",
+          "have := hrq.pos"
+         ],
+         [
+          "tac",
+          "resc @H' @H (some (qr, vr)) (some (q2, r2))"
+         ],
+         [
+          "tac",
+          "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ (some (q2, r2))); clear @HP",
+          {
+           "lay": {}
+          }
+         ],
+         [
+          "cases",
+          "ok",
+          {
+           "false": [
+            [
+             "set",
+             {
+              "e": "18446744073709551614"
+             }
+            ],
+            [
+             "seg",
+             "fn2f",
+             "0"
+            ],
+            [
+             "forget",
+             "nV"
+            ],
+            [
+             "forget",
+             "nI"
+            ],
+            [
+             "jump",
+             "LRe",
+             {
+              "vars": {
+               "qr": "q2",
+               "vr": "r2"
+              },
+              "hrva": "by om"
+             }
+            ]
+           ],
+           "true": [
+            [
+             "tac",
+             "have fr : Fresh hin q2 (4 * r2.alloc) := (Heap.fresh_front @HP.heap.heap).mono fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he)"
+            ],
+            [
+             "have",
+             "hpost : Exptmod.SExptmodFastPost G Xv N r2 md",
+             "finF hcd hD (fun h => h ▸ Std.rp_redG (hrq.post rfl)) (fun h => absurd hb h)"
+            ],
+            [
+             "set",
+             {
+              "e": "0"
+             }
+            ],
+            [
+             "seg",
+             "fn2",
+             "0"
+            ],
+            [
+             "call",
+             "mpExch",
+             "sp - 6320, sp - 6280, q2, py, ydp, r2, Yv",
+             "_",
+             {
+              "with": "tab1",
+              "sig": {
+               "aS": "nE",
+               "aD": "nR .rD",
+               "bS": "nR .yS",
+               "bD": "nR .yD"
+              },
+              "res": "by show r2.sign < 2 ^ 31; rw [hpost.sign]; decide"
+             }
+            ],
+            [
+             "seg",
+             "fn3",
+             "0"
+            ],
+            [
+             "forget",
+             "nV"
+            ],
+            [
+             "forget",
+             "nI"
+            ],
+            [
+             "jump",
+             "LRo",
+             {
+              "vars": {
+               "vr": "r2",
+               "qr": "q2"
+              },
+              "hrva": "by om"
+             }
+            ]
+           ]
+          }
+         ]
+        ]
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "fn1",
+       "0"
+      ],
+      [
+       "tac",
+       "have fr : Fresh hin qr (4 * vr.alloc) := (Heap.fresh_front @HP.heap.heap).mono fun e he => List.mem_append_right _ (List.mem_cons_of_mem _ he)"
+      ],
+      [
+       "have",
+       "hpost : Exptmod.SExptmodFastPost G Xv N vr md",
+       "finF hcd hD (fun h => absurd h hb) (fun _ => rfl)"
+      ],
+      [
+       "call",
+       "mpExch",
+       "sp - 6320, sp - 6280, qr, py, ydp, vr, Yv",
+       "_",
+       {
+        "with": "tab1",
+        "sig": {
+         "aS": "nE",
+         "aD": "nR .rD",
+         "bS": "nR .yS",
+         "bD": "nR .yD"
+        },
+        "res": "by show vr.sign < 2 ^ 31; rw [hpost.sign]; decide"
+       }
+      ],
+      [
+       "seg",
+       "fn3",
+       "0"
+      ],
+      [
+       "forget",
+       "nV"
+      ],
+      [
+       "forget",
+       "nI"
+      ],
+      [
+       "jump",
+       "LRo",
+       {
+        "vars": {
+         "vr": "vr"
+        },
+        "hrva": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "LRo": {
+   "pc": "2f34",
+   "regs": "LR",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h v4 v5 v7 v8 v9 mpv qr : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "17, 0, 0",
+   "kinds": "@LO",
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κLRo z x) (sp - 6256) (sp - 6280) ({TV}) (some (ydp, Yv)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hVa",
+     "∀ j, 0 < (V j).alloc"
+    ],
+    [
+     "hpost",
+     "Exptmod.SExptmodFastPost G Xv N vr md"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * vr.alloc)"
+    ],
+    [
+     "hrva",
+     "0 < vr.alloc"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "lr1",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, sp - 6280, ydp, Yv, (qr, 4 * vr.alloc) :: tabBlks ({TV}) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: H)",
+     "_",
+     {
+      "with": "tab1",
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .yD"
+      },
+      "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hres.ypos⟩",
+      "perm": "by show List.Perm ((qr, 4 * vr.alloc) :: (tabBlks ({TV}) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: digBlk ydp Yv :: H))) _; have := List.perm_middle (l₁ := (qr, 4 * vr.alloc) :: (tabBlks ({TV}) h (2 * h - h) ++ [(Q 1, 4 * (V 1).alloc)])) (a := digBlk ydp Yv) (l₂ := H); simpa only [List.cons_append, List.append_assoc, List.singleton_append, List.nil_append] using this"
+     }
+    ],
+    [
+     "unslot",
+     "nP"
+    ],
+    [
+     "jump",
+     "LMo",
+     {
+      "st": "(@H.congrL (tLay_updO (G := TSx) _ _ _ rfl (by decide) Iv.nil)).congrK (by krfl)",
+      "hp": "@HP.congrL (tLay_updO (G := TSx) _ _ _ rfl (by decide) Iv.nil)"
+     }
+    ]
+   ]
+  },
+  "LMo": {
+   "pc": "2f3c",
+   "regs": "LM",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h v4 v5 v7 v8 v9 qr : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "16, 0, 0",
+   "kinds": "@LM",
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (Iv.upd (ρS p) (nR .yD) Iv.nil) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κLMo z x) (sp - 6256) (sp - 6280) ({TV}) none (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (Iv.upd (ρS p) (nR .yD) Iv.nil) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: (tabBlks ({TV}) h (2 * h - h) ++ ((Q 1, 4 * (V 1).alloc) :: H))) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hVa",
+     "∀ j, 0 < (V j).alloc"
+    ],
+    [
+     "hpost",
+     "Exptmod.SExptmodFastPost G Xv N vr md"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * vr.alloc)"
+    ],
+    [
+     "hrva",
+     "0 < vr.alloc"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "lm1",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, sp - 6232, Q 1, V 1, (qr, 4 * vr.alloc) :: (tabBlks (tabV false Q V h (2 * h)) h (2 * h - h) ++ H)",
+     "_",
+     {
+      "with": "tab1",
+      "sig": {
+       "aS": "nR (.tS 1)",
+       "aD": "nR (.tD 1)"
+      },
+      "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hVa 1⟩",
+      "perm": "(List.Perm.cons _ (heap_m1 Q V _ H (by om))).trans (List.Perm.swap _ _ _)"
+     }
+    ],
+    [
+     "tac",
+     "entc @H' @H none none; rw [tabV_drop1 Q V (by om)] at @H'"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ 1 none); clear @HP; rw [tabV_drop1 Q V (by om)] at @HP'",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "seg",
+     "lm2",
+     "0"
+    ],
+    [
+     "jump",
+     "CLo",
+     {
+      "vars": {
+       "y": "h"
+      },
+      "hy1": "Nat.le_refl _",
+      "hy2": "by om",
+      "hyp": "rfl",
+      "hep": "rfl"
+     }
+    ]
+   ]
+  },
+  "CLo": {
+   "pc": "2f78",
+   "regs": "CL",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; w h y yp ep v4 v5 v7 v8 v9 qr : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "15, 2 * h - y, 0",
+   "kinds": "@LM",
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (Iv.upd (ρS p) (nR .yD) Iv.nil) (tabV false Q V y (2 * h)) (some (qr, vr))) wX WX (tKind TSx (κCLo z x) (sp - 6256) (sp - 6280) (tabV false Q V y (2 * h)) none (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (Iv.upd (ρS p) (nR .yD) Iv.nil) (tabV false Q V y (2 * h)) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: (tabBlks (tabV false Q V y (2 * h)) y (2 * h - y) ++ H)) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hVa",
+     "∀ j, 0 < (V j).alloc"
+    ],
+    [
+     "hpost",
+     "Exptmod.SExptmodFastPost G Xv N vr md"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * vr.alloc)"
+    ],
+    [
+     "hrva",
+     "0 < vr.alloc"
+    ],
+    [
+     "hy1",
+     "h ≤ y"
+    ],
+    [
+     "hy2",
+     "y < 2 * h"
+    ],
+    [
+     "hyp",
+     "yp = sp - 6256 + 24 * y"
+    ],
+    [
+     "hep",
+     "ep = sp - 6256 + 48 * h"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "cl1",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, yp, Q y, V y, (qr, 4 * vr.alloc) :: (tabBlks (tabV false Q V (y + 1) (2 * h)) (y + 1) (2 * h - (y + 1)) ++ H)",
+     "_",
+     {
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS y)",
+       "aD": "nR (.tD y)"
+      },
+      "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hVa y⟩",
+      "perm": "(List.Perm.cons _ (List.Perm.of_eq (heap_front false Q V _ hy2))).trans (List.Perm.swap _ _ _)"
+     }
+    ],
+    [
+     "tac",
+     "entc @H' @H none none; rw [tabV_drop false Q V (by om)] at @H'"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ y none); clear @HP; rw [tabV_drop false Q V (by om)] at @HP'",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "if",
+     "yp + 24 = ep",
+     [
+      [
+       "seg",
+       "cl3",
+       "0"
+      ],
+      [
+       "tac",
+       "rw [show y + 1 = 2 * h by om, tabV_empty] at @H @HP"
+      ],
+      [
+       "forget",
+       "nQ"
+      ],
+      [
+       "jump",
+       "XEo",
+       {
+        "hp": "@HP.perm (List.Perm.of_eq (congrArg (List.cons _) (heap_empty _ _ (by om))))"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "cl2",
+       "0"
+      ],
+      [
+       "jump",
+       "CLo",
+       {
+        "vars": {
+         "y": "y + 1"
+        },
+        "hy1": "by om",
+        "hy2": "by om",
+        "hyp": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "XEo": {
+   "pc": "2d7c",
+   "regs": "xe",
+   "regs_over": {
+    "e": "0"
+   },
+   "vars": "M Mk : Mem; qr : Nat; vr : MpInt",
+   "mu": "14, 0, 0",
+   "kinds": "@LX",
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (Iv.upd (ρS p) (nR .yD) Iv.nil) tnil (some (qr, vr))) wX WX (tKind TSx (κXEo z x) (sp - 6256) (sp - 6280) tnil none (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (Iv.upd (ρS p) (nR .yD) Iv.nil) tnil (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: H) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hpost",
+     "Exptmod.SExptmodFastPost G Xv N vr md"
+    ],
+    [
+     "fr",
+     "Fresh hin qr (4 * vr.alloc)"
+    ],
+    [
+     "hrva",
+     "0 < vr.alloc"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "ex1",
+     "0"
+    ],
+    [
+     "seg",
+     "ex2",
+     "0"
+    ],
+    [
+     "seg",
+     "ex3",
+     "0"
+    ],
+    [
+     "exit",
+     "ok"
+    ]
+   ]
+  },
+  "LRe": {
+   "pc": "2f34",
+   "regs": "LR",
+   "regs_over": {
+    "e": "18446744073709551614"
+   },
+   "vars": "M Mk : Mem; w h v4 v5 v7 v8 v9 mpv qr : Nat; Q : Nat → Nat; V : Nat → MpInt; vr : MpInt",
+   "mu": "9, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".ram",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+    "nQ": ".frz m",
+    "nI": ".ram"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κLRe z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hVa",
+     "∀ j, 0 < (V j).alloc"
+    ],
+    [
+     "hrva",
+     "0 < vr.alloc"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "lr1",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, sp - 6280, qr, vr, {HV}",
+     "_",
+     {
+      "sig": {
+       "aS": "nE",
+       "aD": "nR .rD"
+      },
+      "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hrva⟩"
+     }
+    ],
+    [
+     "tac",
+     "resc @H' @H (some (qr, vr)) none"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updR TSok _ _ _ none); clear @HP",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "unslot",
+     "nP"
+    ],
+    [
+     "jump",
+     "LMe",
+     {}
+    ]
+   ]
+  },
+  "LMe": {
+   "pc": "2f3c",
+   "regs": "LM",
+   "regs_over": {
+    "e": "18446744073709551614"
+   },
+   "vars": "M Mk : Mem; w h v4 v5 v7 v8 v9 : Nat; Q : Nat → Nat; V : Nat → MpInt",
+   "mu": "8, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".ram",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".ram",
+    "nQ": ".frz m",
+    "nI": ".ram"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) ({TV}) none) wX WX (tKind TSx (κLMe z x) (sp - 6256) (sp - 6280) ({TV}) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) ({TV}) none) wX hin ({HV}) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hVa",
+     "∀ j, 0 < (V j).alloc"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "lm1",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, sp - 6232, Q 1, V 1, tabBlks (tabV false Q V h (2 * h)) h (2 * h - h) ++ hin",
+     "_",
+     {
+      "with": "tab1",
+      "sig": {
+       "aS": "nR (.tS 1)",
+       "aD": "nR (.tD 1)"
+      },
+      "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hVa 1⟩",
+      "perm": "heap_m1 Q V _ hin (by om)"
+     }
+    ],
+    [
+     "tac",
+     "entc @H' @H none none; rw [tabV_drop1 Q V (by om)] at @H'"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ 1 none); clear @HP; rw [tabV_drop1 Q V (by om)] at @HP'",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "seg",
+     "lm2",
+     "0"
+    ],
+    [
+     "jump",
+     "CLe",
+     {
+      "vars": {
+       "y": "h"
+      },
+      "hy1": "Nat.le_refl _",
+      "hy2": "by om",
+      "hyp": "rfl",
+      "hep": "rfl"
+     }
+    ]
+   ]
+  },
+  "CLe": {
+   "pc": "2f78",
+   "regs": "CL",
+   "regs_over": {
+    "e": "18446744073709551614"
+   },
+   "vars": "M Mk : Mem; w h y yp ep v4 v5 v7 v8 v9 : Nat; Q : Nat → Nat; V : Nat → MpInt",
+   "mu": "7, 2 * h - y, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".ram",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".ram",
+    "nQ": ".frz m",
+    "nI": ".ram"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) (tabV false Q V y (2 * h)) none) wX WX (tKind TSx (κCLe z x) (sp - 6256) (sp - 6280) (tabV false Q V y (2 * h)) none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) (tabV false Q V y (2 * h)) none) wX hin (tabBlks (tabV false Q V y (2 * h)) y (2 * h - y) ++ hin) Wr0 m Mk"
+    ]
+   ],
+   "prem": [
+    [
+     "hw",
+     "w = Exptmod.wsize Xv"
+    ],
+    [
+     "hh",
+     "h = 2 ^ (w - 1)"
+    ],
+    [
+     "hVa",
+     "∀ j, 0 < (V j).alloc"
+    ],
+    [
+     "hy1",
+     "h ≤ y"
+    ],
+    [
+     "hy2",
+     "y < 2 * h"
+    ],
+    [
+     "hyp",
+     "yp = sp - 6256 + 24 * y"
+    ],
+    [
+     "hep",
+     "ep = sp - 6256 + 48 * h"
+    ]
+   ],
+   "prelude": [
+    "{WFS}"
+   ],
+   "edge": [
+    [
+     "seg",
+     "cl1",
+     "0"
+    ],
+    [
+     "call",
+     "mpClear",
+     "sp - 6320, yp, Q y, V y, tabBlks (tabV false Q V (y + 1) (2 * h)) (y + 1) (2 * h - (y + 1)) ++ hin",
+     "_",
+     {
+      "with": "tab",
+      "sig": {
+       "aS": "nR (.tS y)",
+       "aD": "nR (.tD y)"
+      },
+      "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hVa y⟩",
+      "perm": "List.Perm.of_eq (heap_front false Q V _ hy2)"
+     }
+    ],
+    [
+     "tac",
+     "entc @H' @H none none; rw [tabV_drop false Q V (by om)] at @H'"
+    ],
+    [
+     "tac",
+     "have @HP' := @HP.congrL (tLay_updD TSok _ _ _ y none); clear @HP; rw [tabV_drop false Q V (by om)] at @HP'",
+     {
+      "lay": {}
+     }
+    ],
+    [
+     "if",
+     "yp + 24 = ep",
+     [
+      [
+       "seg",
+       "cl3",
+       "0"
+      ],
+      [
+       "tac",
+       "rw [show y + 1 = 2 * h by om, tabV_empty] at @H @HP"
+      ],
+      [
+       "forget",
+       "nQ"
+      ],
+      [
+       "jump",
+       "XE",
+       {
+        "hp": "@HP.perm (List.Perm.of_eq (heap_empty _ _ (by om)))"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "cl2",
+       "0"
+      ],
+      [
+       "jump",
+       "CLe",
+       {
+        "vars": {
+         "y": "y + 1"
+        },
+        "hy1": "by om",
+        "hy2": "by om",
+        "hyp": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "XE": {
+   "pc": "2d7c",
+   "regs": "xe",
+   "vars": "M Mk : Mem",
+   "mu": "1, 0, 0",
+   "kinds": {
+    "nT": ".frz F1",
+    "nV": ".ram",
+    "nM": ".ram",
+    "nE": ".ram",
+    "nP": ".ram",
+    "nQ": ".ram",
+    "nI": ".ram"
+   },
+   "state": [
+    [
+     "st",
+     "St (tLay TSx (ρS p) tnil none) wX WX (tKind TSx (κXE z x) (sp - 6256) (sp - 6280) tnil none none) Mk M"
+    ],
+    [
+     "hp",
+     "HP (tLay TSx (ρS p) tnil none) wX hin hin Wr0 m Mk"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "ex1",
+     "0"
+    ],
+    [
+     "seg",
+     "ex2",
+     "0"
+    ],
+    [
+     "seg",
+     "ex3",
+     "0"
+    ],
+    [
+     "exit",
+     "err"
+    ]
+   ],
+   "regs_over": {
+    "e": "18446744073709551614"
+   }
+  }
+ },
+ "exits": {
+  "stub": [
+   "exact (by omega : False).elim"
+  ],
+  "err": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err Layout.mpMem, _M, hat.sub rfl rfl, rfl,",
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | yS => exact ⟨Iv.sub_self _, _h.hdr (nR .yS) rfl⟩",
+   "      | yD => exact absurd rfl hrs",
+   "      | _ => simp [Api.Exptmod.ws] at hr",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .yD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .yD }⟩"
+  ],
+  "ok": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.ok qr vr, _M, hat.sub rfl rfl, hpost,",
+   "  HPost.fresh' rfl rfl (fun r hr h1 => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | yS => exact ⟨Iv.sub_self _, _h.hdr (nR .yS) rfl⟩",
+   "      | _ => simp [Api.Exptmod.ws] at hr h1)",
+   "    ⟨by simp only [Api.Exptmod.out, Kind.Fits]; exact Iv.sub_self _, _h.dig (nR .rD) rfl⟩ fr (by om) hfr hh _hp.foot",
+   "    (fun r hr h1 => by cases r <;> simp [Api.Exptmod.ws] at hr h1 <;> first | exact hres.stk.off | exact hres.yoff) (_hp.off (nR .rD))⟩"
+  ]
+ },
+ "call_opts": {
+  "tab": {
+   "hk": "by khk",
+   "hsub": "by khsub",
+   "hsep": "by ksep",
+   "hw": "rfl"
+  },
+  "tab1": {
+   "hk": "by khk",
+   "hsub": "by khsub"
+  }
+ },
+ "defs": [
+  "/-- A table call's kind check (`call_heap`'s `hk`): the entry's kinds by its liveness. -/",
+  "macro \"khk\" : tactic => `(tactic| (intro r; cases r <;> (try simp (disch := omega) only [kS, kD, kRS, kRD, entS, entD, tabV_live, tabV_one, tabV_dead]) <;> first | (set_option linter.unusedSimpArgs false in simp only [{KSL}, Kind.mpS.injEq, Kind.mpD.injEq, and_true, true_and]; omega) | rfl))",
+  "-- A table call's sub-layout check (`hsub`): the entry's slot and digit block.",
+  "set_option hygiene false in macro \"khsub\" : tactic => `(tactic| (intro r; cases r <;> (try simp (disch := omega) only [lD, lRD, entIv, tabV_live, tabV_one, tabV_dead, slotT, slotTU]) <;> iv_norm <;> first | omega | (dsimp only [Std.CopyHP.toP, Std.MulFP.toP, Std.MulAFP.toP]; omega) | (simp only [MpSqr.kmAddr, MpSqr.tmAddr, MpMul.kcAddr, MpMul.tcAddr, MpSqr.ksAddr, MpSqr.tsAddr]; omega) | (simp only [SMpExptmodFast.F, SMpExptmodFast.Ff, Std.Fg, Api.MpSqrAF.F, Api.MpMul.F, Api.MpMul.Fm, Api.MpMul.μ, Api.MpMulA.F] at hFv ⊢; omega)))",
+  "/-- A premise of `St.entCall`/`resCall`/`resStd` over the callee's record. -/",
+  "macro \"kp\" : tactic => `(tactic| (set_option linter.unusedSimpArgs false in first | (simp [{KSL}]; done) | (intro k hk h; cases k <;> simp [{KSL}, entS, entD, MpInt.zeroN] at hk h ⊢ <;> first | omega | rfl)))",
+  "-- `kp` over the setup's callees only (a smaller simp set for the setup's calls).",
+  "macro \"kp0\" : tactic => `(tactic| (set_option linter.unusedSimpArgs false in first | (simp [{KSL0}]; done) | (intro k hk h; cases k <;> simp [{KSL0}, entS, entD, MpInt.zeroN] at hk h ⊢ <;> first | omega | rfl)))",
+  "-- The state after a call on table entry `x` / on `res` (allocating) / on `res` (plain).",
+  "set_option hygiene false in macro \"entc\" h:ident o:ident r:term:max e:term:max : tactic => `(tactic| (have $h := St.entCall TSok (stk := nR .stk) (rS' := $r) (e := $e) $o (z.p.sp - 6256) (z.p.sp - 6280) (by intro r; rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> (try cases r) <;> rfl) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp); clear $o))",
+  "set_option hygiene false in macro \"entc0\" h:ident o:ident r:term:max e:term:max : tactic => `(tactic| (have $h := St.entCall TSok (stk := nR .stk) (rS' := $r) (e := $e) $o (z.p.sp - 6256) (z.p.sp - 6280) (by intro r; rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> (try cases r) <;> rfl) (by kp0) (by kp0) (by kp0) (by kp0) (by kp0) (by kp0) (by kp0) (by kp0); clear $o))",
+  "set_option hygiene false in macro \"resc\" h:ident o:ident r:term:max e:term:max : tactic => `(tactic| (have $h := St.resCall TSok (stk := nR .stk) (rS' := $r) (e := $e) $o (z.p.sp - 6256) (z.p.sp - 6280) (by intro r; rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> (try cases r) <;> rfl) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp); clear $o))",
+  "set_option hygiene false in macro \"rescj\" h:ident o:ident r:term:max e:term:max j:term:max : tactic => `(tactic| (have $h := St.resCallJ TSok (stk := nR .stk) (rS' := $r) (e := $e) $o $j (z.p.sp - 6256) (z.p.sp - 6280) (by intro r; rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> (try cases r) <;> rfl) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp); clear $o))",
+  "set_option hygiene false in macro \"ress\" h:ident o:ident r:term:max q:term:max v:term:max : tactic => `(tactic| (have $h := St.resStd TSok (stk := nR .stk) (rS' := $r) (q := $q) (v := $v) $o (z.p.sp - 6256) (z.p.sp - 6280) (by intro r; rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> (try cases r) <;> rfl) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp); clear $o))",
+  "set_option hygiene false in macro \"entcj\" h:ident o:ident r:term:max e:term:max j:term:max : tactic => `(tactic| (have $h := St.entCallJ TSok (stk := nR .stk) (rS' := $r) (e := $e) $o $j (z.p.sp - 6256) (z.p.sp - 6280) (by intro r; rcases r with _ | _ | _ | _ | _ | _ | _ | r <;> (try cases r) <;> rfl) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp) (by kp); clear $o))",
+  "/-- `call_heap`'s separation check for table calls (two entries of the family: their indices differ). -/",
+  "macro \"ksep\" : tactic => `(tactic| (set_option linter.unusedSimpArgs false in simp [SepPres, Sep, wX, w3, Split.wr, isWG, Std.mpCopyH, Two.isW, Std.mpMulG, Std.mpMulG0, Std.mpMulF0, HContract.withPlace, MpMul.isW, Std.mpMulAG, Std.mpMulAG0, Std.mpMulAF0, MpMulA.isW, Std.mpSqrAG, Std.mpSqrAF, MpSqrA.isW, Std.reduxG, MpReduce2k.isW, Std.mpClear, Api.Un.isW, Std.mpInitSize] <;> omega))"
+ ],
+ "kindsets": {
+  "L": {
+   "nT": ".frz F1",
+   "nV": ".frz Mv",
+   "nM": ".ram",
+   "nE": ".ram",
+   "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+   "nQ": ".frz m",
+   "nI": ".frz Mi"
+  },
+  "LO": {
+   "nT": ".frz F1",
+   "nV": ".ram",
+   "nM": ".ram",
+   "nE": ".ram",
+   "nP": ".mpD (sp - 6284) 1 (fun _ => mpv)",
+   "nQ": ".frz m",
+   "nI": ".ram",
+   "nR .yS": ".mpS py qr vr"
+  },
+  "LM": {
+   "nT": ".frz F1",
+   "nV": ".ram",
+   "nM": ".ram",
+   "nE": ".ram",
+   "nP": ".ram",
+   "nQ": ".frz m",
+   "nI": ".ram",
+   "nR .yS": ".mpS py qr vr",
+   "nR .yD": ".ram"
+  },
+  "LX": {
+   "nT": ".frz F1",
+   "nV": ".ram",
+   "nM": ".ram",
+   "nE": ".ram",
+   "nP": ".ram",
+   "nQ": ".ram",
+   "nI": ".ram",
+   "nR .yS": ".mpS py qr vr",
+   "nR .yD": ".ram"
+  }
+ },
+ "statesets": {
+  "L": [
+   [
+    "st",
+    "St (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX WX (tKind TSx (κ@ z x) (sp - 6256) (sp - 6280) ({TV}) (some (qr, vr)) (some (qr, vr))) Mk M"
+   ],
+   [
+    "hp",
+    "HP (tLay TSx (ρS p) ({TV}) (some (qr, vr))) wX hin ((qr, 4 * vr.alloc) :: {HV}) Wr0 m Mk"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,45 @@
+{
+ "fn": "mp_copy", "mod": "MpCopyG", "src": "mcopyg", "pfx": "cpg",
+ "bv": "ra s0 s1", "nat": "sp pa pb u al adp dp n y e ub sg i j", "keep": "gp tp s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "regs": {
+  "ent": "ra sp s0 s1 a0:pa a1:pb",
+  "rt": "ra sp s0 s1 a0:e",
+  "g": "sp:sp-32 s0:pa s1:pb a1:u",
+  "gc": "sp:sp-32 s0:pa s1:pb a0:pb a1:u",
+  "m0": "sp:sp-32 s0:pa s1:pb a0:e",
+  "lh": "sp:sp-32 s0:pa s1:pb a0:dp+4*n a1:u a4:adp+4*n a5:n",
+  "lz": "sp:sp-32 s0:pa s1:pb a0:dp+4*u a1:u a5:u",
+  "ms": "sp:sp-32 s0:pa s1:pb a0:dp+4*u a1:0 a2:4*(ub-u)",
+  "mr": "sp:sp-32 s0:pa s1:pb",
+  "f0": "sp:sp-32 s0:pa s1:pb a1:u",
+  "fr": "sp:sp-32 s0:pa s1:pb a0:0"
+ },
+ "facts": {
+  "FF": ["rs: Ram (sp - 32) 32", "sp % 16 = 0", "32 ≤ sp", "sp ≤ mpCopyBase ∨ mpCopyBase + 184 ≤ sp - 32"],
+  "UA": ["bytesT4 M pa = BitVec.ofNat 32 u", "u < 2 ^ 31", "Ram pa 24", "pa % 8 = 0", "pa + 24 ≤ sp - 32 ∨ sp ≤ pa"],
+  "AB": ["bytesT4 M (pb + 4) = BitVec.ofNat 32 al", "al < 2 ^ 31", "Ram pb 24", "pb % 8 = 0", "pb + 24 ≤ sp - 32 ∨ sp ≤ pb"],
+  "DA": ["bytesT8 M (pa + 16) = BitVec.ofNat 64 adp", "Ram pa 24", "pa % 8 = 0"],
+  "DB": ["bytesT8 M (pb + 16) = BitVec.ofNat 64 dp", "Ram pb 24", "pb % 8 = 0", "pb + 24 ≤ sp - 32 ∨ sp ≤ pb"],
+  "UB": ["bytesT4 M pb = BitVec.ofNat 32 ub", "ub < 2 ^ 31", "Ram pb 24", "pb % 8 = 0", "pb + 24 ≤ sp - 32 ∨ sp ≤ pb"],
+  "SG": ["bytesT4 M (pa + 8) = BitVec.ofNat 32 sg", "sg < 2 ^ 31", "Ram pa 24", "pa % 8 = 0"],
+  "SB": ["Ram pb 24", "pb % 8 = 0", "pb + 24 ≤ sp - 32 ∨ sp ≤ pb", "pb + 24 ≤ mpCopyBase ∨ mpCopyBase + 184 ≤ pb"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "DG": ["bytesT4 M (adp + 4 * i) = BitVec.ofNat 32 y", "y < 268435456", "Ram (adp + 4 * i) 4"],
+  "SW": ["Ram (dp + 4 * j) 4", "(dp + 4 * j) % 4 = 0", "dp + 4 * j + 4 ≤ mpCopyBase ∨ mpCopyBase + 184 ≤ dp + 4 * j",
+         "dp + 4 * j + 4 ≤ sp - 32 ∨ sp ≤ dp + 4 * j", "dp + 4 * j + 4 ≤ pa ∨ pa + 24 ≤ dp + 4 * j"]
+ },
+ "segs": [
+  {"n": "pr", "at": "7e0 F F", "to": "808", "pre": "ent", "post": "g", "h": ["UA", "AB", "pa ≠ pb", "u ≤ al"], "doc": "`a != b`, room: the frame, save `s1`, `s0`, `ra`."},
+  {"n": "pg", "at": "7e0 F T", "pre": "ent", "post": "gc", "h": ["UA", "AB", "pa ≠ pb", "al < u"], "doc": "No room: the frame, save `s1`, `s0`, `ra`; `mp_grow(b, a->used)`."},
+  {"n": "gm", "at": "87c T", "pre": "m0", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_grow` failed: restore, return its error."},
+  {"n": "go", "at": "87c F", "to": "808", "pre": "m0{e:=0}", "post": "g", "h": ["UA"], "doc": "Grown: reload `a->used`; to the copy."},
+  {"n": "z0", "at": "808 T", "to": "834", "pre": "g", "post": "lz", "h": ["DB", "u = 0"], "doc": "`a->used = 0`: no digits to copy."},
+  {"n": "gl", "at": "808 F", "to": "818", "pre": "g", "post": "lh{n:=0}", "h": ["DB", "DA", "0 < u", "u < 2 ^ 31"], "doc": "The digit pointers; enter the copy loop."},
+  {"n": "lp", "at": "818 T", "to": "818", "pre": "lh", "post": "lh{n:=n+1}", "stu": ["y"], "h": ["DG{i:=n}", "SW{j:=n}", "UA", "n + 1 < u"], "doc": "The loop's back edge: `b->dp[n] := a->dp[n]`."},
+  {"n": "lx", "at": "818 F", "to": "834", "pre": "lh", "post": "lz", "stu": ["y"], "h": ["DG{i:=n}", "SW{j:=n}", "UA", "n + 1 = u"], "doc": "The last iteration."},
+  {"n": "zz", "at": "834 T", "to": "850", "pre": "lz", "post": "f0", "h": ["UB", "ub ≤ u", "u < 2 ^ 31"], "doc": "No old digits above: no `memset`."},
+  {"n": "zm", "at": "834 F", "pre": "lz", "post": "ms", "h": ["UB", "u < ub"], "doc": "`memset(&b->dp[u], 0, 4 (b->used - u))`."},
+  {"n": "zr", "at": "84c", "to": "850", "pre": "mr", "post": "f0", "h": ["UA"], "doc": "Reload `a->used`."},
+  {"n": "fin", "at": "850", "to": "860", "pre": "f0", "post": "fr", "stu": ["sg"], "h": ["SG", "SB"], "doc": "`b->used := a->used`, `b->sign := a->sign`."},
+  {"n": "ret", "at": "860", "pre": "fr", "post": "rt{e:=0}", "h": ["RF"], "doc": "Restore, return `MP_OKAY`."}
+ ]}

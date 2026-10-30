@@ -1,0 +1,25 @@
+{
+ "fn": "mp_abs", "mod": "MpAbsG", "src": "mabsg", "pfx": "abg",
+ "bv": "ra", "nat": "sp pa pb e", "keep": "gp tp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "#": "mp_abs(a, b) at 0x800005cc (frame 32): a != b, ra and b spilled at sp-8, sp-24; mp_copy(a, b) (growing); b->sign := MP_ZPOS.",
+ "regs": {
+  "ent": "ra sp a0:pa a1:pb",
+  "cp": "sp:sp-32 a0:pa a1:pb",
+  "r0": "sp:sp-32 a0:e",
+  "sb": "sp:sp-32 a0:0 a5:pb",
+  "fr": "sp:sp-32 a0:0",
+  "rt": "ra sp a0:e"
+ },
+ "facts": {
+  "FF": ["rs: Ram (sp - 32) 32", "sp % 16 = 0", "32 ≤ sp", "sp ≤ mpAbsBase ∨ mpAbsBase + 60 ≤ sp - 32"],
+  "PB": ["bytesT8 M (sp - 24) = BitVec.ofNat 64 pb"],
+  "SB": ["Ram pb 24", "pb % 8 = 0", "pb + 24 ≤ sp - 32 ∨ sp ≤ pb", "pb + 24 ≤ mpAbsBase ∨ mpAbsBase + 60 ≤ pb"],
+  "RF": ["bytesT8 M (sp - 8) = ra"]
+ },
+ "segs": [
+  {"n": "pr", "at": "5cc F", "pre": "ent", "post": "cp", "h": ["pa ≠ pb", "pa < 2 ^ 64", "pb < 2 ^ 64"], "doc": "`a != b`: the frame, spill `ra`, `b`; `mp_copy(a, b)`."},
+  {"n": "ok", "at": "5e0 F", "to": "5e8", "pre": "r0{e:=0}", "post": "sb", "h": ["PB"], "doc": "`MP_OKAY`: reload `b`."},
+  {"n": "sg", "at": "5e8", "to": "5f0", "pre": "sb", "post": "fr", "h": ["SB"], "doc": "`b->sign := MP_ZPOS`."},
+  {"n": "ret", "at": "5f0", "pre": "fr", "post": "rt{e:=0}", "h": ["RF"], "doc": "Restore, return `MP_OKAY`."},
+  {"n": "cf", "at": "5e0 T", "pre": "r0", "post": "rt", "h": ["PB", "RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_copy` failed: restore, return its error."}
+ ]}

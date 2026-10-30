@@ -1,0 +1,12 @@
+{
+ "frame": false, "fn": "s_mp_div_3", "mod": "Div3NG", "src": "div3n", "pfx": "d3n",
+ "#": "",
+ "bv": "", "nat": "sp pa pc w", "keep": "gp tp s3 s4 s5 s6 s7 s8 s9 s10 s11", "h0": [],
+ "regs": {
+  "xN": "sp:sp-80 s0:0 s1:pa s2:pc a2:0 a5:w",
+  "tN": "sp:sp-80 s0:0 s1:pa s2:pc"
+ },
+ "facts": {},
+ "segs": [
+  {"n": "n", "at": "6744 T", "to": "674c", "pre": "xN", "post": "tN", "doc": "`d == NULL`: no remainder stored."}
+ ]}

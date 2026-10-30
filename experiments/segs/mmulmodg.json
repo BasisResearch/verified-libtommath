@@ -1,0 +1,7 @@
+{"mlmPro": [["0x80005d90", "0x80005dc0", null]],
+ "mlmIe": [["0x80005dc4", "0x80005dc8", ["br", false]], ["0x80005dcc", "0x80005de8", "jr"]],
+ "mlmMu": [["0x80005dc4", "0x80005dc8", ["br", true]], ["0x80005dec", "0x80005df8", null]],
+ "mlmMe": [["0x80005dfc", "0x80005e00", ["br", true]], ["0x80005e18", "0x80005e20", null]],
+ "mlmMd": [["0x80005dfc", "0x80005e00", ["br", false]], ["0x80005e04", "0x80005e10", null]],
+ "mlmMk": [["0x80005e14", "0x80005e20", null]],
+ "mlmRet": [["0x80005e24", "0x80005e44", "jr"]]}

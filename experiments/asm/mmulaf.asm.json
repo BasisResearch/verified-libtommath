@@ -1,0 +1,10 @@
+{"extends": "mmula.asm.json",
+ "subst": {"MpMulA.Q": "MpMulAF.Q", "MPreA": "MPreAF", "fresA hres": "fresA hres.toGA",
+           "outA hres (Hide.get hq).1.shape (Hide.get hq).1.pos (Hide.get hq).1.top fun hk => by rw [(Hide.get hq).1.mag hk]; exact mag_full hva.toShapeU hvb.toShapeU": "outAF hres (Hide.get hq).1.shape (Hide.get hq).1.pos (Hide.get hq).1.top (fun hk => by rw [(Hide.get hq).1.mag hk]; exact mag_full hva.toShapeU hvb.toShapeU) (Hide.get hq).1.grow"},
+ "#": "mp_mul(a, b, a) on the comba path (Api/MpMulGAF.lean): mmula with MpMulAF.Small in the residue; the Karatsuba/Toom/balance and s_mp_mul_digs branches contradict it, the s_mp_mul_digs_fast exit adds grow (MulFastHA.Out.grow).",
+ "fn": "mp_mul (in place, comba)", "mod": "MpMulAFMainG", "ns": "Tom.Machine.Fn.MpMulAFG5", "api": "MpMulGAF",
+ "imports": ["Tom.Machine.Kit.Run", "Tom.Machine.Fn.MpMulG", "Tom.Machine.Fn.MpMulAFG5K"],
+ "opens": ["open Tom.Machine.Fn.MpMulG Tom.Machine.Fn.MpMulGK Tom.Machine.Fn.MpMulG5K Tom.Machine.Fn.MpMulAG5K Tom.Machine.Fn.MpMulAFG5K", "open Tom.Machine.Api.MpMulA (P R)"],
+ "blocks": {"big{bg}": [["exit", "no"]], "digs": [["exit", "no"]]},
+ "cuts": {"T": {"edge": [["exit", "no"]]}},
+ "exits": {"no": ["exact (by have := hres.small.ua; have := hres.small.digs; omega : False).elim"]}}

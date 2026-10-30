@@ -1,0 +1,130 @@
+{
+ "fn": "mp_mod", "mod": "MpModMainG", "ns": "Tom.Machine.Fn.MpModG5", "api": "MpMod",
+ "rows": "experiments/segs/mmodg.rows.json", "code": "mpMod", "F": 976, "lay_rfl": true, "dsimp_q": true, "hdig": false,
+ "imports": ["Tom.Machine.Api.MpMod", "Tom.Machine.Api.Std_r10a", "Tom.Machine.Kit.Run", "Tom.Machine.Kit.Sites", "Tom.Spec.IntFacts", "Tom.Machine.Kit.ByteBuf", "Tom.Machine.Fn.MpModG",
+             "Tom.Spec.MpModStep"],
+ "opens": ["open Tom.Machine.Fn.MpModG Tom.MpModStep",
+           "open Tom.Machine.Api.MpMod (R P lay kind isW ws Res)"],
+ "callees": {
+  "mpAddGP": {"heap": true, "site": "cD", "ctor": "Api.MpAddG.R", "params": ["sp", "pa", "adp", "pb", "bdp", "pc", "cdp", "a", "b", "c", "H"],
+              "regions": [["stk", "stk"], ["aS", "S pa"], ["aD", "D adp"], ["bS", "S pb"], ["bD", "D bdp"], ["cS", "S pc"], ["cD", "D cdp"], ["code", "code"]],
+              "entry": "0x80000608"}
+ },
+ "R": ["stk", "aS", "aD", "bS", "bD", "cS", "cD", "code"], "written": ["stk", "cS", "cD"],
+ "Rk": {"aS": "S pa adp a", "aD": "D adp a", "bS": "S pb bdp b", "bD": "D bdp b", "cS": "S pc cdp c", "cD": "D cdp c"},
+ "frame": [["nT", 32], ["nQ", 24], ["nL", 24]], "site": "nS",
+ "refs": {"nQ": "S sp - 56", "nS": "D q", "nR .aS": "S pa", "nR .aD": "D adp", "nR .bS": "S pb", "nR .bD": "D bdp",
+          "nR .cS": "S pc", "nR .cD": "D cdp"},
+ "ctx_vocab": {"N": "(initPrec z.p.b.used)"},
+ "rowdef": {"ub": "b.used", "sb": "b.sign"},
+ "defs": ["def ρt (p : P) (q n : Nat) : X → Iv := Iv.upd (ρX p) nS ⟨q, 4 * n⟩"],
+ "snaps": {"F1": "W(m, pro)"},
+ "prelude": [
+  "have hva := hres.va; have hvb := hres.vb; have := hva.used_le; have := hva.alloc_lt; have := hvb.used_le; have := hvb.alloc_lt",
+  "have := hres.bnz; have := hres.bits; have := hres.au; have := hres.bsize; have := hres.cpos; have := hres.apos",
+  "have env : Env a b c := ⟨hva, hvb, hres.bnz, hres.sc, hres.bsize⟩",
+  "have eF : Api.MpMod.F = 976 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi",
+  "have eL : allocLo = 0x800188a0 := rfl; have eB : mpModBase = 0x80001680 := rfl; have eI : MpInit.Fsize = 576 := rfl",
+  "have eC : MpClear.F = 544 := rfl; have eD : Api.MpDivR.F = 896 := rfl; have eA : Api.MpAddG.F = 608 := rfl",
+  "have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl",
+  "have hR : RamH (sp - 80) 80 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩",
+  "have hN : b.used ≤ N := Nat.le_max_right _ _; have hN31 : N < 2 ^ 31 := Nat.max_lt.2 ⟨by decide, by omega⟩",
+  "have hpa := hS .aS .stk (by decide); have hpb := hS .bS .stk (by decide); have hpc := hS .cS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_bS, layE_cS, layE_code, textIv] at hpa hpb hpc hco"
+ ],
+ "blocks": {
+  "xc": [
+   ["call", "mpExch", "sp - 80, sp - 56, q, pc, cdp, U, c", "_",
+    {"res": "by show U.sign < 2 ^ 31; rcases hT.valid.sign_ok with h | h <;> rw [h] <;> decide"}],
+   ["seg", "kc", "ws nL"],
+   ["call", "mpClear", "sp - 80, sp - 56, cdp, c, (q, 4 * U.alloc) :: H", "_",
+    {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hres.cpos⟩", "perm": "List.Perm.swap (digBlk cdp c) (q, 4 * U.alloc) H"}],
+   ["seg", "ret", "0"],
+   ["exit", "okx"]
+  ]
+ },
+ "cuts": {
+  "E": {"pc": "1680", "regs": "ent", "mu": "1, 0, 0",
+   "state": [["st", "St (ρX p) wX WX (κX p m) m m"], ["hp", "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"]],
+   "edge": [
+    ["seg", "pro", "ws nT"], ["forget", "nQ"],
+    ["call", "mpInitSize", "sp - 80, sp - 56, b.used, hin", "xr", {"hq": "hq", "res": "⟨⟨by om, by om, by om⟩, by om, by om, by unfold OffHeap; om⟩"}],
+    ["cases", "xr", {
+     "none": [["set", {"e": "18446744073709551614"}], ["seg", "ie", "0"], ["exit", "mem", {"_C": "c"}]],
+     "some q": [["tac", "have en : IsP.n ⟨sp - 80, sp - 56, b.used, hin⟩ = N := rfl; have ez : (MpInt.zeroN N).alloc = N := rfl"], ["set", {"e": "0"}], ["seg", "dv", "0"],
+      ["call", "mpDivRP", "sp - 80, pa, adp, pb, bdp, sp - 56, q, a, b, MpInt.zeroN N, hin", "xd",
+       {"hq": "hd", "res": "⟨⟨by om, by om, by om⟩, hva, hvb, hres.bnz, hres.bits, hres.au, fun hs => Nat.le_trans (MpInt.used_le_of_mag_le hvb.toShape hva (Nat.le_of_lt hs)) hN, ip_pos _, by om, hres.aoff, hres.boff, by unfold OffHeap; om, (MpInt.zeroN_valid hN31).toShape, List.mem_cons_of_mem _ hres.ablk, hres.apos, List.mem_cons_of_mem _ hres.bblk⟩"}],
+      ["cases", "xd", {
+       "mem": [["set", {"e": "18446744073709551614"}], ["seg", "de", "ws nL"],
+        ["call", "mpClear", "sp - 80, sp - 56, q, MpInt.zeroN N, hin", "_", {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, ip_pos _⟩"}],
+        ["seg", "ret", "0"], ["exit", "mem", {"_C": "c"}]],
+       "ok ⟨qt, U⟩": [["set", {"e": "0"}],
+        ["jump", "K", {"vars": {"q": "qt"}, "hT": "t_of env hd.1.1", "ht0": "hd.1.2",
+                       "fr": "fresh_of_place (fun _ h => h) hd.2 hq (by have := hd.1.2; om)"}]]}]]}]
+   ]
+  },
+  "K": {"pc": "16e4", "regs": "ir", "regs_over": {"e": "0"}, "vars": "M Mk : Mem; q : Nat; U : MpInt", "mu": "0, 0, 0",
+   "kinds": {"nS": ".mpD q U.alloc U.digit", "nQ": ".mpS (sp - 56) q U", "nT": ".frz F1", "nL": ".frz m"},
+   "state": [["st", "St (ρt p q U.alloc) wX WX (κK z x) Mk M"], ["hp", "HP (ρt p q U.alloc) wX hin ((q, 4 * U.alloc) :: hin) (InAny (lay p) ws) m Mk"]],
+   "prem": [["hT", "T a b U"], ["fr", "Fresh hin q (4 * U.alloc)"], ["ht0", "0 < U.alloc"]],
+   "prelude": ["have hus : U.sign < 2 ^ 31 := by rcases hT.valid.sign_ok with h | h <;> rw [h] <;> decide",
+               "have hbs : b.sign < 2 ^ 31 := by rcases hvb.sign_ok with h | h <;> rw [h] <;> decide",
+               "have hTv := hT.valid; have := hTv.used_le; have := hTv.alloc_lt; have := fr.lo; have := fr.hi",
+               "have hu : U.used ≤ b.used := MpInt.used_le_of_mag_le hvb.toShape hTv (by rw [hT.mag]; exact Nat.le_of_lt (Nat.mod_lt _ (hvb.mag_pos hres.bnz)))"],
+   "edge": [
+    ["if", "U.used = 0", [
+      ["seg", "kz", "ws nL", {"tu": "U.used"}],
+      ["have", "hk : U.used = 0 ∨ U.sign = b.sign", "Or.inl hz"],
+      ["use", "xc"]
+     ], [
+      ["if", "U.sign = b.sign", [
+        ["seg", "ks", "ws nL", {"tu": "U.used", "ts": "U.sign"}],
+        ["have", "hk : U.used = 0 ∨ U.sign = b.sign", "Or.inr hs"],
+        ["use", "xc"]
+       ], [
+        ["seg", "ka", "0", {"tu": "U.used", "ts": "U.sign"}],
+        ["have", "hn : ¬ (U.used = 0 ∨ U.sign = b.sign)", "by rintro (h | h) <;> contradiction"],
+        ["call", "mpAddGP", "sp - 80, pb, bdp, sp - 56, q, pc, cdp, b, U, c, (q, 4 * U.alloc) :: H", "xa",
+         {"hq": "ha", "perm": "List.Perm.swap (digBlk cdp c) (q, 4 * U.alloc) H",
+          "res": "⟨⟨by om, by om, by om⟩, hvb, hTv, hres.sc, by rw [Nat.max_eq_left hu]; om, by om, ht0, hres.cpos, hres.coff⟩"}],
+        ["cases", "xa", {
+         "none": [["set", {"e": "18446744073709551614"}], ["seg", "kd", "ws nL"],
+          ["call", "mpClear", "sp - 80, sp - 56, q, U, digBlk cdp c :: H", "_",
+           {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, ht0⟩", "perm": "List.Perm.swap (q, 4 * U.alloc) (digBlk cdp c) H"}],
+          ["seg", "ret", "0"], ["exit", "mem", {"_C": "c.withSign (addSign b U)"}]],
+         "some ⟨q2, c2⟩": [["set", {"e": "0"}], ["seg", "kd", "ws nL"],
+          ["call", "mpClear", "sp - 80, sp - 56, q, U, (q2, 4 * c2.alloc) :: H", "_",
+           {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, ht0⟩", "perm": "List.Perm.swap (q, 4 * U.alloc) (q2, 4 * c2.alloc) H"}],
+          ["seg", "ret", "0"], ["exit", "oka"]]}]
+       ], "hs"]
+     ], "hz"]
+   ]
+  }
+ },
+ "let": {
+  "WIT": ["  { wit := fun r hr hrs => by",
+          "      cases r with",
+          "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+          "      | cS => exact ⟨Iv.sub_self _, _h.hdr (nR .cS) rfl⟩",
+          "      | cD => exact absurd rfl hrs",
+          "      | _ => simp [ws] at hr"]
+ },
+ "exits": {
+  "mem": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.mem _C, _M, hat.sub rfl rfl, rfl,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .cD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .cD }⟩"],
+  "okx": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.ok q U, _M, hat.sub rfl rfl, fin_keep hT hk,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig nS rfl⟩, place := .fresh fr (by om), frame := hfr, heap := hh",
+   "    foot := fun _ hx => (foot_uncons (e := digBlk cdp c) (Foot.of_cons hx)).imp id id, off := _hp.off nS }⟩"],
+  "oka": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.ok q2 c2, _M, hat.sub rfl rfl, fin_add env hT hn ha.1,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .cD) rfl⟩, place := Place.drop (T := [(q, 4 * U.alloc)]) ha.2, frame := hfr, heap := hh",
+   "    foot := fun _ hx => (foot_uncons (e := digBlk cdp c) (Foot.of_cons hx)).imp id id, off := _hp.off (nR .cD) }⟩"]
+ }
+}

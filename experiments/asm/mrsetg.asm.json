@@ -1,0 +1,71 @@
+{"extends": "mrset.asm.json",
+ "#": "mp_reduce_setup(a, b) growing a (Api/MpReduceSetupG.lean): mp_2expt grows a (Std.mp2exptG), its MP_MEM returned (row fe); the tail call mp_div(a, b, a, NULL) over the layout with a's digits re-placed (flat \"lay\", Kit/Replace.lean).",
+ "mod": "MpReduceSetupGMainG", "ns": "Tom.Machine.Fn.MpReduceSetupGG5", "api": "MpReduceSetupG",
+ "imports": ["Tom.Machine.Api.MpReduceSetupG", "Tom.Machine.Api.Std_r10a", "Tom.Machine.Api.Std_red2", "Tom.Machine.Kit.Run",
+             "Tom.Machine.Fn.MpReduceSetupG", "Tom.Machine.Kit.Replace", "Tom.Spec.MpReduceSetupStep"],
+ "opens": ["open Tom.Machine.Fn.MpReduceSetupG Tom.MpReduceSetupStep",
+           "open Tom.Machine.Api.MpReduceSetup (R P lay kind isW ws)", "open Tom.Machine.Api.MpReduceSetupG (Res)"],
+ "ctx_vocab": {"hin": "Api.MpReduceSetupG.hin z.p"},
+ "refs": {"nR .aD": "D q"},
+ "prelude": [
+  "have hvb := hres.vb; have := hvb.used_le; have := hvb.alloc_lt; have := hres.b0; have := hres.apos; have := hres.sa.alloc_lt",
+  "have hk : b.used * 2 * 28 < 2 ^ 31 := hres.k_lt; have eX : Api.Expt2G.F = 592 := rfl; have eFG : Api.MpReduceSetupG.F = 896 := rfl",
+  "have eF : Api.MpReduceSetup.F = 896 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi",
+  "have eB : mpReduceSetupBase = 0x800063a8 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl",
+  "have hR : RamH (sp - 32) 32 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩",
+  "have hpa := hS .aS .stk (by decide); have hpb := hS .bS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_bS, layE_code, textIv] at hpa hpb hco"
+ ],
+ "let": {"RW": null,
+  "F32": "(by show 32 ≤ (lay p R.stk).len; rw [layE_stk]; exact (by decide : 32 ≤ 896))",
+  "WITP": ["    { wit := fun r hr hrs => by",
+           "        cases r with",
+           "        | stk => exact ⟨trivial, (hB .stk).2⟩",
+           "        | aS => exact ⟨Iv.sub_self _, _h.hdr (nR .aS) rfl⟩",
+           "        | aD => exact absurd rfl hrs",
+           "        | _ => simp [ws] at hr"],
+  "FOOT": "fun y hy => (foot_uncons (e := digBlk adp a) (Foot.of_cons hy)).imp id id"},
+ "cuts": {
+  "E": {
+   "edge": [
+    ["bind", {"q": "adp"}], ["seg", "pro", "ws nT"], ["seg", "pk", "0"], ["seg", "pc", "ws nT"],
+    ["call", "mp2exptG", "sp - 32, pa, adp, a, 56 * b.used, H", "xr",
+     {"hq": "he2", "res": "⟨⟨by om, by om, by om⟩, hres.sa, by om, hres.apos, hres.aoff⟩"}],
+    ["cases", "xr", {
+     "none": [["set", {"e": "18446744073709551614"}], ["seg", "fe", "0"], ["exit", "mem0"]],
+     "some ⟨q1, a2⟩": [
+      ["tac", "have he2' : Expt2Post (expt2In a (b.used * 2 * Layout.digitBits)) (b.used * 2 * Layout.digitBits) a2 := by rw [show b.used * 2 * Layout.digitBits = 56 * b.used by show b.used * 2 * 28 = 56 * b.used; omega]; exact he2.post"],
+      ["tac", "have env : Env (expt2In a (b.used * 2 * Layout.digitBits)) b := ⟨(MpInt.zeroN_valid (expt2In_alloc_lt hres.sa.alloc_lt hres.k_lt)).toShape, hvb, hres.b0, hres.bz, hres.k_lt, expt2In_room _ _⟩"],
+      ["tac", "have h2 := a2_of env he2'"], ["tac", "have hu2 : a2.used = 2 * b.used + 1 := (by rw [he2'.used]; show _ * 2 * 28 / 28 + 1 = _; omega); have hapos : 0 < a2.alloc := by rw [he2'.alloc]; exact Nat.lt_of_lt_of_le (Nat.succ_pos _) (expt2In_room _ _)"],
+      ["tac", "have hSF := Split.sound_upd (L := lay p) (by decide) (by show 0 < 4 * a2.alloc; om) {F32} hS @H.sound"],
+      ["tac", "have hpF := HP.unsplit_upd (L := lay p) (by decide) (by decide) {F32} (hB .stk).2 @HP"],
+      ["bind", {"q": "q1"}], ["seg", "tl", "0"],
+      ["tail", "mpDivQH", "sp, pa, q1, pb, bdp, a2, b, H", "x",
+       {"flat": {"lay": "Iv.upd (lay p) R.aD ⟨q1, 4 * a2.alloc⟩", "sound": "hSF", "hp": "hpF",
+                 "ins": "InAny.push proj (Split.sub_upd (e := proj) rfl (fun _ => rfl) (by decide) {F32})",
+                 "kd": "Kind.set (Kind.set (kind p) R.aS (.mpS pa q1 a2)) R.aD (.mpD q1 a2.alloc a2.digit)"},
+        "hq": "hq", "K'": "v.keep", "hsub": "by intro r; cases r <;> exact Iv.sub_self _",
+        "res": "⟨hres.stk, h2.valid, hvb, hres.b0, by show 28 * b.used < 2 ^ 31; om, by om, by om, hres.aoff, hres.boff, hres.bblk⟩"}],
+      ["exit", "fin"]]}]
+   ]
+  }
+ },
+ "exits": {
+  "mem0": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.mem adp (MpInt.zeroN a.alloc), _M, hat.sub rfl rfl, hres.apos,",
+   "{WITP}",
+   "      wsite := ⟨Iv.sub_self _, _h.dig (nR .aD) rfl⟩, place := .keep, frame := hfr, heap := hh",
+   "      foot := fun _ h => .inl h, off := hoff .aD }⟩"],
+  "fin": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "rcases x with _ | ⟨q2, a3⟩",
+   "· exact Lbl.exit fun cf hat => ⟨.mem q1 a2, _M, hat.sub rfl rfl, hapos,",
+   "{WIT}",
+   "      wsite := ⟨Iv.sub_self _, _h.dig R.aD rfl⟩, place := he2.place, frame := hfr, heap := hh",
+   "      foot := {FOOT}, off := hpo.off }⟩",
+   "· exact Lbl.exit fun cf hat => ⟨.ok q2 a3, _M, hat.sub rfl rfl, fin env h2 hq.1,",
+   "{WIT}",
+   "      wsite := ⟨Iv.sub_self _, _h.dig R.aD rfl⟩, frame := hfr, heap := hh, off := hpo.off",
+   "      place := Place.trans (I0 := ⟨adp, 4 * a.alloc⟩) he2.place (fun e he => he) hpo.place",
+   "      foot := fun y hy => (hpo.foot y hy).elim (fun h => ({FOOT}) y h) (fun h => Place.cov he2.place h) }⟩"]
+ }
+}

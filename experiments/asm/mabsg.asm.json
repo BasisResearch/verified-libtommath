@@ -1,0 +1,47 @@
+{"#": "mp_abs(a, b) growing b (Api/MpAbsG.lean): the frame, mp_copy(a, b) by Std.mpCopyGP (b's digits at q1; its MP_MEM returned: row cf), b->sign := MP_ZPOS on the re-placed struct.",
+ "fn": "mp_abs (growing)", "mod": "MpAbsGMainG", "ns": "Tom.Machine.Fn.MpAbsGG5", "api": "MpAbsG",
+ "rows": "experiments/segs/mabsg.rows.json", "code": "mpAbs", "F": 608, "dsimp_q": true, "hdig": false,
+ "imports": ["Tom.Machine.Api.MpAbsG", "Tom.Machine.Api.Std_red2d", "Tom.Machine.Fn.MpAbsG", "Tom.Machine.Kit.Run", "Tom.Machine.Kit.Grow"],
+ "opens": ["open Tom.Machine.Fn.MpAbsG", "open Tom.Machine.Api.MpAbsG (R P lay kind isW ws Res)"],
+ "R": ["stk", "aS", "aD", "bS", "bD", "code"], "written": ["stk", "bS", "bD"],
+ "Rk": {"bS": "S pb bdp b", "bD": "D bdp b"},
+ "post_site": "bD",
+ "frame": [["nF", 32]],
+ "refs": {"nR .aS": "S pa", "nR .aD": "D adp", "nR .bS": "S pb", "nR .bD": "D bdp"},
+ "pos": ["hres.apos", "hres.bpos"],
+ "prelude": [
+  "have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi; have hne := hres.ne",
+  "have hga := Hdr.geom (hB .aS).2; have := hga.st.lo_ge; have := hga.st.hi_le; have hgb := Hdr.geom (hB .bS).2; have := hgb.st.lo_ge; have := hgb.st.hi_le",
+  "have eE : heapEnd = 0x87800000 := rfl; have eF : Api.MpAbsG.F = 608 := rfl; have eB : mpAbsBase = 0x800005cc := rfl; have eG : Api.MpCopyG.F = 576 := rfl",
+  "have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hR : RamH (sp - 32) 32 := ⟨Ram.sub (hB .stk).2 (by simp only [lay, eF]; omega) (by simp only [lay, eF]; omega)⟩",
+  "have hpb := hS .bS .stk (by decide); have hco := hS .stk .code (by decide); have hcb := hS .bS .code (by decide)",
+  "simp only [Iv.Disj, Disj, lay, eF, textIv] at hpb hco hcb"],
+ "let": {
+  "WIT": ["  { wit := fun r hr hrs => by",
+          "      cases r with",
+          "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+          "      | bS => exact ⟨Iv.sub_self _, _h.hdr (nR .bS) rfl⟩",
+          "      | bD => exact absurd rfl hrs",
+          "      | _ => simp [ws] at hr"]},
+ "cuts": {
+  "E": {"pc": "5cc", "regs": "ent", "mu": "0, 0, 0",
+   "state": [["st", "St (ρX p) wX WX (κX p m) m m"], ["hp", "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"]],
+   "edge": [
+    ["seg", "pr", "ws nF"],
+    ["call", "mpCopyGP", "sp - 32, pa, adp, pb, bdp, a, b, H", "xc",
+     {"hq": "hcp", "res": "⟨⟨by om, by om, by om⟩, hres.sa, hres.sb, hres.asign, hres.apos, hne, hres.bpos, hres.boff⟩"}],
+    ["cases", "xc", {
+     "none": [["set", {"e": "18446744073709551614"}], ["seg", "cf", "0"], ["exit", "mem"]],
+     "some ⟨q1, b1⟩": [
+      ["tac", "obtain ⟨hcp, hpl, hft⟩ := hcp"],
+      ["set", {"e": "0"}], ["seg", "ok", "0"], ["seg", "sg", "s nR .bS"], ["seg", "ret", "0"], ["exit", "ret"]]}]]}},
+ "exits": {
+  "mem": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨none, _M, hat.sub rfl rfl, hcp.1,", "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .bD) rfl⟩, place := .keep",
+   "    frame := hfr, heap := hh, foot := fun _ h => .inl h, off := hoff .bD }⟩"],
+  "ret": ["obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨some (q1, { b1 with sign := 0 }), _M, hat.sub rfl rfl, AbsPost.of_copy hcp,", "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .bD) rfl⟩, place := hpl",
+   "    frame := hfr, heap := hh, foot := hft, off := _hp.off (nR .bD) }⟩"]}}

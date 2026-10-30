@@ -1,0 +1,277 @@
+{
+ "extends": "mmuldg.asm.json",
+ "#": "mp_mul_d(a, b, a) in place growing a: mmuldg.asm.json with the destination the source; the row reads a->dp[ix] from the overlay (the grown block's digits, a's above the row).",
+ "subst": {
+  "c": "a",
+  "pc": "pa",
+  "cS": "aS",
+  "cD": "aD",
+  "hsc": "hsa",
+  "cpos": "apos",
+  "coff": "aoff",
+  "sc": "sa"
+ },
+ "fn": "mp_mul_d(a, b, a) (growing)",
+ "mod": "MulDGAMainG",
+ "ns": "Tom.Machine.Fn.MulDGAG5",
+ "api": "MulDGA",
+ "imports": [
+  "Tom.Machine.Api.MulDGA",
+  "Tom.Machine.Fn.MulDGG",
+  "Tom.Machine.Kit.Run",
+  "Tom.Machine.Kit.Grow"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.MulDGG",
+  "open Tom.Machine.Api.MpLshdG (R)",
+  "open Tom.Machine.Api.MulDGA (P lay kind isW ws Res)"
+ ],
+ "R": [
+  "stk",
+  "aS",
+  "aD",
+  "code"
+ ],
+ "written": [
+  "stk",
+  "aS",
+  "aD"
+ ],
+ "Rk": {
+  "aS": "S pa adp a",
+  "aD": "D adp a",
+  "cS": null,
+  "cD": null
+ },
+ "refs": {
+  "nR .aS": "S pa",
+  "nR .aD": "D q",
+  "nR .cS": null,
+  "nR .cD": null
+ },
+ "pos": [
+  "hres.apos"
+ ],
+ "cuts": {
+  "LP": {
+   "edge": [
+    [
+     "seg",
+     "lc",
+     "0",
+     {
+      "y": "a.digit ix",
+      "DG{i:=ix}": "⟨by rw [← congrFun hg.digit ix]; exact ((_h.dig (nR .aD) rfl).arr ix (by omega)).trans (by simp only [ovl, Nat.lt_irrefl, if_false]), hdl, Ram.sub (_h.dig (nR .aD) rfl).ram (by omega) (by omega)⟩",
+      "adp": "q"
+     }
+    ],
+    [
+     "mul",
+     "mr"
+    ],
+    [
+     "seg",
+     "lb1",
+     "o nR .aD",
+     {
+      "_st": "(by om) (by omega)",
+      "adp": "q"
+     }
+    ],
+    [
+     "if",
+     "ix + 1 < u",
+     [
+      [
+       "seg",
+       "lb2",
+       "0",
+       {
+        "adp": "q"
+       }
+      ],
+      [
+       "tac",
+       "rw [MulDG.carry_succ]"
+      ],
+      [
+       "jump",
+       "LP",
+       {
+        "vars": {
+         "ix": "ix + 1"
+        },
+        "hix": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "le2",
+       "0",
+       {
+        "adp": "q"
+       }
+      ],
+      [
+       "tac",
+       "rw [MulDG.carry_succ]"
+      ],
+      [
+       "jump",
+       "T",
+       {
+        "vars": {
+         "ix": "ix + 1",
+         "m0": "writeLog m0 {L0}"
+        },
+        "rx": "⟨by rd_out, by rd_out, by rd_out, by rd_out, by rd_out, by rd_out, by rd_out⟩",
+        "hix": "by om"
+       }
+      ]
+     ],
+     "hb"
+    ]
+   ],
+   "regs_over": {
+    "ou": "a.used",
+    "c": "combaW (mulDCol a b) ix",
+    "adp": "q"
+   }
+  },
+  "G": {
+   "kinds": {
+    "nR .cS": ".mpS pc q {SG}"
+   },
+   "edge": [
+    [
+     "seg",
+     "s",
+     "s nR .cS",
+     {
+      "ou": "a.used",
+      "adp": "q"
+     }
+    ],
+    [
+     "reK",
+     "nR .cD",
+     ".mpD q A.alloc (ovl (MulDG.g a b) A.digit 0)",
+     "by rw [ovl_zero]"
+    ],
+    [
+     "if",
+     "u = 0",
+     [
+      [
+       "seg",
+       "z",
+       "0",
+       {
+        "ou": "a.used"
+       }
+      ],
+      [
+       "jump",
+       "T",
+       {
+        "vars": {
+         "ix": "0"
+        },
+        "hix": "by om"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "l0",
+       "ws nF",
+       {
+        "ou": "a.used",
+        "adp": "q"
+       }
+      ],
+      [
+       "jump",
+       "LP",
+       {
+        "vars": {
+         "ix": "0"
+        },
+        "hix": "by om"
+       }
+      ]
+     ],
+     "hu"
+    ]
+   ]
+  },
+  "T": {
+   "regs_over": {
+    "ou": "a.used",
+    "c": "combaW (mulDCol a b) ix"
+   },
+   "edge": [
+    [
+     "bind",
+     {
+      "f": "ovl (MulDG.g a b) A.digit ix"
+     }
+    ],
+    [
+     "if",
+     "A.used ≤ ix + 1",
+     [
+      [
+       "seg",
+       "xn",
+       "d nR .cD",
+       {
+        "_st": "(by om) (by omega)"
+       }
+      ],
+      [
+       "use",
+       "Tn"
+      ]
+     ],
+     [
+      [
+       "exit",
+       "dead"
+      ]
+     ],
+     "hn"
+    ]
+   ]
+  }
+ },
+ "prelude": [
+  "have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi",
+  "have hsa := hres.sa; have := hsa.used_le; have := hsa.alloc_lt; have hsc := hres.sc; have := hsc.used_le; have := hsc.alloc_lt",
+  "have hsz := hres.size_lt; have := hres.cpos; have hbr : b < 268435456 := hres.hb",
+  "have hsg : a.sign < 2 ^ 31 := by rcases hres.asign with h | h <;> rw [h] <;> decide",
+  "have eE : heapEnd = 0x87800000 := rfl; have eF : Api.MulDGA.F = 624 := rfl; have eB : mpMulDBase = 0x800019fc := rfl; have eG : MpGrow.F = 544 := rfl",
+  "have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hR : RamH (sp - 80) 80 := ⟨Ram.sub (hB .stk).2 (by simp only [lay, eF]; omega) (by simp only [lay, eF]; omega)⟩",
+  "have hpc := hS .cS .stk (by decide); have hco := hS .stk .code (by decide); have hcc := hS .cS .code (by decide); have hpa := hS .aS .stk (by decide)",
+  "simp only [Iv.Disj, Disj, lay, eF, textIv] at hpc hco hcc hpa"
+ ],
+ "ctx_vocab": {
+  "u": "z.p.a.used",
+  "al": "z.p.c.alloc",
+  "sg": "z.p.a.sign",
+  "pc": "z.p.pa",
+  "cdp": "z.p.adp"
+ },
+ "let": {
+  "SG": "{ A with used := a.used, sign := a.sign }"
+ },
+ "exits": {
+  "dead": [
+   "exact absurd (show A.used ≤ ix + 1 by omega) hn"
+  ]
+ }
+}

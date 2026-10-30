@@ -1,0 +1,7 @@
+{"mrshdN": [["0x80001e1c", "0x80001e1c", ["br", true]], ["0x80001ea4", "0x80001ea4", "jr"]],
+ "mrshdZ": [["0x80001e1c", "0x80001e1c", ["br", false]], ["0x80001e20", "0x80001e28", ["br", true]], ["0x80001ea0", "0x80001ea0", "j"]],
+ "mrshdE": [["0x80001e1c", "0x80001e1c", ["br", false]], ["0x80001e20", "0x80001e28", ["br", false]], ["0x80001e2c", "0x80001e3c", null]],
+ "mrshdL": [["0x80001e3c", "0x80001e58", ["br", true]]],
+ "mrshdLe": [["0x80001e3c", "0x80001e58", ["br", false]]],
+ "mrshdM": [["0x80001e5c", "0x80001e60", ["br", false]], ["0x80001e64", "0x80001e7c", null]],
+ "mrshdR": [["0x80001e80", "0x80001e9c", "jr"]]}

@@ -1,0 +1,434 @@
+{
+ "fn": "mp_mul",
+ "mod": "MpMulG",
+ "src": "mmulg",
+ "pfx": "mmg",
+ "imports": [
+  "Tom.Machine.Kit.BitW",
+  "Tom.Machine.Fn.MpMulGK"
+ ],
+ "bv": "ra s0 e",
+ "nat": "sp pa pb pc ua ub sa sb mn mx hm x ne dg cu",
+ "keep": "tp s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "h0": [
+  "FF"
+ ],
+ "regs": {
+  "ent": "ra sp s0 gp:0x80019090 a0:pa a1:pb a2:pc",
+  "z0": "sp:sp-32 s0:x gp:0x80019090 a0:pa a1:pb a2:pc a3:ub a4:ua a5:mn a6:sb a7:80",
+  "z1": "@z0 s0:ne",
+  "kh": "sp:sp-32 s0:ne gp:0x80019090 a0:pa a1:pb a2:pc a4:hm a5:mn a6:mx a7:80",
+  "cl": "sp:sp-32 s0:ne gp:0x80019090 a0:pa a1:pb a2:pc",
+  "cd": "@cl a3:dg",
+  "rc": "sp:sp-32 s0:ne gp:0x80019090 a0:e",
+  "rt": "ra sp s0 gp:0x80019090 a0:e",
+  "rc2": "@rc a2:pc",
+  "rc3": "@rc2 ra",
+  "za": "sp:sp-32 gp:0x80019090 a0:pa a1:pb a2:pc a3:ub a4:ua"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 32) 32",
+   "sp % 16 = 0",
+   "32 ≤ sp",
+   "sp ≤ mpMulBase ∨ mpMulBase + 340 ≤ sp - 32"
+  ],
+  "AB": [
+   "bytesT4 M pa = BitVec.ofNat 32 ua",
+   "ua < 2 ^ 30",
+   "bytesT4 M pb = BitVec.ofNat 32 ub",
+   "ub < 2 ^ 30",
+   "bytesT4 M (pa + 8) = BitVec.ofNat 32 sa",
+   "sa < 2",
+   "bytesT4 M (pb + 8) = BitVec.ofNat 32 sb",
+   "sb < 2",
+   "Ram pa 24",
+   "pa % 8 = 0",
+   "pa + 24 ≤ sp - 32 ∨ sp ≤ pa",
+   "Ram pb 24",
+   "pb % 8 = 0",
+   "pb + 24 ≤ sp - 32 ∨ sp ≤ pb"
+  ],
+  "KC": [
+   "bytesT4 M 0x800194fc = BitVec.ofNat 32 80",
+   "Ram 0x800194fc 4",
+   "0x800194fc + 4 ≤ sp - 32 ∨ sp ≤ 0x800194fc"
+  ],
+  "TC": [
+   "bytesT4 M 0x800194f4 = BitVec.ofNat 32 350",
+   "Ram 0x800194f4 4",
+   "0x800194f4 + 4 ≤ sp - 32 ∨ sp ≤ 0x800194f4"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = BitVec.ofNat 64 pc"
+  ],
+  "CU": [
+   "bytesT4 M pc = BitVec.ofNat 32 cu",
+   "cu < 2 ^ 31",
+   "Ram pc 24",
+   "pc % 8 = 0",
+   "pc + 24 ≤ sp - 32 ∨ sp ≤ pc",
+   "pc + 24 ≤ mpMulBase ∨ mpMulBase + 340 ≤ pc"
+  ]
+ },
+ "segs": [
+  {
+   "n": "pro0",
+   "at": "18a8 T",
+   "to": "18d8",
+   "pre": "ent",
+   "post": "z0{mn:=ua, x:=(sa + 18446744073709551615 * sb) % 18446744073709551616}",
+   "h": [
+    "AB",
+    "KC",
+    "ua < ub",
+    "sa < 2",
+    "sb < 2"
+   ],
+   "eqs": [
+    "sub01"
+   ],
+   "doc": "`a->used < b->used`: save `ra`, `s0`; `min := a->used`; the signs, `KARATSUBA_MUL_CUTOFF`; `s0 := a->sign - b->sign`.",
+   "by": "(rcases (show sb = 0 ∨ sb = 1 by omega) with h | h <;> rcases (show sa = 0 ∨ sa = 1 by omega) with h' | h' <;> subst h h' <;> decide)"
+  },
+  {
+   "n": "pro1",
+   "at": "18a8 F",
+   "to": "18c4",
+   "pre": "ent",
+   "post": "za",
+   "h": [
+    "AB",
+    "ub ≤ ua"
+   ],
+   "doc": "`b->used ≤ a->used`: save `ra`, `s0`."
+  },
+  {
+   "n": "pro2",
+   "at": "18c4",
+   "to": "18d8",
+   "pre": "za",
+   "post": "z0{mn:=ub, x:=(sa + 18446744073709551615 * sb) % 18446744073709551616}",
+   "h": [
+    "AB",
+    "KC",
+    "sa < 2",
+    "sb < 2"
+   ],
+   "eqs": [
+    "sub01"
+   ],
+   "doc": "`min := b->used` (`sext.w`); the signs, `KARATSUBA_MUL_CUTOFF`; `s0 := a->sign - b->sign`.",
+   "by": "(rcases (show sb = 0 ∨ sb = 1 by omega) with h | h <;> rcases (show sa = 0 ∨ sa = 1 by omega) with h' | h' <;> subst h h' <;> decide)"
+  },
+  {
+   "n": "sn",
+   "at": "18d8",
+   "alu": "snez",
+   "pre": "z0",
+   "post": "z1{ne:=if x = 0 then 0 else 1}",
+   "h": [
+    "x < 2 ^ 64"
+   ],
+   "doc": "`snez s0, s0`: `neg = (a->sign != b->sign)` (one step)."
+  },
+  {
+   "n": "hb",
+   "at": "18dc F F",
+   "to": "18f4",
+   "pre": "z1",
+   "post": "kh{mx:=ub, hm:=ub/2}",
+   "h": [
+    "80 ≤ mn",
+    "ua ≤ ub",
+    "ub < 2 ^ 30",
+    "mn < 2 ^ 30"
+   ],
+   "doc": "`min ≥ K`, `max = b->used`: `max / 2` (cut after the `sraiw`)."
+  },
+  {
+   "n": "ha",
+   "at": "18dc F T",
+   "to": "19a0",
+   "pre": "z1",
+   "post": "kh{mx:=ua, hm:=ua/2}",
+   "h": [
+    "80 ≤ mn",
+    "ub < ua",
+    "ua < 2 ^ 30",
+    "mn < 2 ^ 30"
+   ],
+   "doc": "`min ≥ K`, `max = a->used`: `max / 2` (cut after the `sraiw`)."
+  },
+  {
+   "n": "hbt",
+   "at": "18f4 T",
+   "to": "1978",
+   "pre": "kh",
+   "post": "kh",
+   "h": [
+    "80 ≤ hm",
+    "hm < 2 ^ 30"
+   ],
+   "doc": "`max / 2 ≥ K`: to the ratio test."
+  },
+  {
+   "n": "hbf",
+   "at": "18f4 F",
+   "to": "18f8",
+   "pre": "kh",
+   "post": "kh",
+   "h": [
+    "hm < 80"
+   ],
+   "doc": "`max / 2 < K`: not balanced."
+  },
+  {
+   "n": "hat",
+   "at": "19a0 T",
+   "to": "1978",
+   "pre": "kh",
+   "post": "kh",
+   "h": [
+    "80 ≤ hm",
+    "hm < 2 ^ 30"
+   ],
+   "doc": "`max / 2 ≥ K`: to the ratio test."
+  },
+  {
+   "n": "haf",
+   "at": "19a0 F",
+   "to": "18f8",
+   "pre": "kh",
+   "post": "kh",
+   "h": [
+    "hm < 80"
+   ],
+   "doc": "`max / 2 < K`: not balanced (`j`)."
+  },
+  {
+   "n": "rnb",
+   "at": "1978 T",
+   "to": "18f8",
+   "pre": "kh",
+   "post": "kh{hm:=2*mn}",
+   "h": [
+    "mx < 2 * mn",
+    "mn < 2 ^ 30",
+    "mx < 2 ^ 30"
+   ],
+   "doc": "`max < 2 min`: not balanced."
+  },
+  {
+   "n": "bal",
+   "at": "1978 F",
+   "pre": "kh",
+   "post": "cl",
+   "h": [
+    "2 * mn ≤ mx",
+    "mn < 2 ^ 30",
+    "mx < 2 ^ 30"
+   ],
+   "doc": "`max ≥ 2 min`: spill `c`, call `s_mp_balance_mul`."
+  },
+  {
+   "n": "too",
+   "at": "18f8 T",
+   "pre": "kh",
+   "post": "cl",
+   "h": [
+    "TC",
+    "350 ≤ mn",
+    "mn < 2 ^ 30"
+   ],
+   "doc": "`min ≥ TOOM_MUL_CUTOFF`: spill `c`, call `s_mp_toom_mul`."
+  },
+  {
+   "n": "kar",
+   "at": "18f8 F",
+   "pre": "kh",
+   "post": "cl",
+   "h": [
+    "TC",
+    "mn < 350"
+   ],
+   "doc": "Karatsuba: spill `c`, call `s_mp_karatsuba_mul`."
+  },
+  {
+   "n": "ld1",
+   "at": "18dc T F T",
+   "pre": "z1",
+   "post": "cd{dg:=ua+ub+1}",
+   "h": [
+    "TC",
+    "mn < 80",
+    "512 ≤ ua + ub + 1",
+    "ua < 2 ^ 30",
+    "ub < 2 ^ 30"
+   ],
+   "doc": "`min < K`, `digs ≥ MP_WARRAY`: spill `c`, call `s_mp_mul_digs`."
+  },
+  {
+   "n": "ld2",
+   "at": "18dc T F F T",
+   "pre": "z1",
+   "post": "cd{dg:=ua+ub+1}",
+   "h": [
+    "TC",
+    "mn < 80",
+    "ua + ub + 1 < 512",
+    "256 < mn"
+   ],
+   "doc": "`min > MP_MAXFAST`: call `s_mp_mul_digs` (not taken: `min < K`)."
+  },
+  {
+   "n": "lf",
+   "at": "18dc T F F F",
+   "pre": "z1",
+   "post": "cd{dg:=ua+ub+1}",
+   "h": [
+    "TC",
+    "mn < 80",
+    "ua + ub + 1 < 512"
+   ],
+   "doc": "`digs < MP_WARRAY`, `min ≤ MP_MAXFAST`: spill `c`, call `s_mp_mul_digs_fast`."
+  },
+  {
+   "n": "lk",
+   "at": "1908",
+   "to": "1910",
+   "pre": "rc",
+   "post": "rc3",
+   "h": [
+    "RF"
+   ],
+   "doc": "After karatsuba: reload `c`."
+  },
+  {
+   "n": "rk",
+   "at": "1910",
+   "pre": "rc3",
+   "post": "rt",
+   "h": [
+    "RF",
+    "CU",
+    "ne < 2",
+    "cu < 2 ^ 31"
+   ],
+   "stu": [
+    "min (ne % 2) (cu % 4294967296)"
+   ],
+   "eqs": [
+    "sgn01"
+   ],
+   "doc": "After karatsuba: `c->sign := neg ∧ c->used > 0`, restore, return `err`.",
+   "by": "simp only [Tom.Machine.WV.sgn01]"
+  },
+  {
+   "n": "lfa",
+   "at": "1954",
+   "to": "1958",
+   "pre": "rc",
+   "post": "rc2",
+   "h": [
+    "RF"
+   ],
+   "doc": "After the fast multiplier: reload `c`."
+  },
+  {
+   "n": "lba",
+   "at": "1988",
+   "to": "1958",
+   "pre": "rc",
+   "post": "rc2",
+   "h": [
+    "RF"
+   ],
+   "doc": "After balance: reload `c` (`j`)."
+  },
+  {
+   "n": "rf",
+   "at": "1958",
+   "pre": "rc2",
+   "post": "rt",
+   "h": [
+    "RF",
+    "CU",
+    "ne < 2",
+    "cu < 2 ^ 31"
+   ],
+   "stu": [
+    "min (ne % 2) (cu % 4294967296)"
+   ],
+   "eqs": [
+    "sgn01"
+   ],
+   "doc": "After the fast multiplier or balance: the sign, return.",
+   "by": "simp only [Tom.Machine.WV.sgn01]"
+  },
+  {
+   "n": "lto",
+   "at": "19b0",
+   "to": "19b4",
+   "pre": "rc",
+   "post": "rc2",
+   "h": [
+    "RF"
+   ],
+   "doc": "After toom: reload `c`."
+  },
+  {
+   "n": "rto",
+   "at": "19b4",
+   "pre": "rc2",
+   "post": "rt",
+   "h": [
+    "RF",
+    "CU",
+    "ne < 2",
+    "cu < 2 ^ 31"
+   ],
+   "stu": [
+    "min (ne % 2) (cu % 4294967296)"
+   ],
+   "eqs": [
+    "sgn01"
+   ],
+   "doc": "After toom: the sign, return.",
+   "by": "simp only [Tom.Machine.WV.sgn01]"
+  },
+  {
+   "n": "ldg",
+   "at": "19d8",
+   "to": "19dc",
+   "pre": "rc",
+   "post": "rc2",
+   "h": [
+    "RF"
+   ],
+   "doc": "After `s_mp_mul_digs`: reload `c`."
+  },
+  {
+   "n": "rd",
+   "at": "19dc",
+   "pre": "rc2",
+   "post": "rt",
+   "h": [
+    "RF",
+    "CU",
+    "ne < 2",
+    "cu < 2 ^ 31"
+   ],
+   "stu": [
+    "min (ne % 2) (cu % 4294967296)"
+   ],
+   "eqs": [
+    "sgn01"
+   ],
+   "doc": "After `s_mp_mul_digs`: the sign, return.",
+   "by": "simp only [Tom.Machine.WV.sgn01]"
+  }
+ ]
+}

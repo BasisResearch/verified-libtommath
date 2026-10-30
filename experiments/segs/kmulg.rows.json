@@ -1,0 +1,822 @@
+{
+ "fn": "s_mp_karatsuba_mul",
+ "mod": "KMulG",
+ "src": "kmulg",
+ "pfx": "kml",
+ "bv": "ra s0 s1 s2 s3 s4 s5",
+ "nat": "sp pa pb pr ua ub nb e er adp bdp x0d y0d x1d y1d i k xa yb a x",
+ "keep": "gp tp s6 s7 s8 s9 s10 s11",
+ "h0": [
+  "FF"
+ ],
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 a0:pa a1:pb a2:pr",
+  "z0": "sp:sp-240 s0:nb s1:pa s2:pb s3 s4 s5:pr",
+  "i1": "@z0 a0:sp-232 a1:nb",
+  "r1": "@z0 a0:e",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 a0:er",
+  "bq": "@z0 s4:er",
+  "r2": "@bq a0:e",
+  "k0": "@bq a0:sp-232",
+  "k1": "@bq a0:sp-208",
+  "k2": "@bq a0:sp-184",
+  "i2": "@bq a0:sp-208 a1:ua-nb",
+  "i3": "@bq a0:sp-184 a1:nb",
+  "i4": "@bq a0:sp-160 a1:ub-nb",
+  "bt": "@bq s3:2*nb",
+  "rb": "@bt a0:e",
+  "i5": "@bt a0:sp-136 a1:2*nb",
+  "i6": "@bt a0:sp-112 a1:2*nb",
+  "i7": "@bt a0:sp-88 a1:2*nb",
+  "k3": "@bt a0:sp-160",
+  "k4": "@bt a0:sp-136",
+  "k5": "@bt a0:sp-112",
+  "k6": "@bt a0:sp-88",
+  "cpa": "@bt a2:ua",
+  "j2": "@bt a2:ua a3:bdp+4*nb a4:adp+4*nb",
+  "l1": "@bt a0:x0d+4*i a1:y0d+4*i a2:bdp+4*i a3:bdp a4:adp a5:adp+4*i a7:adp+4*nb",
+  "j3": "@bt a3:bdp+4*nb",
+  "l2": "@bt a2:x1d+4*k a3:bdp+4*nb a4:adp+4*(nb+k) a5:nb+k",
+  "l3": "@bt a3:bdp+4*(nb+k) a4:y1d+4*k a5:nb+k",
+  "q0": "@bt a0:sp-232",
+  "qy0": "@bt a0:sp-184",
+  "qm1": "@bt a0:sp-232 a1:sp-184 a2:sp-112",
+  "qm2": "@bt a0:sp-208 a1:sp-160 a2:sp-88",
+  "qa1": "@bt a0:sp-208 a1:sp-232 a2:sp-136",
+  "qa2": "@bt a0:sp-160 a1:sp-184 a2:sp-232",
+  "qm3": "@bt a0:sp-136 a1:sp-232 a2:sp-136",
+  "qa3": "@bt a0:sp-112 a1:sp-88 a2:sp-232",
+  "qs": "@bt a0:sp-136 a1:sp-232 a2:sp-136",
+  "qh1": "@bt a0:sp-136 a1:nb",
+  "qh2": "@bt a0:sp-88 a1:2*nb",
+  "qa4": "@bt a0:sp-112 a1:sp-136 a2:sp-136",
+  "qa5": "@bt a0:sp-136 a1:sp-88 a2:pr",
+  "l1m": "@l1 a1:y0d+4*i+4 a2:bdp+4*i+4",
+  "cpm1": "@bt a2:ua a5:ub",
+  "cpm2": "@bt a2:ua a4:ua-nb a5:ub-nb"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 240) 240",
+   "sp % 16 = 0",
+   "240 ≤ sp",
+   "sp ≤ sMpKaratsubaMulBase ∨ sMpKaratsubaMulBase + 772 ≤ sp - 240"
+  ],
+  "AU": [
+   "bytesT4 M pa = BitVec.ofNat 32 ua",
+   "ua < 2 ^ 30",
+   "Ram pa 24",
+   "pa % 8 = 0",
+   "pa + 24 ≤ sp - 240 ∨ sp ≤ pa"
+  ],
+  "BU": [
+   "bytesT4 M pb = BitVec.ofNat 32 ub",
+   "ub < 2 ^ 30",
+   "Ram pb 24",
+   "pb % 8 = 0",
+   "pb + 24 ≤ sp - 240 ∨ sp ≤ pb"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = s1",
+   "bytesT8 M (sp - 32) = s2",
+   "bytesT8 M (sp - 48) = s4",
+   "bytesT8 M (sp - 56) = s5"
+  ],
+  "RS": [
+   "bytesT8 M (sp - 40) = s3"
+  ],
+  "AD": [
+   "bytesT8 M (pa + 16) = BitVec.ofNat 64 adp",
+   "bytesT8 M (pb + 16) = BitVec.ofNat 64 bdp",
+   "Ram pa 24",
+   "pa % 8 = 0",
+   "Ram pb 24",
+   "pb % 8 = 0"
+  ],
+  "X0": [
+   "bytesT8 M (sp - 232 + 16) = BitVec.ofNat 64 x0d",
+   "bytesT8 M (sp - 184 + 16) = BitVec.ofNat 64 y0d"
+  ],
+  "X1": [
+   "bytesT8 M (sp - 208 + 16) = BitVec.ofNat 64 x1d"
+  ],
+  "Y1": [
+   "bytesT8 M (sp - 160 + 16) = BitVec.ofNat 64 y1d"
+  ],
+  "W1": [
+   "Ram x1d (4 * (ua - nb))",
+   "x1d % 4 = 0",
+   "x1d + 4 * (ua - nb) ≤ sMpKaratsubaMulBase ∨ sMpKaratsubaMulBase + 772 ≤ x1d",
+   "x1d + 4 * (ua - nb) ≤ pa ∨ pa + 24 ≤ x1d"
+  ],
+  "W3": [
+   "Ram y1d (4 * (ub - nb))",
+   "y1d % 4 = 0",
+   "y1d + 4 * (ub - nb) ≤ sMpKaratsubaMulBase ∨ sMpKaratsubaMulBase + 772 ≤ y1d",
+   "y1d + 4 * (ub - nb) ≤ pb ∨ pb + 24 ≤ y1d"
+  ],
+  "DG": [
+   "bytesT4 M a = BitVec.ofNat 32 x",
+   "x < 2 ^ 31",
+   "Ram a 4"
+  ],
+  "WX0": [
+   "Ram x0d (4 * nb)",
+   "x0d % 4 = 0",
+   "x0d + 4 * nb ≤ sMpKaratsubaMulBase ∨ sMpKaratsubaMulBase + 772 ≤ x0d"
+  ],
+  "WY0": [
+   "Ram y0d (4 * nb)",
+   "y0d % 4 = 0",
+   "y0d + 4 * nb ≤ sMpKaratsubaMulBase ∨ sMpKaratsubaMulBase + 772 ≤ y0d"
+  ]
+ },
+ "segs": [
+  {
+   "n": "pro0",
+   "at": "3a98 T",
+   "to": "3ad8",
+   "pre": "ent",
+   "post": "z0",
+   "h": [
+    "AU",
+    "BU",
+    "ua < ub",
+    "nb = ua / 2"
+   ],
+   "doc": "`a->used < b->used`: save `s0`–`s2`, `s5`, `ra`, `s4`; `B := a->used >> 1` (cut after the `sraiw`)."
+  },
+  {
+   "n": "pro1",
+   "at": "3a98 F",
+   "to": "3ad8",
+   "pre": "ent",
+   "post": "z0",
+   "h": [
+    "AU",
+    "BU",
+    "ub ≤ ua",
+    "nb = ub / 2"
+   ],
+   "doc": "`b->used ≤ a->used`: save; `B := b->used >> 1` (cut after the `sraiw`)."
+  },
+  {
+   "n": "pz",
+   "at": "3ad8",
+   "pre": "z0",
+   "post": "i1",
+   "doc": "`mp_init_size(&x0, B)`."
+  },
+  {
+   "n": "e1",
+   "at": "3ae4 T",
+   "pre": "r1",
+   "post": "rt{er:=18446744073709551614}",
+   "h": [
+    "RF",
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x0)` failed: return `MP_MEM`."
+  },
+  {
+   "n": "i2",
+   "at": "3ae4 F",
+   "pre": "r1{e:=0}",
+   "post": "i2{er:=18446744073709551614}",
+   "h": [
+    "AU",
+    "2 * nb ≤ ua"
+   ],
+   "doc": "`mp_init_size(&x1, a->used - B)`."
+  },
+  {
+   "n": "x0f",
+   "at": "3afc F",
+   "pre": "r2{er:=18446744073709551614}",
+   "post": "k0{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x1)` failed: `mp_clear(&x0)`."
+  },
+  {
+   "n": "ret",
+   "at": "3b08",
+   "pre": "bq",
+   "post": "rt",
+   "h": [
+    "RF"
+   ],
+   "doc": "After `mp_clear(&x0)`: restore, return `err`."
+  },
+  {
+   "n": "i3",
+   "at": "3afc T",
+   "pre": "r2{er:=18446744073709551614, e:=0}",
+   "post": "i3{er:=18446744073709551614}",
+   "doc": "`mp_init_size(&y0, B)`."
+  },
+  {
+   "n": "y0f",
+   "at": "3b38 T",
+   "pre": "r2{er:=18446744073709551614}",
+   "post": "k1{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&y0)` failed: `mp_clear(&x1)`."
+  },
+  {
+   "n": "i4",
+   "at": "3b38 F",
+   "pre": "r2{er:=18446744073709551614, e:=0}",
+   "post": "i4{er:=18446744073709551614}",
+   "h": [
+    "BU",
+    "2 * nb ≤ ub"
+   ],
+   "doc": "`mp_init_size(&y1, b->used - B)`."
+  },
+  {
+   "n": "y1f",
+   "at": "3b4c F",
+   "pre": "r2{er:=18446744073709551614}",
+   "post": "k2{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&y1)` failed: `mp_clear(&y0)`."
+  },
+  {
+   "n": "cy0",
+   "at": "3b58",
+   "pre": "bq",
+   "post": "k1",
+   "doc": "After `mp_clear(&y0)`: `mp_clear(&x1)`."
+  },
+  {
+   "n": "cx1",
+   "at": "3b60",
+   "pre": "bq",
+   "post": "k0",
+   "doc": "After `mp_clear(&x1)`: `mp_clear(&x0)`."
+  },
+  {
+   "n": "i5",
+   "at": "3b4c T",
+   "pre": "r2{er:=18446744073709551614, e:=0}",
+   "post": "i5{er:=18446744073709551614}",
+   "h": [
+    "nb < 2 ^ 30"
+   ],
+   "doc": "Save `s3`; `mp_init_size(&t1, 2 B)`."
+  },
+  {
+   "n": "t1f",
+   "at": "3b78 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k3{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&t1)` failed: `mp_clear(&y1)`."
+  },
+  {
+   "n": "i6",
+   "at": "3b78 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "i6{er:=18446744073709551614}",
+   "doc": "`mp_init_size(&x0y0, 2 B)`."
+  },
+  {
+   "n": "x0y0f",
+   "at": "3b88 F",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k4{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x0y0)` failed: `mp_clear(&t1)`."
+  },
+  {
+   "n": "ct1",
+   "at": "3b94",
+   "pre": "bt",
+   "post": "k3",
+   "doc": "After `mp_clear(&t1)`: `mp_clear(&y1)`."
+  },
+  {
+   "n": "cy1",
+   "at": "3b9c",
+   "pre": "bt",
+   "post": "k2",
+   "h": [
+    "RS"
+   ],
+   "doc": "After `mp_clear(&y1)`: restore `s3`; `mp_clear(&y0)`."
+  },
+  {
+   "n": "i7",
+   "at": "3b88 T",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "i7{er:=18446744073709551614}",
+   "doc": "`mp_init_size(&x1y1, 2 B)`."
+  },
+  {
+   "n": "x1y1f",
+   "at": "3bb0 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x1y1)` failed: `mp_clear(&x0y0)`."
+  },
+  {
+   "n": "cx1y1",
+   "at": "3d80",
+   "pre": "bt",
+   "post": "k5",
+   "doc": "After `mp_clear(&x1y1)`: `mp_clear(&x0y0)`."
+  },
+  {
+   "n": "cx0y0",
+   "at": "3d88",
+   "pre": "bt",
+   "post": "k4",
+   "doc": "After `mp_clear(&x0y0)`: `mp_clear(&t1)`."
+  },
+  {
+   "n": "cpa",
+   "at": "3bb0 F",
+   "to": "3bc0",
+   "st": [
+    "nb"
+   ],
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "cpm1{er:=18446744073709551614}",
+   "h": [
+    "AU",
+    "BU"
+   ],
+   "doc": "`y0.used := B` (`a->used`, `b->used` loaded)."
+  },
+  {
+   "n": "cpb",
+   "at": "3bc0",
+   "to": "3bcc",
+   "st": [
+    "ua - nb"
+   ],
+   "pre": "cpm1{er:=18446744073709551614}",
+   "post": "cpm2{er:=18446744073709551614}",
+   "h": [
+    "2 * nb ≤ ua",
+    "2 * nb ≤ ub",
+    "ua < 2 ^ 30",
+    "ub < 2 ^ 30"
+   ],
+   "doc": "`x1.used := a->used - B`."
+  },
+  {
+   "n": "cpc",
+   "at": "3bcc",
+   "to": "3bd0",
+   "st": [
+    "nb"
+   ],
+   "pre": "cpm2{er:=18446744073709551614}",
+   "post": "cpm2{er:=18446744073709551614}",
+   "doc": "`x0.used := B`."
+  },
+  {
+   "n": "cpd",
+   "at": "3bd0",
+   "to": "3bd4",
+   "st": [
+    "ub - nb"
+   ],
+   "pre": "cpm2{er:=18446744073709551614}",
+   "post": "cpa{er:=18446744073709551614}",
+   "doc": "`y1.used := b->used - B`."
+  },
+  {
+   "n": "cz",
+   "at": "3bd4 T",
+   "to": "3c3c",
+   "pre": "cpa{er:=18446744073709551614, nb:=0}",
+   "post": "j2{er:=18446744073709551614, nb:=0}",
+   "h": [
+    "AD"
+   ],
+   "doc": "`B = 0`: no low digits to copy."
+  },
+  {
+   "n": "cl",
+   "at": "3bd4 F",
+   "to": "3bf8",
+   "pre": "cpa{er:=18446744073709551614}",
+   "post": "l1{er:=18446744073709551614, i:=0}",
+   "h": [
+    "AD",
+    "X0",
+    "0 < nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "The low copy loop's set-up (`tmpa`, `tmpb`, `tmpx = x0.dp`, `tmpy = y0.dp`)."
+  },
+  {
+   "n": "la1",
+   "at": "3bf8",
+   "to": "3c08",
+   "st": [
+    "xa"
+   ],
+   "pre": "l1{er:=18446744073709551614}",
+   "post": "l1m{er:=18446744073709551614}",
+   "h": [
+    "DG{a:=adp+4*i, x:=xa}",
+    "WX0",
+    "i < nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "`*tmpx++ = *tmpa++` (low digit of `a`)."
+  },
+  {
+   "n": "lb1",
+   "at": "3c08 T",
+   "to": "3bf8",
+   "st": [
+    "yb"
+   ],
+   "pre": "l1m{er:=18446744073709551614}",
+   "post": "l1{er:=18446744073709551614, i:=i+1}",
+   "h": [
+    "DG{a:=bdp+4*i, x:=yb}",
+    "WY0",
+    "i + 1 < nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "`*tmpy++ = *tmpb++` (low digit of `b`), back edge."
+  },
+  {
+   "n": "lx1",
+   "at": "3c08 F",
+   "to": "3c3c",
+   "st": [
+    "yb"
+   ],
+   "pre": "l1m{er:=18446744073709551614}",
+   "post": "j2{er:=18446744073709551614}",
+   "h": [
+    "DG{a:=bdp+4*i, x:=yb}",
+    "WY0",
+    "y0d + 4 * nb ≤ pa ∨ pa + 24 ≤ y0d",
+    "AU",
+    "i + 1 = nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "The last low digit of `b`; `tmpa`, `tmpb` advanced by `B`; reload `a->used`."
+  },
+  {
+   "n": "g2",
+   "at": "3c3c T",
+   "to": "3c64",
+   "pre": "j2{er:=18446744073709551614}",
+   "post": "j3{er:=18446744073709551614}",
+   "h": [
+    "ua ≤ nb",
+    "nb < 2 ^ 30",
+    "ua < 2 ^ 30"
+   ],
+   "doc": "No high digits of `a` to copy."
+  },
+  {
+   "n": "g2f",
+   "at": "3c3c F",
+   "to": "3c48",
+   "pre": "j2{er:=18446744073709551614}",
+   "post": "l2{er:=18446744073709551614, k:=0}",
+   "h": [
+    "X1",
+    "nb < ua",
+    "ua < 2 ^ 30"
+   ],
+   "doc": "The high copy loop of `a` (`tmpx = x1.dp`)."
+  },
+  {
+   "n": "lb2",
+   "at": "3c48 T",
+   "to": "3c48",
+   "st": [
+    "xa"
+   ],
+   "pre": "l2{er:=18446744073709551614}",
+   "post": "l2{er:=18446744073709551614, k:=k+1}",
+   "h": [
+    "DG{a:=adp+4*(nb+k), x:=xa}",
+    "W1",
+    "AU",
+    "nb + k + 1 < ua"
+   ],
+   "doc": "`*tmpx++ = *tmpa++` (high digits of `a`), back edge."
+  },
+  {
+   "n": "lx2",
+   "at": "3c48 F",
+   "to": "3c64",
+   "st": [
+    "xa"
+   ],
+   "pre": "l2{er:=18446744073709551614}",
+   "post": "j3{er:=18446744073709551614}",
+   "h": [
+    "DG{a:=adp+4*(nb+k), x:=xa}",
+    "W1",
+    "AU",
+    "nb + k + 1 = ua"
+   ],
+   "doc": "The last high digit of `a`."
+  },
+  {
+   "n": "g3",
+   "at": "3c64 T",
+   "pre": "j3{er:=18446744073709551614}",
+   "post": "q0{er:=18446744073709551614}",
+   "h": [
+    "BU",
+    "ub ≤ nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "No high digits of `b` to copy: `mp_clamp(&x0)`."
+  },
+  {
+   "n": "g3f",
+   "at": "3c64 F",
+   "to": "3c74",
+   "pre": "j3{er:=18446744073709551614}",
+   "post": "l3{er:=18446744073709551614, k:=0}",
+   "h": [
+    "BU",
+    "Y1",
+    "nb < ub",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "The high copy loop of `b` (`tmpy = y1.dp`)."
+  },
+  {
+   "n": "lb3",
+   "at": "3c74 T",
+   "to": "3c74",
+   "st": [
+    "xa"
+   ],
+   "pre": "l3{er:=18446744073709551614}",
+   "post": "l3{er:=18446744073709551614, k:=k+1}",
+   "h": [
+    "DG{a:=bdp+4*(nb+k), x:=xa}",
+    "W3",
+    "BU",
+    "nb + k + 1 < ub"
+   ],
+   "doc": "`*tmpy++ = *tmpb++` (high digits of `b`), back edge."
+  },
+  {
+   "n": "lx3",
+   "at": "3c74 F",
+   "st": [
+    "xa"
+   ],
+   "pre": "l3{er:=18446744073709551614}",
+   "post": "q0{er:=18446744073709551614}",
+   "h": [
+    "DG{a:=bdp+4*(nb+k), x:=xa}",
+    "W3",
+    "BU",
+    "nb + k + 1 = ub"
+   ],
+   "doc": "The last high digit of `b`: `mp_clamp(&x0)`."
+  },
+  {
+   "n": "q1",
+   "at": "3c98",
+   "pre": "bt{er:=18446744073709551614}",
+   "post": "qy0{er:=18446744073709551614}",
+   "doc": "`mp_clamp(&y0)`."
+  },
+  {
+   "n": "q2",
+   "at": "3ca0",
+   "pre": "bt{er:=18446744073709551614}",
+   "post": "qm1{er:=18446744073709551614}",
+   "doc": "`mp_mul(&x0, &y0, &x0y0)`."
+  },
+  {
+   "n": "f1",
+   "at": "3cb0 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul(&x0, &y0)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o1",
+   "at": "3cb0 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qm2{er:=18446744073709551614}",
+   "doc": "`mp_mul(&x1, &y1, &x1y1)`."
+  },
+  {
+   "n": "f2",
+   "at": "3cc4 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul(&x1, &y1)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o2",
+   "at": "3cc4 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa1{er:=18446744073709551614}",
+   "doc": "`s_mp_add(&x1, &x0, &t1)`."
+  },
+  {
+   "n": "f3",
+   "at": "3cd8 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`s_mp_add(&x1, &x0)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o3",
+   "at": "3cd8 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa2{er:=18446744073709551614}",
+   "doc": "`s_mp_add(&y1, &y0, &x0)`."
+  },
+  {
+   "n": "f4",
+   "at": "3cec T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`s_mp_add(&y1, &y0)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o4",
+   "at": "3cec F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qm3{er:=18446744073709551614}",
+   "doc": "`mp_mul(&t1, &x0, &t1)`."
+  },
+  {
+   "n": "f5",
+   "at": "3d00 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_mul(&t1, &x0)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o5",
+   "at": "3d00 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa3{er:=18446744073709551614}",
+   "doc": "`mp_add(&x0y0, &x1y1, &x0)`."
+  },
+  {
+   "n": "f6",
+   "at": "3d14 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_add(&x0y0, &x1y1)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o6",
+   "at": "3d14 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qs{er:=18446744073709551614}",
+   "doc": "`s_mp_sub(&t1, &x0, &t1)`."
+  },
+  {
+   "n": "f7",
+   "at": "3d28 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`s_mp_sub` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o7",
+   "at": "3d28 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qh1{er:=18446744073709551614}",
+   "doc": "`mp_lshd(&t1, B)`."
+  },
+  {
+   "n": "f8",
+   "at": "3d38 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_lshd(&t1)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o8",
+   "at": "3d38 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qh2{er:=18446744073709551614}",
+   "doc": "`mp_lshd(&x1y1, 2 B)`."
+  },
+  {
+   "n": "f9",
+   "at": "3d48 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_lshd(&x1y1)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o9",
+   "at": "3d48 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa4{er:=18446744073709551614}",
+   "doc": "`mp_add(&x0y0, &t1, &t1)`."
+  },
+  {
+   "n": "f10",
+   "at": "3d5c T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_add(&x0y0, &t1)` failed: `mp_clear(&x1y1)`."
+  },
+  {
+   "n": "o10",
+   "at": "3d5c F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa5{er:=18446744073709551614}",
+   "doc": "`mp_add(&t1, &x1y1, c)`."
+  },
+  {
+   "n": "fz",
+   "at": "3d70 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k6{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "The last `mp_add` failed."
+  },
+  {
+   "n": "ok",
+   "at": "3d70 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "k6{er:=0}",
+   "doc": "`err := MP_OKAY`; `mp_clear(&x1y1)`."
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "fn": "mp_mulmod", "mod": "MpMulmodG", "src": "mmulmodg", "pfx": "mlm", "imports": ["Tom.Machine.Kit.GenX_seg5a"],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "nat": "sp pa pb pc pd uc e", "keep": "gp tp", "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pb a2:pc a3:pd",
+  "B": "sp:sp-96 s0:pa s1:pb s2:pd s3:pc s4 s5 s6 s7 s8 s9 s10 s11",
+  "ci": "@B a0:sp-72 a1:uc", "ir": "@B a0:e", "mc": "@B a0:pa a1:pb a2:sp-72", "dm": "@B a0:sp-72 a1:pc a2:pd",
+  "cl": "@B a0:sp-72",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e"
+ },
+ "facts": {
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1", "bytesT8 M (sp - 32) = s2", "bytesT8 M (sp - 40) = s3"],
+  "UC": ["bytesT4 M pc = BitVec.ofNat 32 uc", "Ram pc 24", "pc + 24 ≤ sp - 96 ∨ sp ≤ pc", "uc < 2 ^ 31"],
+  "ER": ["bytesT8 M (sp - 88) = BitVec.ofNat 64 e"]
+ },
+ "segs": [
+  {"n": "pro", "at": "5d90", "pre": "ent", "post": "ci", "h": ["UC"], "doc": "Save `ra`, `s0`–`s3`; `mp_init_size(&t, c->used)`."},
+  {"n": "ie", "at": "5dc4 F", "pre": "ir", "post": "rt", "h": ["e ≠ 0", "e < 2 ^ 64", "RF"], "doc": "`mp_init_size` failed: return its error."},
+  {"n": "mu", "at": "5dc4 T", "pre": "ir{e:=0}", "post": "mc", "doc": "`mp_mul(a, b, &t)`."},
+  {"n": "me", "at": "5dfc T", "pre": "ir", "post": "cl", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_mul` failed: spill `err`; `mp_clear(&t)`."},
+  {"n": "md", "at": "5dfc F", "pre": "ir{e:=0}", "post": "dm", "doc": "`mp_mod(&t, c, d)`."},
+  {"n": "mk", "at": "5e14", "pre": "ir", "post": "cl", "doc": "`err := mp_mod(…)`, spilled; `mp_clear(&t)`."},
+  {"n": "ret", "at": "5e24", "pre": "B", "post": "rt", "h": ["RF", "ER"], "doc": "Restore, return `err`."}
+ ]}

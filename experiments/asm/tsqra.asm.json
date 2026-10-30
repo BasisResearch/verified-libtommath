@@ -1,0 +1,18 @@
+{
+ "region": {"api": "Api.MpSqrA", "gpre": {"res": "ToomSqr.ResA p", "isW": "MpSqrA.isW"}},
+"extends": "tsqr.asm.json",
+ "subst": {"SqrAlg.lay": "SqrAlg.layA", "SqrAlg.Q": "SqrAlg.QA", "SqrAlg.F": "SqrAlg.FA", "Api.MpSqr (P kind)": "Api.MpSqrA (P kind)",
+           "Api.MpSqr.hin": "Api.MpSqrA.hin", "Api.MpSqr.ws": "Api.MpSqrA.ws", "Api.MpSqr.rets": "Api.MpSqrA.rets",
+           "Api.MpSqr.out": "Api.MpSqrA.out", "Api.MpSqr.site'": "Api.MpSqrA.site'", "Api.MpSqr.hout": "Api.MpSqrA.hout",
+           "Api.MpSqr.lay": "Api.MpSqrA.lay", "Api.MpSqr.R": "Api.MpSqrA.R",
+           "Tom.Machine.Fn.ToomSqrG5K": "Tom.Machine.Fn.ToomSqrAG5K", "bS": "aS", "bD": "aD",
+           "hres.sb": "hres.va.toShape", "hres.bpos": "hres.apos", "hres.boff": "hres.aoff", "hP.res.bpos": "hP.res.apos",
+           "pp.pb": "pp.pa", "pp.bdp": "pp.adp", "pp.b": "pp.a"},
+ "#": "s_mp_toom_sqr(a, a) (Api/ToomSqr.lean StatementA): a is read only by the three copy loops (a->used, a->dp), before the first call into b = a (mp_sub(&a0, &a1, b)); the region type is Fn/ToomSqrAG5K.lean's.",
+ "fn": "s_mp_toom_sqr (in place)", "mod": "ToomSqrAMainG", "ns": "Tom.Machine.Fn.ToomSqrAG5", "api": "ToomSqrAI",
+ "R": ["stk", "aS", "aD", "ks", "ts", "km", "tm", "code", "dZ", "dU", "dV", "dW"],
+ "written": ["stk", "aS", "aD", "dZ", "dU", "dV", "dW"],
+ "wit": {"bS": null, "bD": null},
+ "ctx_vocab": {"pb": "z.p.pa", "bdp": "z.p.adp", "b": "z.p.a"}, "rowdef": {"pb": "pa"},
+ "families": {"c": {"4": {"#": "mp_sqr(b, b) with b = a: the callee's P is ours' type, so `exact hres.aoff` unifies the records (z.p with a callee record over z.p.sp - 160) and recurses; the projections reduced first",
+                          "XO": "(by dsimp only [Fn.KSqrG5K.SqrABKP.toB, Std.SqrABP.toP, Std.SqrABKP.toP]; exact hres.aoff)"}}}}

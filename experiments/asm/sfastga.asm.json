@@ -1,0 +1,56 @@
+{
+ "extends": "sfastg.asm.json",
+ "subst": {
+  "b": "a",
+  "pb": "pa",
+  "bdp": "adp",
+  "bS": "aS",
+  "bD": "aD",
+  "hsb": "hsa",
+  "hres.sb": "hres.sa",
+  "hres.bsign": "hres.asign",
+  "hres.boff": "hres.aoff",
+  "hres.bpos": "hres.apos",
+  "layE_bS": "layE_aS",
+  "Two": "Un",
+  "SqrFastH": "SqrFastHA",
+  "SqrFastHMainG": "SqrFastHAMainG",
+  "SqrFastHG5": "SqrFastHAG5",
+  "B.used": "u"},
+ "#": "s_mp_sqr_fast(a, a) growing a: the source is the destination's array (q, B = mfIn a (2 a->used)), read as a.digit (G's reK), written by the copy only after the columns are done.",
+ "fn": "s_mp_sqr_fast(a, a) (growing)",
+ "R": ["stk", "aS", "aD", "code"],
+ "written": ["stk", "aS", "aD"],
+ "Rk": {
+  "bS": null,
+  "bD": null},
+ "refs": {
+  "nR .bS": null,
+  "nR .bD": null,
+  "nR .aD": "D q"},
+ "ctx_vocab": {
+  "pb": null,
+  "bdp": null,
+  "b": null,
+  "dp": null},
+ "rowdef": {
+  "pb": "pa",
+  "dp": "q",
+  "ou": "u"},
+ "digits": {
+  "adp": null,
+  "q": "a.digit"},
+ "pos": ["hres.apos"],
+ "let": {
+  "DIG": "a.digit",
+  "GREK": [["reK", "nR .aD", ".mpD q B.alloc B.digit", "(show Kind.mpD q B.alloc a.digit = Kind.mpD q B.alloc B.digit from by rw [hcp])"]],
+  "HHI": "by simp only [ovl]; rw [if_neg (by omega), hcp]",
+  "HHIZ": "by simp only [zfill, ovl]; rw [if_neg (by omega), if_neg (by omega), hcp]",
+  "BS": "{ B with used := u }"},
+ "prelude": ["have hsa := hres.sa; have hsb := hres.sb; have hda := hsa.digit_lt; have := hres.warr", "have := hsa.used_le; have := hsa.alloc_lt; have := hsb.used_le; have := hsb.alloc_lt; have := hres.apos; have := hres.bpos", "have eR : radix = 268435456 := rfl; have eF : Api.SqrFastH.F = 2752 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl", "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi; have hsp2 : 2208 ≤ sp := by omega", "have eB : sMpSqrFastBase = 0x80007010 := rfl; have eG : MpGrow.F = 544 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl", "have hR : RamH (sp - 2208) 2208 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩", "have hadg := (show Dig m adp a.alloc a.digit from (hB .aD).2).ram; have := hadg.lo_ge; have := hadg.hi_le", "have hpa := hS .aS .stk (by decide); have hco := hS .stk .code (by decide); have hcc := hS .aS .code (by decide)", "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_code, textIv] at hpa hco hcc", "have hpaF : pa + 24 ≤ sp - 2208 ∨ sp ≤ pa := by rcases hpa with h | h <;> omega", "have hccF : pa + 24 ≤ sMpSqrFastBase ∨ sMpSqrFastBase + 700 ≤ pa := by rcases hcc with h | h <;> omega"],
+ "cuts": {
+  "CL": {"edge": [["if", "j + 1 < 2 * u", [["seg", "cl", "o nR .bD", {"_st": "(by om) (by omega)"}], ["jump", "CL", {"hj": "by omega"}]], [["if", "B.used ≤ 2 * u", [["seg", "cxs", "o nR .bD", {"_st": "(by om) (by omega)"}], ["setmp", "nR .bS", "nR .bD", "mfRes a a B (2 * u)", "intro i hi; exact sq_fill hsB hroom (by omega) hgd (fun k hk => by simp only [ovl]; rw [if_pos (by omega)]) (fun k h1 h2 => absurd h2 (by omega)) (fun k h1 h2 => {HHI}) i"], ["seg", "kc", "0"], ["have", "hresA : (mfRes a a B (2 * u)).alloc = B.alloc", "rfl"], ["call", "clamp", "pb, q, mfRes a a B (2 * u)", "c4", {"hq": "hcl", "res": "mfRes_shape hsB (by om)"}], ["redig", "nR .bD", "hcl.alloc", "hcl.digit"], ["tac", "refine pass (@H.congrK (κ' := Kind.set (Kind.set (κCL z xc) (nR .bS) (.mpS pb q c4)) (nR .bD) (.mpD q c4.alloc c4.digit)) (by krfl)) fun @H => ?_"], ["seg", "r", "0"], ["exit", "ret"]], [["exit", "dead"]], "hou"]], "hjl"]]},
+  "Z": {"edge": [["seg", "z0", "0"], ["seg", "z1", "u nR .bS"], ["if", "B.used = 0", [["seg", "zs", "0"], ["setmp", "nR .bS", "nR .bD", "mfRes a a B 0", "intro i hi; exact sq_fill (g := fun _ => 0) hsB (Nat.zero_le _) (by omega) (fun k hk => absurd hk (by omega)) (fun k hk => absurd hk (by omega)) (fun k h1 h2 => absurd h2 (by omega)) (fun _ _ _ => rfl) i", {"used": "by simp only [mfRes]; omega"}], ["seg", "kcz", "0"], ["have", "hresA : (mfRes a a B (0)).alloc = B.alloc", "rfl"], ["call", "clamp", "pb, q, mfRes a a B (0)", "c4", {"hq": "hcl", "res": "mfRes_shape hsB (by om)"}], ["redig", "nR .bD", "hcl.alloc", "hcl.digit"], ["tac", "refine pass (@H.congrK (κ' := Kind.set (Kind.set (κZ z xc) (nR .bS) (.mpS pb q c4)) (nR .bD) (.mpD q c4.alloc c4.digit)) (by krfl)) fun @H => ?_"], ["seg", "rz", "0"], ["exit", "retz"]], [["exit", "dead"]], "hbu"]]},
+  "KM": null},
+ "exits": {
+  "dead": ["exfalso; omega"]}}

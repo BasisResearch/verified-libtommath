@@ -1,0 +1,69 @@
+{
+ "fn": "mp_reduce_setup", "mod": "MpReduceSetupMainG", "ns": "Tom.Machine.Fn.MpReduceSetupG5", "api": "MpReduceSetup",
+ "rows": "experiments/segs/mrsetg.rows.json", "code": "mpReduceSetup", "F": 896, "lay_rfl": true, "dsimp_q": true, "hdig": false,
+ "imports": ["Tom.Machine.Api.MpReduceSetup", "Tom.Machine.Api.Std_r10a", "Tom.Machine.Api.StdNorm", "Tom.Machine.Kit.Run",
+             "Tom.Machine.Fn.MpReduceSetupG", "Tom.Spec.MpReduceSetupStep"],
+ "opens": ["open Tom.Machine.Fn.MpReduceSetupG Tom.MpReduceSetupStep",
+           "open Tom.Machine.Api.MpReduceSetup (R P lay kind isW ws Res)"],
+ "callees": {
+  
+ },
+ "R": ["stk", "aS", "aD", "bS", "bD", "code"], "written": ["stk", "aS", "aD"],
+ "Rk": {"aS": "S pa adp a", "aD": "D adp a", "bS": "S pb bdp b", "bD": "D bdp b"},
+ "frame": [["nT", 32]],
+ "refs": {"nR .aS": "S pa", "nR .aD": "D adp", "nR .bS": "S pb", "nR .bD": "D bdp"},
+ "ctx_vocab": {"hin": "Api.MpReduceSetup.hin z.p"},
+ "rowdef": {"ub": "b.used"},
+ "prelude": [
+  "have hvb := hres.vb; have := hvb.used_le; have := hvb.alloc_lt; have := hres.b0; have := hres.apos; have := hres.sa.alloc_lt",
+  "have hk : b.used * 2 * 28 < 2 ^ 31 := hres.k_lt; have hrm : b.used * 2 * 28 / 28 + 1 ≤ a.alloc := hres.room",
+  "have env : Env a b := ⟨hres.sa, hvb, hres.b0, hres.bz, hres.k_lt, hres.room⟩",
+  "have eF : Api.MpReduceSetup.F = 896 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have hst := hres.stk; have hlo := hst.lo; rw [eE] at hlo; have := hst.al; have := hst.hi",
+  "have eB : mpReduceSetupBase = 0x800063a8 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl",
+  "have hR : RamH (sp - 32) 32 := ⟨Ram.sub (hB .stk).2 (by rw [layE_stk]; dsimp only; omega) (by rw [layE_stk]; dsimp only; omega)⟩",
+  "have hpa := hS .aS .stk (by decide); have hpb := hS .bS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_bS, layE_code, textIv] at hpa hpb hco"
+ ],
+ "let": {
+  "WIT": ["    { wit := fun r hr hrs => by",
+          "        cases r with",
+          "        | stk => exact ⟨trivial, (hB .stk).2⟩",
+          "        | aS => exact ⟨Iv.sub_self _, _h.hdr R.aS rfl⟩",
+          "        | aD => exact absurd rfl hrs",
+          "        | _ => simp [ws] at hr"],
+  "RW": "simp only [Std.mpDivQH, Api.MpDivQ.hout, Api.MpDivQ.hin, Api.MpDivQ.lay, digBlk, hal2] at h; exact h"
+ },
+ "cuts": {
+  "E": {"pc": "63a8", "regs": "ent", "mu": "0, 0, 0",
+   "state": [["st", "St (ρX p) wX WX (κX p m) m m"], ["hp", "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"]],
+   "edge": [
+    ["seg", "pro", "ws nT"], ["seg", "pk", "0"], ["seg", "pc", "ws nT"],
+    ["call", "mp2expt", "sp - 32, pa, adp, a, 56 * b.used", "a2",
+     {"hq": "he2", "res": "⟨hres.sa, by om, by show 56 * b.used / Layout.digitBits + 1 ≤ a.alloc; rw [show Layout.digitBits = 28 from rfl]; om, by om, by om⟩"}],
+    ["tac", "have he2' : Expt2Post a (b.used * 2 * Layout.digitBits) a2 := by rw [show b.used * 2 * Layout.digitBits = 56 * b.used by show b.used * 2 * 28 = 56 * b.used; omega]; exact he2"],
+    ["tac", "have h2 := a2_of env he2'; have hal2 : a2.alloc = a.alloc := he2.alloc; have hu2 : a2.used = 2 * b.used + 1 := by have := he2.used; dsimp only at this; rw [show Layout.digitBits = 28 from rfl] at this; omega"],
+    ["seg", "tl", "0"],
+    ["tail", "mpDivQH", "sp, pa, adp, pb, bdp, a2, b, H", "x",
+     {"flat": {"kd": "Kind.set (Kind.set (kind p) R.aS (.mpS pa adp a2)) R.aD (.mpD adp a2.alloc a2.digit)",
+               "hp": "(HP.flatE (ws := ws) hc.heap hoff (ramW hB) (by intro r hr; cases r <;> first | exact absurd hr (by decide) | decide)).perm (List.Perm.of_eq (show Api.MpReduceSetup.hin p = Api.MpDivQ.hin ⟨sp, pa, adp, pb, bdp, a2, b, H⟩ by simp only [Api.MpReduceSetup.hin, Api.MpDivQ.hin, digBlk, hal2]))"},
+      "hq": "hq", "K'": "v.keep", "hsub": "by intro r; cases r; exact Iv.sub_self _; exact Iv.sub_self _; (show Iv.Sub ⟨adp, 4 * a2.alloc⟩ ⟨adp, 4 * a.alloc⟩; rw [hal2]; exact Iv.sub_self _); all_goals exact Iv.sub_self _",
+      "res": "⟨hres.stk, h2.valid, hvb, hres.b0, by show 28 * b.used < 2 ^ 31; om, by om, by om, hres.aoff, hres.boff, hres.bblk⟩"}],
+    ["exit", "fin"]
+   ]
+  }
+ },
+ "exits": {
+  "fin": ["obtain ⟨hfr, hh⟩ := _hp.fin _h", "rcases x with _ | ⟨q2, a3⟩",
+   "· exact Lbl.exit fun cf hat => ⟨.mem a2, _M, hat.sub rfl rfl, trivial,",
+   "{WIT}",
+   "      wsite := ⟨Iv.sub_self _, by have h := _h.dig R.aD rfl; rw [hal2] at h; exact h⟩, place := .keep, frame := hfr",
+   "      heap := by have h := hh; {RW}",
+   "      foot := fun _ h => .inl h, off := hoff .aD }⟩",
+   "· exact Lbl.exit fun cf hat => ⟨.ok q2 a3, _M, hat.sub rfl rfl, fin env h2 hq.1,",
+   "{WIT}",
+   "      wsite := ⟨Iv.sub_self _, _h.dig R.aD rfl⟩, frame := hfr, heap := hh, off := hpo.off",
+   "      place := by have h := hpo.place; {RW}",
+   "      foot := fun y hy => by have h := hpo.foot y hy; {RW} }⟩"]
+ }
+}

@@ -1,0 +1,45 @@
+{"extends": "r2ks.asm.json",
+ "#": "mp_reduce_2k_setup(a, d) growing tmp (Api/Reduce2kSetupGr.lean): mp_2expt(&tmp, p) by Std.mp2exptG (tmp's block re-placed; its MP_MEM: row xe, mp_clear(&tmp)), s_mp_sub(&tmp, a, &tmp) in tmp's block, mp_clear(&tmp) behind it.",
+ "mod": "Reduce2kSetupGrMainG", "ns": "Tom.Machine.Fn.Reduce2kSetupGrG5", "api": "Reduce2kSetupGr", "F": 672,
+ "imports": ["Tom.Machine.Api.Reduce2kSetupGr", "Tom.Machine.Api.StdNorm", "Tom.Machine.Api.Std_red2", "Tom.Machine.Kit.Run", "Tom.Spec.Reduce2kSetupGrStep"],
+ "opens": ["open Tom.Machine.Fn.Reduce2kSetupG Tom.Reduce2kSetupStep",
+           "open Tom.Machine.Api.Reduce2kSetup (R P isW ws kind)", "open Tom.Machine.Api.Reduce2kSetupGr (lay Res)"],
+ "post": "fun cf => ∃ x M, At ra (Api.Reduce2kSetup.rets p x ra) M v.keep o cf ∧ Api.Reduce2kSetup.Q p x ∧ HPost (lay p) ws .dD (Api.Reduce2kSetup.out p x) (lay p .dD) hin hin m M",
+ "prelude": ["have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi",
+   "have hva := hres.va; have := hva.used_le; have := hva.alloc_lt; have := hres.apos; have := hres.bits; have := countBits_le hva.toShape",
+   "have eD1 : d.alloc = 1 := rfl; have eR : radix = 268435456 := rfl; have eF : Api.Reduce2kSetupGr.F = 672 := rfl; have eX : Api.Expt2G.F = 592 := rfl",
+   "have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl; have eL : allocLo = 0x800188a0 := rfl",
+   "have eB : mpReduce2kSetupBase = 0x80006088 := rfl; have eI : MpInit.Finit = 560 := rfl; have eC : MpClear.F = 544 := rfl",
+   "have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eP : defPrec = 32 := rfl",
+   "have hR : RamH (sp - 80) 80 := ⟨Ram.sub (hB .stk).2 (by simp only [lay, eF]; omega) (by simp only [lay, eF]; omega)⟩",
+   "have hpa := hS .aS .stk (by decide); have hpd := hS .dD .stk (by decide); have hco := hS .stk .code (by decide)",
+   "simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hpd hco"],
+ "cuts": {
+  "E": {
+   "edge": [["seg", "pro", "ws nT"], ["forget", "nQ"],
+    ["call", "mpInit", "sp - 80, sp - 56, hin", "xr", {"hq": "hq"}],
+    ["cases", "xr", {
+     "none": [["set", {"e": "18446744073709551614"}], ["seg", "ie", "0"], ["exit", "none"]],
+     "some q": [["tac", "have := hq.lo; have := hq.hi; have := hq.al; have en : InP.n ⟨sp - 80, sp - 56, hin⟩ = 32 := rfl; have ez : (MpInt.zeroN defPrec).alloc = 32 := rfl"],
+       ["set", {"e": "0"}], ["seg", "cb", "0"],
+       ["call", "cntBits", "pa, adp, a", "_", {"res": "⟨hva, hres.bits⟩"}],
+       ["set", {"nb": "countBits a"}], ["seg", "cr", "0"],
+       ["call", "mp2exptG", "sp - 80, sp - 56, q, MpInt.zeroN defPrec, countBits a, hin", "xt",
+        {"hq": "he2", "res": "⟨⟨by om, by om, by om⟩, (MpInt.zeroN_valid (by decide)).toShape, by om, (by decide : 0 < 32), by unfold OffHeap; om⟩"}],
+       ["cases", "xt", {
+        "none": [["set", {"e": "18446744073709551614"}], ["seg", "xe", "ws nL"],
+          ["call", "mpClear", "sp - 80, sp - 56, q, MpInt.zeroN defPrec, hin", "_", {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, (by decide : 0 < 32)⟩"}],
+          ["seg", "ret", "0"], ["exit", "none"]],
+        "some ⟨q2, t1⟩": [
+          ["tac", "have hpw := pow_ofG hva (by om) he2.post; have := hpw.used; have := hpw.tused; have := hpw.valid.used_le; have := hpw.valid.alloc_lt; have ht1 : 0 < t1.alloc := Nat.lt_of_lt_of_le (Nat.succ_pos _) (by rw [he2.post.alloc]; exact expt2In_room _ _)"],
+          ["bind", {"q": "q2"}], ["seg", "xo", "0"],
+          ["call", "sSubA", "sp - 80, sp - 56, q2, pa, adp, t1, a", "t2", {"res": "⟨hpw.valid.toShape, hva.toShape, hpw.valid.sign_ok, hpw.used, by om, by om⟩", "hq": "hsb"}],
+          ["tac", "have hfin := setup_finG hva hpw hsb; have hal2 := hfin.2; have hd2 := (SSubPost.spec hpw.valid.toShape hva.toShape hpw.ge hpw.valid.used_le hpw.valid.alloc_lt hpw.valid.sign_ok hsb).1.digit_lt; have := hd2 0"],
+          ["seg", "so", "ws nL"],
+          ["tac", "have hq2d : q2 + 4 ≤ sp - 80 ∨ sp ≤ q2 := by have d1 := St.disj @H nS nT; have d2 := St.disj @H nS nQ; have d3 := St.disj @H nS nL; have d4 := St.disj @H nS (nR .stk); simp [ρX, ρ3, Split.lay, Site.lay, Iv.upd, lay, Disj, Std.mp2exptG, Api.Expt2G.site', Std.mpInit, Ca.siteI, Api.Reduce2kSetupGr.F, Api.Expt2G.F] at d1 d2 d3 d4; omega"],
+          ["bind", {"df": "d.digit"}], ["seg", "sd", "d nR .dD df", {"x": "t2.digit 0"}],
+          ["call", "mpClear", "sp - 80, sp - 56, q2, t2, H", "_",
+           {"perm": "by show List.Perm ((q2, 4 * t1.alloc) :: H) ((q2, 4 * t2.alloc) :: H); rw [hal2]", "res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, by rw [hal2]; exact ht1⟩"}],
+          ["set", {"e": "0"}], ["seg", "r1", "0"], ["exit", "some"]]}]]}]]}
+ }
+}

@@ -1,0 +1,107 @@
+theorem sub3 {pp : P} (hF : 896 ≤ pp.sp) (y : Y) : (ρ3 pp y).Sub (layG pp (proj y)) := by
+  rcases y with _ | _ | _ | _ | _ | _ | _ | r
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · simp [ρ3, Split.lay, layG_stk, proj, Iv.Sub] <;> omega
+  · cases r <;> simp [ρ3, Split.lay, layG_stk, layG_aS, layG_aD, layG_bS, layG_bD, layG_cS, layG_cD, layG_dS, layG_dD, layG_code, layG_qD, layG_t1D, layG_t2D, layG_xD, layG_yD, proj, Iv.Sub] <;> omega
+
+theorem offG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (r : R) : Off (layG pp r) (Api.MpDiv.hin pp) := by
+  cases r
+  · exact hP.off .stk
+  · exact hP.off .aS
+  · exact hP.off .aD
+  · exact hP.off .bS
+  · exact hP.off .bD
+  · exact hP.off .cS
+  · exact hP.off .cD
+  · exact hP.off .dS
+  · exact hP.off .dD
+  · exact hP.off .code
+  · exact Off.nil _
+  · exact Off.nil _
+  · exact Off.nil _
+  · exact Off.nil _
+  · exact Off.nil _
+
+theorem posG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (y : Y) :
+    0 < (ρ3 pp y).len ∨ (ρ3 pp y).base < heapStart ∨ heapEnd ≤ (ρ3 pp y).base := by
+  have := hP.res.apos; have := hP.res.cpos; have := hP.res.dpos; have := hP.res.bnz; have := hP.res.vb.used_le
+  rcases y with _ | _ | _ | _ | _ | _ | _ | r
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · left; simp [ρ3, Split.lay, layG_stk]
+  · cases r
+    · left; simp [ρ3, Split.lay, layG_stk] <;> omega
+    · left; simp [ρ3, Split.lay, layG_aS] <;> omega
+    · left; simp [ρ3, Split.lay, layG_aD] <;> omega
+    · left; simp [ρ3, Split.lay, layG_bS] <;> omega
+    · left; simp [ρ3, Split.lay, layG_bD] <;> omega
+    · left; simp [ρ3, Split.lay, layG_cS] <;> omega
+    · left; simp [ρ3, Split.lay, layG_cD] <;> omega
+    · left; simp [ρ3, Split.lay, layG_dS] <;> omega
+    · left; simp [ρ3, Split.lay, layG_dD] <;> omega
+    · left; simp [ρ3, Split.lay, layG_code, textIv, textLen]
+    · right; left; simp [ρ3, Split.lay, layG_qD, Iv.nil]; decide
+    · right; left; simp [ρ3, Split.lay, layG_t1D, Iv.nil]; decide
+    · right; left; simp [ρ3, Split.lay, layG_t2D, Iv.nil]; decide
+    · right; left; simp [ρ3, Split.lay, layG_xD, Iv.nil]; decide
+    · right; left; simp [ρ3, Split.lay, layG_yD, Iv.nil]; decide
+
+/-- The heap checkpoint at the entry. -/
+theorem entry_hp {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) :
+    HP (ρX pp) wX (Api.MpDiv.hin pp) (Api.MpDiv.hin pp) (InAny (Api.MpDiv.lay pp) Api.MpDiv.ws) mm mm := by
+  have hF : 896 ≤ pp.sp := by have h := hP.res.stk.lo; rw [show heapEnd = 0x87800000 from rfl] at h; omega
+  have hstk : Ram (layG pp .stk).base (layG pp .stk).len := (hP.bund .stk).2
+  refine HP.entry hP.heap (fun y => (offG hP (proj y)).sub (sub3 hF y) (posG hP y)) ?_ ?_
+  · intro y hy q hq
+    have hs := sub3 hF y
+    have hq2 : (ρ3 pp y).In q := hq
+    have hq' : (layG pp (proj y)).In q := by unfold Iv.Sub Iv.In at *; omega
+    rcases y with _ | _ | _ | _ | _ | _ | _ | r
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+    · cases r <;> simp [wX, w3, Split.wr, isWG] at hy
+      · exact InAny.of_mem (w := Api.MpDiv.R.stk) (by decide) hq'
+      · exact InAny.of_mem (w := Api.MpDiv.R.cS) (by decide) hq'
+      · exact InAny.of_mem (w := Api.MpDiv.R.cD) (by decide) hq'
+      · exact InAny.of_mem (w := Api.MpDiv.R.dS) (by decide) hq'
+      · exact InAny.of_mem (w := Api.MpDiv.R.dD) (by decide) hq'
+      · simp [proj, layG_qD, Iv.nil, Iv.In] at hq'; omega
+      · simp [proj, layG_t1D, Iv.nil, Iv.In] at hq'; omega
+      · simp [proj, layG_t2D, Iv.nil, Iv.In] at hq'; omega
+      · simp [proj, layG_xD, Iv.nil, Iv.In] at hq'; omega
+      · simp [proj, layG_yD, Iv.nil, Iv.In] at hq'; omega
+  · intro y hy
+    have hs := sub3 hF y
+    rcases y with _ | _ | _ | _ | _ | _ | _ | r
+    · exact Ram.sub hstk hs.1 hs.2
+    · exact Ram.sub hstk hs.1 hs.2
+    · exact Ram.sub hstk hs.1 hs.2
+    · exact Ram.sub hstk hs.1 hs.2
+    · exact Ram.sub hstk hs.1 hs.2
+    · exact Ram.sub hstk hs.1 hs.2
+    · exact Ram.sub hstk hs.1 hs.2
+    · cases r <;> simp [wX, w3, Split.wr, isWG] at hy
+      · exact Ram.sub hstk hs.1 hs.2
+      · simpa [ρ3, Split.lay, layG_cS, Layout.sizeofMpInt] using (Hdr.geom (show Hdr mm pp.pc pp.cdp pp.c from (hP.bund .cS).2)).st
+      · simpa [ρ3, Split.lay, layG_cD] using (show Dig mm pp.cdp pp.c.alloc pp.c.digit from (hP.bund .cD).2).ram
+      · simpa [ρ3, Split.lay, layG_dS, Layout.sizeofMpInt] using (Hdr.geom (show Hdr mm pp.pd pp.ddp pp.d from (hP.bund .dS).2)).st
+      · simpa [ρ3, Split.lay, layG_dD] using (show Dig mm pp.ddp pp.d.alloc pp.d.digit from (hP.bund .dD).2).ram
+      · simpa [ρ3, Split.lay, layG_qD] using Ram.nil
+      · simpa [ρ3, Split.lay, layG_t1D] using Ram.nil
+      · simpa [ρ3, Split.lay, layG_t2D] using Ram.nil
+      · simpa [ρ3, Split.lay, layG_xD] using Ram.nil
+      · simpa [ρ3, Split.lay, layG_yD] using Ram.nil

@@ -1,0 +1,15 @@
+{
+ "region": {"api": "Api.MpMulA", "gpre": {"res": "BalMulA.Res p", "isW": "MpMulA.isW"}},
+ "extends": "bal.asm.json",
+ "subst": {"c": "a", "pc": "pa", "cdp": "adp", "cS": "aS", "cD": "aD",
+           "hres.sc": "hres.va.toShape", "hres.cpos": "hres.apos", "hres.coff": "hres.aoff", "hP.res.cpos": "hP.res.apos",
+           "MulAlg.lay": "MulAlgA.lay", "MulAlg.Q": "MulAlgA.Q", "MulAlg.F": "MulAlgA.F",
+           "Api.MpMul.ws": "Api.MpMulA.ws", "Api.MpMul.hin": "Api.MpMulA.hin", "Api.MpMul.lay": "Api.MpMulA.lay", "Api.MpMul.R": "Api.MpMulA.R",
+           "Api.MpMul.rets": "Api.MpMulA.rets", "Api.MpMul.out": "Api.MpMulA.out", "Api.MpMul.hout": "Api.MpMulA.hout",
+           "Api.MpMul.site'": "Api.MpMulA.site'", "Api.MpMul (P kind)": "Api.MpMulA (P kind)", "outKeepB": "outKeepBA"},
+ "#": "s_mp_balance_mul(a, b, a) (Api/MulAlgA.lean): a is read (the copies into a0, or as B's struct copy) until mp_exch(&r, a), which hands a r's block and r a's old one, freed by mp_clear_multi.",
+ "fn": "s_mp_balance_mul (in place)", "mod": "BalMulAMainG", "ns": "Tom.Machine.Fn.BalMulAG5", "api": "BalMulA",
+ "R": ["stk", "aS", "aD", "bS", "bD", "kc", "tc", "code", "dZ", "dT", "dU"],
+ "wit": {"cS": null, "cD": null},
+ "ctx_vocab": {"pc": "z.p.pa", "cdp": "z.p.adp", "c": "z.p.a"},
+ "let": {"SOUNDG": "soundG hS hB"}}

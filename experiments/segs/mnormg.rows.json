@@ -1,0 +1,39 @@
+{
+ "#": "mp_montgomery_calc_normalization(a, b) over the growing mp_2expt and mp_mul_2 (Api/MontNormG.lean): the segments between its calls; the loop counter s2 = xw k (x = k - 1, Fn/MontNormGK.lean).",
+ "fn": "mp_montgomery_calc_normalization", "mod": "MontNormG", "src": "mnormg", "pfx": "mng",
+ "imports": ["Tom.Machine.Kit.GenX_seg5a", "Tom.Machine.Fn.MontNormGK"],
+ "bv": "ra s0 s1 s2 s3 s4 s5", "nat": "sp pa pb ub n r e k x1 c", "keep": "gp tp s6 s7 s8 s9 s10 s11",
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 a0:pa a1:pb",
+  "cb": "sp:sp-64 s0:pa s1 s2 s3:pb s4 s5 a0:pb", "cr": "@cb a0:n",
+  "md": "sp:sp-64 s0:pa s1:ub s2 s3:pb s4 s5 a0:n a1:28", "mr": "@md -a1 a0:r",
+  "ce": "sp:sp-64 s0:pa s1:ub-1 s2:r s3:pb s4 s5 a0:pa a1:28*(ub-1)+r-1", "er": "@ce -a1 a0:e",
+  "st": "sp:sp-64 s0:pa s1:ub s2:0 s3:pb s4 s5 a0:pa a1:1", "sr": "@st -a0 -a1",
+  "lh": "sp:sp-64 s0:pa s1:x1 s2:!(xw k) s3:pb s4:18446744073709551615 s5:28",
+  "ml": "@lh a0:pa a1:pa", "mo": "@lh a0:e", "cm": "@lh s1:0 a0:pa a1:pb", "cq": "@lh s1:0 a0:c",
+  "sb": "@lh s1:0 a0:pa a1:pb a2:pa", "sq": "@lh s1:0 a0:0", "jn": "@lh s1:0",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 a0:e"
+ },
+ "facts": {
+  "UB": ["bytesT4 M pb = BitVec.ofNat 32 ub", "Ram pb 24", "ub < 2 ^ 31"],
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1", "bytesT8 M (sp - 32) = s2", "bytesT8 M (sp - 40) = s3"],
+  "RS": ["bytesT8 M (sp - 48) = s4", "bytesT8 M (sp - 56) = s5"]
+ },
+ "segs": [
+  {"n": "pro", "at": "58b4", "pre": "ent", "post": "cb", "doc": "Save `ra`, `s0`–`s3`; `mp_count_bits(b)`."},
+  {"n": "ua", "at": "58dc F", "pre": "cr", "post": "md", "h": ["UB", "1 < ub"], "doc": "`b->used > 1`: `__moddi3(bits, 28)`."},
+  {"n": "ub", "at": "58dc T", "pre": "cr", "post": "st", "h": ["UB", "ub ≤ 1"], "doc": "`b->used ≤ 1`: save `s4`, `s5`; `mp_set(a, 1)`."},
+  {"n": "a2", "at": "58f0", "pre": "mr", "post": "ce", "h": ["1 < ub", "28 * ub < 2 ^ 31", "r < 28"], "doc": "The exponent `28 (b->used - 1) + bits - 1`; `mp_2expt(a, e)`."},
+  {"n": "fe", "at": "5914 T", "pre": "er", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_2expt` failed (it grows `a`): restore, return its error."},
+  {"n": "a3", "at": "5914 F", "to": "5930", "pre": "er{e:=0}", "post": "lh{k:=r,x1:=0}", "h": ["r < 28"], "eqs": ["xw"], "doc": "Save `s4`, `s5`; `x := bits - 1`; the loop head."},
+  {"n": "b2", "at": "59b0", "to": "5930", "pre": "sr", "post": "lh{k:=1,x1:=ub}", "doc": "After `mp_set`: `x := 0`; the loop head."},
+  {"n": "l1", "at": "5930", "pre": "lh", "post": "ml", "doc": "`mp_mul_2(a, a)`."},
+  {"n": "mf", "at": "593c T", "pre": "mo", "post": "rt", "h": ["RF", "RS", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_mul_2` failed (it grows `a`): restore, return its error."},
+  {"n": "l2", "at": "593c F", "pre": "mo{e:=0}", "post": "cm", "doc": "`mp_cmp_mag(a, b)`."},
+  {"n": "lt", "at": "5950 T", "to": "596c", "pre": "cq", "post": "jn", "h": ["c = 18446744073709551615"], "doc": "`MP_LT`: no subtraction."},
+  {"n": "ge", "at": "5950 F", "pre": "cq", "post": "sb", "h": ["c ≠ 18446744073709551615", "c < 2 ^ 64"], "doc": "Not `MP_LT`: `s_mp_sub(a, b, a)`."},
+  {"n": "l4", "at": "5968 F", "to": "596c", "pre": "sq", "post": "jn", "doc": "`s_mp_sub` returned `MP_OKAY`."},
+  {"n": "nx", "at": "596c T", "to": "5930", "pre": "jn", "post": "lh{k:=k+1,x1:=0}", "h": ["k < 28"], "doc": "`x + 1 < 28`: the next pass."},
+  {"n": "xt", "at": "596c F", "pre": "jn", "post": "rt{e:=0}", "h": ["k = 28", "RF", "RS"], "doc": "`x = 28`: restore, return `MP_OKAY`."}
+ ]
+}

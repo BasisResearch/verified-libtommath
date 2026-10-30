@@ -1,0 +1,11 @@
+{"extends": "msqr.asm.json",
+ "subst": {"b": "a", "pb": "pa", "bdp": "adp", "bS": "aS", "bD": "aD", "bpos": "apos", "hres.sb": "hva.toShape", "hres.bsign": "hva.sign_ok",
+           "GPre": "GPreA", "kindG": "kindGA", "algBase": "algBaseA", "toomSqr": "toomSqrA", "ksqr": "ksqrA", "fastRes": "fastResA",
+           "sqrFast": "sqrFastA"},
+ "fn": "mp_sqr (in place)",
+ "R": ["stk", "aS", "aD", "ks", "ts", "km", "tm", "code"], "wit": {"bS": null, "bD": null},
+ "callees": {"sqrFastA": {"ctor": "Un.R", "params": ["sp", "pa", "adp", "a"],
+   "regions": [["stk", "stk"], ["aS", "S pa"], ["aD", "D adp"], ["code", "code"]], "entry": "0x80007010", "heap": false}},
+ "ctx_vocab": {"pb": "z.p.pa"}, "rowdef": {"pb": "pa"},
+ "let": {"API": "MpSqrA", "BP": "", "BP2": "", "ARGS": "sp - 16, pa, adp, a, H", "FARGS": "sp - 16, pa, adp, a",
+         "SIG": "| .stk => (nR .stk : X) | .aS => (nR .aS : X) | .aD => (nR .aD : X) | .ks => (nR .ks : X) | .ts => (nR .ts : X) | .km => (nR .km : X) | .tm => (nR .tm : X) | .code => (nR .code : X)"}}

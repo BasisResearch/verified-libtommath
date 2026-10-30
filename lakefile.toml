@@ -1,0 +1,39 @@
+name = "VerifiedLibtommath"
+defaultTargets = ["Vsa", "VsaIris", "TomSpec", "Tom"]
+
+# The Sail RISC-V model (sail-riscv generated to Lean), lean-sail and the
+# emulator library; built in their own .lake dirs.
+[[require]]
+name = "lean-riscv"
+path = "riscv-lean/lean_emulator"
+
+# iris-lean (separation logic) for the allocator proofs; brings batteries and
+# Qq v4.34.0.
+[[require]]
+name = "iris"
+git = "https://github.com/leanprover-community/iris-lean"
+rev = "740e2c4a9c672c61d76ad2f9c478c922f7461cf6"
+subDir = "Iris"
+
+# The machine layer: a program logic over the Sail model, decoding, and the
+# relocated libgcc/newlib proofs.
+[[lean_lib]]
+name = "Vsa"
+globs = ["Vsa.+"]
+leanOptions.backward.isDefEq.respectTransparency = false
+
+# The separation-logic layer and the dlmalloc proofs (newlib's allocator).
+[[lean_lib]]
+name = "VsaIris"
+globs = ["VsaIris.+"]
+
+# The specifications: libtommath's mp_int representation and its operations
+# against Lean's Nat/Int. Machine-independent (no Vsa import).
+[[lean_lib]]
+name = "TomSpec"
+globs = ["Tom.Layout", "Tom.Spec.+"]
+
+# The proofs: the compiled RV64I code of c/tommath-arith.elf meets the specs.
+[[lean_lib]]
+name = "Tom"
+globs = ["Tom.Machine.+"]

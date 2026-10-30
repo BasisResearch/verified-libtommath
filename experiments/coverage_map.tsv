@@ -1,0 +1,53 @@
+# function	theorem whose proof covers it	how
+mp_init	Tom.Machine.Fn.MpInit.init_correct	contract
+mp_init_size	Tom.Machine.Fn.MpInit.size_correct	contract
+mp_grow	Tom.Machine.Fn.MpGrowR.correct	contract (all paths)
+mp_montgomery_setup	Tom.Machine.Fn.MpMontSetup.correct	contract
+_malloc_r	Tom.Machine.Fn.Alloc.mallocR_correct	contract (ship-your-interpreter's dlmalloc proofs, relocated)
+_free_r	Tom.Machine.Fn.Alloc.free_correct	inside free's contract
+_realloc_r	Tom.Machine.Fn.Alloc.realloc_correct	inside realloc's contract (grow)
+_calloc_r	Tom.Machine.Fn.Calloc.calloc_correct	inside calloc's contract
+malloc	Tom.Machine.Fn.Alloc.mallocR_correct	the allocator proofs load the wrapper
+_malloc_trim_r	Tom.Machine.Fn.Alloc.free_correct	callee of _free_r, inside its proof
+_sbrk_r	Tom.Machine.Fn.Alloc.mallocR_correct	callee of _malloc_r, inside its proof
+_sbrk	Tom.Machine.Fn.Alloc.mallocR_correct	callee of _sbrk_r, inside its proof
+__malloc_lock	Tom.Machine.Fn.Alloc.mallocR_correct	callee, inside the allocator proofs
+__malloc_unlock	Tom.Machine.Fn.Alloc.mallocR_correct	callee, inside the allocator proofs
+__retarget_lock_acquire_recursive	Tom.Machine.Fn.Alloc.mallocR_correct	callee, inside the allocator proofs
+__retarget_lock_release_recursive	Tom.Machine.Fn.Alloc.mallocR_correct	callee, inside the allocator proofs
+__errno	Tom.Machine.Fn.Calloc.calloc_correct	callee of _calloc_r/_sbrk, inside the proofs
+memmove	Tom.Machine.Fn.Alloc.realloc_correct	callee of _realloc_r, inside its proof
+__umoddi3	Tom.Machine.Fn.Libgcc.Divdi3.correct	the sign fix-up code __divdi3 runs
+s_mp_div_3	Tom.Machine.Fn.Div3.correct	contract (c != NULL)
+mp_read_radix	Tom.Machine.Fn.ReadRadixG5.correct	contract
+s_mp_sqr	Tom.Machine.Fn.SMpSqrG5.correct	contract
+mp_reduce_2k	Tom.Machine.Fn.MpReduce2kG5.correct	contract
+s_mp_mul_digs	Tom.Machine.Fn.SMpMulDigsG5.correct	contract
+mp_reduce_2k_setup	Tom.Machine.Fn.Reduce2kSetupG5.correct	contract
+mp_reduce_2k_setup_l	Tom.Machine.Fn.Reduce2kSetupLG5.correct	contract
+mp_reduce_2k_l	Tom.Machine.Fn.MpReduce2kLG5.correct	contract (D5: a->used ≤ MP_PREC, d on the comba path)
+mp_gcd	Tom.Machine.Fn.MpGcdG5.correct	contract
+mp_montgomery_reduce	Tom.Machine.Fn.MontRedG5.correct	contract
+s_mp_mul_high_digs	Tom.Machine.Fn.SMpMulHighDigsG5.correct	contract (c = a)
+mp_div_d	Tom.Machine.Fn.MpDivDG5.correct	contract (c != a)
+mp_to_radix	Tom.Machine.Fn.MpToRadixG5.correct	contract (written = NULL)
+s_mp_karatsuba_mul	Tom.Machine.Fn.KMulG5.correct	contract (Res.ih := Fn.MulGroupB.mulBelow _); c = a: Tom.Machine.Fn.KMulAG5.correct
+s_mp_karatsuba_sqr	Tom.Machine.Fn.KSqrG5.correct	contract (Res.ih := Fn.MulGroupB.sqrBelow _)
+mp_sqr	Tom.Machine.Fn.MulGroupB.sqrCorrect	contract (both shapes, no premises)
+mp_mul	Tom.Machine.Fn.MulGroupB.mulCorrect	contract (both shapes, no premises; operands with stale digits above used: MulGroupB.mulCorrectU)
+s_mp_toom_sqr	Tom.Machine.Fn.ToomSqrG5.correctClosed	contract (its premise MpMulA.Statement := Fn.MulGroupB.mulCorrect.2)
+mp_div	Tom.Machine.Fn.MpDivG5.correct	contract (c, d non-NULL)
+mp_mod	Tom.Machine.Fn.MpModG5.correct	contract
+mp_reduce_setup	Tom.Machine.Fn.MpReduceSetupG5.correct	contract
+mp_mulmod	Tom.Machine.Fn.MpMulmodG5.correct	contract (Res.mul := Fn.MulGroupB.mulCorrect.1)
+s_mp_toom_mul	Tom.Machine.Fn.ToomMulG5.correct	contract (Res.ih := Fn.MulGroupB.mulBelow _); c = a: Tom.Machine.Fn.ToomMulAG5.correct
+s_mp_balance_mul	Tom.Machine.Fn.BalMulG5.correct	contract (Res.ih := Fn.MulGroupB.mulBelow _; the left-over slice over ValidU operands); c = a: Tom.Machine.Fn.BalMulAG5.correct
+mp_abs	Tom.Machine.Fn.MpAbsGG5.correct	contract (growing b: Api.MpAbsG, a != b; the D5 one Fn.MpAbs.correct)
+mp_invmod	Tom.Machine.Fn.Invmod.correctG	contract (b of any size: Api.MpInvmodG, the workers' mp_copy growing their temporaries; its assembly MpInvmodG5 over the two workers' proofs; the D5 Api.MpInvmod.Statement derived, Fn.Invmod.correct by MpInvmodG.Statement.d5)
+s_mp_invmod_fast	Tom.Machine.Fn.InvmodFastG5.correct	contract (b of any size: Api.InvmodFastG; the D5 statement Api.InvmodFastG.Statement.d5)
+s_mp_invmod_slow	Tom.Machine.Fn.InvmodSlowG5.correct	contract (b of any size: Api.InvmodSlowG; b even: mp_invmod's call; odd b with a = 0 mod b loops)
+mp_reduce	Tom.Machine.Fn.MpReduceG5.correct	contract (Barrett: 0 < um < 255, x->used ≤ 2 um, mu->used = um + 1; x grown in place)
+s_mp_exptmod_fast	Tom.Machine.Fn.SExptFastG5.correct	contract (all three redmodes on the comba paths: Api.SMpExptmodFast.Res, its D5 rooms; DR moduli with a nonzero low digit)
+mp_exptmod	Tom.Machine.Fn.MpExptmod.correct	contract (P > 1, P->used < 79 with room 2 P->used + 1; DR moduli with a nonzero low digit; 2k moduli exact within MP_PREC; X < 0 without caps: mp_invmod, mp_abs growing)
+mp_reduce	Tom.Machine.Fn.MpReduceG5.correct	contract (Barrett at any size: 0 < um with MP_DIGIT_BIT (um + 1) and MP_DIGIT_BIT x->used ints, x->used ≤ 2 um, mu->used = um + 1; x grown in place; both multipliers on either path, SMpMulDigsAGClosed)
+s_mp_exptmod	Tom.Machine.Fn.SExptG5.correct	contract (any modulus: P > 0, redmode < 2, MP_DIGIT_BIT (2 P->used + 1) an int; every multiplier at any size; stack Fs = 10576 + 8 (G->used + 3 P->used))

@@ -1,0 +1,207 @@
+{
+ "#": "mp_reduce_2k_l: mred2k.asm.json's loop with mp_mul(&q, d, &q) on the comba path (Std.mpMulAF: q's block re-placed, kept or grown); callees from experiments/asm/callees.json, vocabulary from the contract.",
+ "fn": "mp_reduce_2k_l",
+ "mod": "MpReduce2kLMainG",
+ "ns": "Tom.Machine.Fn.MpReduce2kLG5",
+ "api": "MpReduce2kL",
+ "rows": "experiments/segs/r2klg.rows.json",
+ "code": "mpReduce2kL",
+ "F": 6952,
+ "imports": [
+  "Tom.Machine.Api.MpReduce2kL",
+  "Tom.Machine.Api.Std_r6bD",
+  "Tom.Machine.Api.StdR5",
+  "Tom.Machine.Api.StdNorm",
+  "Tom.Machine.Fn.MpReduce2kLG",
+  "Tom.Machine.Kit.Placed",
+  "Tom.Spec.MpReduce2kLStep",
+  "Tom.Machine.Kit.Run",
+  "Tom.Machine.Kit.ByteBuf",
+  "Tom.Machine.Fn.MpMulAFClosed"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.MpReduce2kLG Tom.MpReduce2kLStep",
+  "open Tom.Machine.Api.MpReduce2kL (R P lay kind isW ws Res)"
+ ],
+ "callees": {
+  "mpMulAF": {"heap": true, "ctor": "Api.MpMulA.R", "params": ["sp", "pa", "adp", "pb", "bdp", "a", "b", "H", "kc", "tc"], "entry": "0x800018a8", "site": "aD"}
+ },
+ "R": [
+  "stk",
+  "aS",
+  "aD",
+  "nS",
+  "nD",
+  "dS",
+  "dD",
+  "kc",
+  "tc",
+  "code"
+ ],
+ "written": [
+  "stk",
+  "aS",
+  "aD"
+ ],
+ "Rk": {
+  "aS": "S pa adp a",
+  "aD": "D adp a"
+ },
+ "frame": [
+  ["fT", 64],
+  ["qH", 24]
+ ],
+ "site": "qD",
+ "refs": {
+  "qH": "S sp - 88",
+  "qD": "D q",
+  "nR .aS": "S pa",
+  "nR .aD": "D adp",
+  "nR .nS": "S pn",
+  "nR .nD": "D ndp",
+  "nR .dS": "S pd",
+  "nR .dD": "D ddp",
+  "nR .kc": "D 2147587324",
+  "nR .tc": "D 2147587316"
+ },
+ "ctx_vocab": {
+  "k": "(countBits z.p.n)"
+ },
+ "pos": [
+  "hres.aroom",
+  "MpInt.alloc_pos_of_mag hres.vn hres.npos",
+  "hres.dpos"
+ ],
+ "lay_rfl": {
+  "nS": "⟨p.pn, 24⟩",
+  "nD": "⟨p.ndp, 4 * p.n.alloc⟩",
+  "dS": "⟨p.pd, 24⟩",
+  "dD": "⟨p.ddp, 4 * p.d.alloc⟩",
+  "kc": "⟨MpMul.kcAddr, 4⟩",
+  "tc": "⟨MpMul.tcAddr, 4⟩"
+ },
+ "defs": [
+  "def ρq (p : P) (q n : Nat) : X → Iv := Iv.upd (ρX p) qD ⟨q, 4 * n⟩"
+ ],
+ "snaps": {
+  "F1": "W(m, pro)",
+  "FT": "W(F1, cb)"
+ },
+ "prelude": [
+  "have hst := hres.stk; have := hst.lo; have := hst.al; have := hst.hi",
+  "have hva := hres.va; have hvn := hres.vn; have hvd := hres.vd; have := hva.used_le; have := hva.alloc_lt; have := hvn.used_le; have := hvn.alloc_lt; have := hvd.used_le; have := hvd.alloc_lt",
+  "have := hres.aroom; have := hres.qroom; have := hres.dsmall; have := hres.bits; have := hres.npos; have := hres.dpos",
+  "have eR : radix = 268435456 := rfl; have eF : Api.MpReduce2kL.F = 6952 := rfl; have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl",
+  "have eL : allocLo = 0x800188a0 := rfl; have eB : mpReduce2kLBase = 0x80005f70 := rfl; have eI : MpInit.Finit = 560 := rfl",
+  "have eC : MpClear.F = 544 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eP : defPrec = 32 := rfl",
+  "have hR : RamH (sp - 96) 96 := ⟨Ram.sub (hB .stk).2 (by simp only [layE_stk]; omega) (by simp only [layE_stk]; omega)⟩",
+  "have hpa := hS .aS .stk (by decide); have hpn := hS .nS .stk (by decide); have hpd := hS .dS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, layE_stk, layE_aS, layE_nS, layE_dS, layE_code, textIv] at hpa hpn hpd hco",
+  "have env : Env a n d := ⟨hva, hvn, hvd, hres.npos, hres.hd, hres.aroom⟩",
+  "have hk0 : 0 < k := by rw [env.p]; unfold Mont.nbits; split <;> omega",
+  "have hk31 : k < 2 ^ 31 := Nat.lt_of_le_of_lt (countBits_le hvn.toShape) hres.bits"
+ ],
+ "cuts": {
+  "E": {
+   "pc": "5f70",
+   "regs": "ent",
+   "mu": "a.mag + 1, 0, 0",
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κX p m) m m"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin (InAny (lay p) ws) m m"
+    ]
+   ],
+   "edge": [
+    [
+     "seg",
+     "pro",
+     "ws fT"
+    ],
+    [
+     "forget",
+     "qH"
+    ],
+    [
+     "call",
+     "mpInit",
+     "sp - 96, sp - 88, hin",
+     "xr",
+     {"hq": "hq"}
+    ],
+    [
+     "cases",
+     "xr",
+     {"none": [["set", {"e": "18446744073709551614"}], ["seg", "ie", "0"], ["exit", "keep", {"_X": "(false, a)", "_Q": "⟨hva.toShape, rfl⟩"}]], "some q": [["bind", {"fr": "hq"}], ["seg", "cb", "ws fT"], ["call", "cntBits", "pn, ndp, n", "_", {"res": "⟨hvn, hres.bits⟩"}], ["seg", "cr", "0", {"k": "countBits n"}], ["jump", "H", {"vars": {"a1": "a", "qv": "MpInt.zeroN defPrec"}, "pr": "RI.start env", "hqa": "Nat.le_refl _"}]]}
+    ]
+   ]
+  },
+  "H": {
+   "pc": "6030",
+   "regs": "lh",
+   "regs_over": {
+    "k": "countBits n"
+   },
+   "vars": "M Mk : Mem; q : Nat; a1 qv : MpInt",
+   "mu": "a1.mag, 0, 0",
+   "kinds": {
+    "qD": ".mpD q qv.alloc qv.digit",
+    "fT": ".frz FT",
+    "qH": ".mpS (sp - 88) q qv",
+    "nR .aS": ".mpS pa adp a1",
+    "nR .aD": ".mpD adp a1.alloc a1.digit"
+   },
+   "state": [
+    [
+     "st",
+     "St (ρq p q qv.alloc) wX WX (κH z x) Mk M"
+    ],
+    [
+     "hp",
+     "HP (ρq p q qv.alloc) wX hin ((q, 4 * qv.alloc) :: hin) (InAny (lay p) ws) m Mk"
+    ],
+    [
+     "fr",
+     "Fresh hin q (4 * qv.alloc)"
+    ]
+   ],
+   "prem": [
+    [
+     "pr",
+     "RI a n a1 qv"
+    ],
+    [
+     "hqa",
+     "defPrec ≤ qv.alloc"
+    ]
+   ],
+   "prelude": [
+    "have hva1 := pr.acct.valid; have := hva1.used_le; have := hva1.alloc_lt; have hal1 := pr.acct.alloc; have hu1 := RI.used env pr; have hqs := pr.q; have := hqs.used_le; have := hqs.alloc_lt; have := fr.lo; have := fr.hi"
+   ],
+   "edge": [
+    [
+     "seg",
+     "dh",
+     "0"
+    ],
+    [
+     "call",
+     "div2dR",
+     "sp - 96, pa, adp, sp - 88, q, a1, k, qv",
+     "x2",
+     {"hq": "hq2", "res": "⟨hva1, hqs, hk0, hk31, (by show 28 * a1.used < 2 ^ 31; omega), by om, by om, by om⟩"}
+    ],
+    [
+     "cases",
+     "x2",
+     {"pair ⟨a2, q2⟩": [["have", "s1 : S1 a n a1 a2 q2", "RI.div env pr (by om) hq2.2 hq2.1"], ["have", "hq2a : q2.alloc = qv.alloc", "Div2dPost.alloc_eq hq2.2"], ["have", "hu2 : a2.used ≤ a.used", "MpInt.used_le_of_mag_le hva.toShape s1.rem.valid (by rw [s1.rem.mag]; exact Nat.le_trans (Nat.mod_le _ _) pr.le)"], ["have", "hq2u : q2.used ≤ a.used", "MpInt.used_le_of_mag_le hva.toShape s1.quo.valid (by rw [s1.quo.mag]; exact Nat.le_trans (Nat.div_le_self _ _) pr.le)"], ["tac", "have := s1.rem.alloc; have := s1.quo.valid.used_le; have := s1.quo.valid.alloc_lt"], ["seg", "dm", "0"], ["call", "mpMulAF", "sp - 96, sp - 88, q, pd, ddp, q2, d, hin, 2147587324, 2147587316", "xm", {"hq": "hm", "hsub": "by intro r; cases r <;> (simp only [Std.mpMulAF, Std.mpMulAF0, HContract.withPlace, Std.MulAFP.toP]; iv_omega)", "perm": "List.Perm.of_eq (show (q, 4 * qv.alloc) :: hin = (q, 4 * q2.alloc) :: hin by rw [hq2a])", "res": "mulF_res (by om) (by om) (by om) s1.quo.valid hvd (by om) (by om) hres.dpos (by unfold OffHeap; om) hres.doff (by om) (by om) Fn.MpMulAFClosed.correct"}], ["cases", "xm", {"pair ⟨ok, q, qm⟩": [["tac", "have hqm0 := mulF_pos hm.1; have hqmg := mulF_grow hm.1; have hqms := mulF_shape hm.1; have := hqms.used_le; have := hqms.alloc_lt"], ["cases", "ok", {"false": [["set", {"e": "18446744073709551614"}], ["seg", "mf", "0"], ["call", "mpClear", "sp - 96, sp - 88, q, qm, hin", "_", {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hqm0⟩"}], ["seg", "ret", "0"], ["exit", "keep", {"_X": "(false, a2)", "_Q": "⟨s1.rem.valid.toShape, s1.rem.alloc⟩", "_WS": "_h.digEq (nR .aD) rfl s1.rem.alloc rfl"}]], "true": [["set", {"e": "0"}], ["have", "s2", "S1.mul s1 (mulF_post hm.1)"], ["have", "hu3 : qm.used ≤ a.used", "MpInt.used_le_of_mag_le hva.toShape s2.valid (by rw [s2.mag]; exact Nat.le_trans (fold_q_le env _) pr.le)"], ["seg", "ma", "0"], ["call", "sAddCA", "sp - 96, pa, adp, sp - 88, q, a2, qm", "a3", {"hq": "ha3", "res": "⟨s1.rem.valid.toShape, s2.valid.toShape, s1.rem.valid.sign_ok, by om, by om, by om⟩"}], ["have", "s3", "S2.add env pr s1 s2 ha3"], ["tac", "have := s3.alloc; have := s3.valid.used_le; have := s3.valid.alloc_lt"], ["seg", "ao", "0"], ["call", "cmpMag", "pa, adp, pn, ndp, a3, n", "_", {"res": "⟨s3.valid, hvn⟩"}], ["if", "a3.mag < n.mag", [["tac", "simp only [Std.cmpMag, cmp_lt hlt]"], ["set", {"r": "18446744073709551615"}], ["seg", "lt", "0"], ["call", "mpClear", "sp - 96, sp - 88, q, qm, hin", "_", {"res": "⟨⟨by om, by om, by om⟩, by unfold OffHeap; om, hqm0⟩"}], ["seg", "ret", "0"], ["exit", "keep", {"_X": "(true, a3)", "_Q": "⟨S3.fin env pr s3 hlt, s3.alloc⟩", "_WS": "_h.digEq (nR .aD) rfl s3.alloc rfl"}]], [["tac", "simp only [Std.cmpMag, cmp_ge hlt]; have hc1 : (if a3.mag = n.mag then 0 else 1) ≤ 1 := by split <;> omega"], ["set", {"r": "if a3.mag = n.mag then 0 else 1"}], ["seg", "ge", "0"], ["call", "sSubA", "sp - 96, pa, adp, pn, ndp, a3, n", "a4", {"hq": "ha4", "res": "⟨s3.valid.toShape, hvn.toShape, s3.valid.sign_ok, S3.ge env s3 hlt, by om, by om⟩"}], ["have", "hsb", "S3.sub env pr s3 s2 hlt ha4"], ["seg", "sb", "0"], ["jump", "H", {"vars": {"a1": "a4", "qv": "qm"}, "pr": "hsb.1", "hqa": "by om", "fr": "mulF_fresh hm.2.1 fr (congrArg (4 * ·) hq2a.symm) hqm0"}]], "hlt"]]}]]}]]}
+    ]
+   ]
+  }
+ },
+ "hdig": false
+}

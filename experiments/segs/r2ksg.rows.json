@@ -1,0 +1,27 @@
+{
+ "fn": "mp_reduce_2k_setup", "mod": "Reduce2kSetupG", "src": "r2ksg", "pfx": "rsg", "imports": ["Tom.Machine.Kit.GenX_seg5a"],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "nat": "sp pa pd e nb tdp x a", "keep": "gp tp", "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pd",
+  "ci": "sp:sp-80 s0:pa s1:pd s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:sp-56", "ir": "@ci a0:e", "cb": "@ci a0:pa", "pr": "@ci a0:nb",
+  "ex": "@ci a1:nb", "sc": "@ci a1:pa a2:sp-56", "c0": "@ci -a0", "ld": "@ci a4:tdp", "ldz": "@ld s1:pd", "ciz": "@ci s1:pd",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e"
+ },
+ "facts": {
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1"],
+  "ER": ["bytesT8 M (sp - 72) = BitVec.ofNat 64 e"],
+  "TP": ["bytesT8 M (sp - 56 + 16) = BitVec.ofNat 64 tdp"],
+  "TD": ["bytesT4 M a = BitVec.ofNat 32 x", "x < 268435456", "Ram a 4", "a + 4 ≤ sp - 80 ∨ sp ≤ a"],
+  "PD": ["Ram pd 4", "pd % 4 = 0", "pd + 4 ≤ mpReduce2kSetupBase ∨ mpReduce2kSetupBase + 236 ≤ pd"]
+ },
+ "segs": [
+  {"n": "pro", "at": "6088", "pre": "ent", "post": "ci", "doc": "Save `ra`, `s0`, `s1`; `mp_init(&tmp)`."},
+  {"n": "ie", "at": "60a8 F", "pre": "ir", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_init` failed: return its error."},
+  {"n": "cb", "at": "60a8 T", "pre": "ir{e:=0}", "post": "cb", "doc": "`mp_count_bits(a)`."},
+  {"n": "cr", "at": "60d0", "pre": "pr", "post": "ex", "doc": "`mp_2expt(&tmp, p)`."},
+  {"n": "xo", "at": "60dc F", "pre": "ir{e:=0}", "post": "sc", "doc": "`s_mp_sub(&tmp, a, &tmp)`."},
+  {"n": "so", "at": "60f0 F", "to": "6100", "pre": "ir{e:=0}", "post": "ld", "h": ["TP"], "doc": "`err` in the frame; `tmp.dp`."},
+  {"n": "sd", "at": "6100", "pre": "ldz", "post": "ciz", "st": ["x"], "h": ["TD{a:=tdp+4*0}", "PD"], "doc": "`*d := tmp.dp[0]`; `mp_clear(&tmp)`."},
+  {"n": "r1", "at": "610c", "pre": "c0", "post": "rt", "h": ["RF", "ER"], "doc": "Restore, return `err`."},
+  {"n": "xe", "at": "60dc T", "pre": "ir", "post": "ci", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_2expt` failed (it grows `tmp`): `err` in the frame; `mp_clear(&tmp)`."},
+  {"n": "ret", "at": "6134", "pre": "c0", "post": "rt", "h": ["RF", "ER"], "doc": "Restore, return `err`."}
+ ]}

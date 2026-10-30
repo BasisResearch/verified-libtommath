@@ -1,0 +1,39 @@
+verified-libtommath
+
+The code of this repository is licensed under the Apache License, Version 2.0 (LICENSE).
+It includes or derives from the third-party material below, under the licenses named.
+
+libtommath v1.3.0 (https://github.com/libtom/libtommath, tag v1.3.0, 95d80fd8)
+  vendor/libtommath/: unmodified except that its README.md is removed. The LibTom license
+  (Unlicense, public domain): vendor/libtommath/LICENSE. Tom/Layout.lean is generated from its
+  headers by scripts/gen_layout.sh.
+
+Sail RISC-V model (https://github.com/riscv/sail-riscv)
+  riscv-lean/Lean_RV64D_executable/ (the model generated to Lean) and riscv-lean/lean_emulator/
+  (its Lean emulator): BSD-2-Clause, riscv-lean/LICENCE-sail-riscv.
+
+lean-sail (https://github.com/rems-project/lean-sail, 079463134b9c)
+  riscv-lean/lean-sail/, patched so that unmapped addresses read as zero. The upstream repository
+  has no license file (at this revision or at its head); riscv-lean/lean-sail/Sail/BitVec.lean
+  carries its own header: Copyright (c) 2023 Amazon.com, Inc. or its affiliates, Apache-2.0.
+
+iris-lean (https://github.com/leanprover-community/iris-lean, 740e2c4a)
+  A Lake dependency (fetched, not vendored; Apache-2.0); VsaIris/ builds its separation logic on it.
+
+ship-your-interpreter (https://github.com/BasisResearch/ship-your-interpreter, Basis Research)
+  The machine layer (Vsa/), the separation-logic layer and allocator proofs (VsaIris/), the
+  libgcc proofs (Vsa/Reloc/Libgcc/), riscv-lean/, the bare-metal harness (c/harness/) and
+  scripts/emit_derive_case.py, scripts/rv_steps.py, scripts/gen_alloc_steps.py derive from
+  ship-your-interpreter, via related projects by the same authors; the allocator and libgcc
+  proofs are relocated to this image.
+
+newlib 4.5.0 (as shipped with xPack GNU RISC-V Embedded GCC 15.2.0)
+  c/tommath-arith.elf links newlib's malloc/free/realloc/calloc, memset, memcpy and memmove; their
+  machine code also appears in the listings generated from it (experiments/disasm.txt,
+  Tom/Machine/Code.lean, Tom/Machine/Img.lean, VsaIris/Vsa/AllocCode.lean). Licenses:
+  licenses/COPYING.NEWLIB.
+
+libgcc (GCC 15.2.0)
+  c/tommath-arith.elf links libgcc's __muldi3, __udivdi3, __umoddi3, __divdi3 and __moddi3 (and
+  the same listings contain their machine code). GPL-3.0 (licenses/COPYING3) with the GCC Runtime
+  Library Exception, version 3.1 (licenses/COPYING.RUNTIME).

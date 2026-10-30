@@ -1,0 +1,8 @@
+{"extends": "saddg.asm.json",
+ "subst": {"c": "b", "pc": "pb", "cdp": "bdp", "cS": "bS", "cD": "bD", "hsc": "hsb", "cpos": "bpos"},
+ "fn": "s_mp_add(a, b, b) (growing)",
+ "R": ["stk", "aS", "aD", "bS", "bD", "code"], "rowdef": {"pc": "pb", "bdp": "q"}, "pos": ["hres.apos", "hres.bpos"],
+ "let": {"API": "SAddGB", "CPRE": [], "HPC": ["simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hpb hco"],
+         "YB": "{OV} i i", "HYB": "(SAddG.ov_self a b {MN} {X} hg.digit i)",
+         "HDO": ["have hdo : {OV} i i < 268435456 := by rw [SAddG.ov_self a b {MN} {X} hg.digit i]; exact hsb.digit_lt i"]},
+ "families": {"o": {"1": {"XDP": "q", "YX": "{OV} i i", "HYX": "(SAddG.ov_self a b {MN} {X} hg.digit i)"}}}}

@@ -1,0 +1,140 @@
+{
+ "fn": "mp_sqr",
+ "mod": "MpSqrG",
+ "src": "msqrg",
+ "pfx": "msq",
+ "bv": "ra s0",
+ "nat": "sp pa pb u e",
+ "keep": "gp tp s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11",
+ "h0": [
+  "FF"
+ ],
+ "regs": {
+  "ent": "ra sp gp:2147586192 s0 a0:pa a1:pb",
+  "cc": "sp:sp-16 gp:2147586192 s0:pb a0:pa a1:pb",
+  "rr": "sp:sp-16 s0:pb a0:e",
+  "rt": "ra sp s0 a0:e",
+  "cf": "sp:sp-16 gp:2147586192 s0:pb a0:pa a1:pb a5:u"
+ },
+ "facts": {
+  "FF": [
+   "rs: Ram (sp - 16) 16",
+   "sp % 16 = 0",
+   "16 ≤ sp",
+   "sp ≤ mpSqrBase ∨ mpSqrBase + 148 ≤ sp - 16"
+  ],
+  "AS": [
+   "bytesT4 M pa = BitVec.ofNat 32 u",
+   "u < 2 ^ 29",
+   "Ram pa 24",
+   "pa % 8 = 0"
+  ],
+  "TS": [
+   "bytesT4 M (2147587312 + 4 * 0) = BitVec.ofNat 32 400",
+   "Ram 2147587312 4"
+  ],
+  "KS": [
+   "bytesT4 M (2147587320 + 4 * 0) = BitVec.ofNat 32 120",
+   "Ram 2147587320 4",
+   "2147587324 ≤ sp - 16 ∨ sp ≤ 2147587320"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0"
+  ],
+  "BS": [
+   "Ram pb 24",
+   "pb % 8 = 0",
+   "pb + 24 ≤ sp - 16 ∨ sp ≤ pb",
+   "pb + 24 ≤ mpSqrBase ∨ mpSqrBase + 148 ≤ pb"
+  ]
+ },
+ "segs": [
+  {
+   "n": "et",
+   "at": "6410 T",
+   "pre": "ent",
+   "post": "cc",
+   "h": [
+    "AS",
+    "TS",
+    "400 ≤ u"
+   ],
+   "doc": "`a->used ≥ TOOM_SQR_CUTOFF`: save `ra`, `s0`; `s_mp_toom_sqr(a, b)`."
+  },
+  {
+   "n": "ek",
+   "at": "6410 F T",
+   "pre": "ent",
+   "post": "cc",
+   "h": [
+    "AS",
+    "TS",
+    "KS",
+    "u < 400",
+    "120 ≤ u"
+   ],
+   "doc": "`a->used ≥ KARATSUBA_SQR_CUTOFF`: `s_mp_karatsuba_sqr(a, b)`."
+  },
+  {
+   "n": "ef",
+   "at": "6410 F F",
+   "to": "6434",
+   "pre": "ent",
+   "post": "cf",
+   "h": [
+    "AS",
+    "TS",
+    "KS",
+    "u < 120"
+   ],
+   "doc": "Below both cut-offs (cut before the shifted test: kernel depth)."
+  },
+  {
+   "n": "eg",
+   "at": "6434 F T",
+   "pre": "cf",
+   "post": "cc",
+   "h": [
+    "u < 120"
+   ],
+   "doc": "`2 a->used + 1 < 512`, `a->used < 128`: `s_mp_sqr_fast(a, b)`."
+  },
+  {
+   "n": "xk",
+   "at": "6470",
+   "pre": "rr",
+   "post": "rt",
+   "h": [
+    "RF",
+    "BS"
+   ],
+   "doc": "After the call: `b->sign := MP_ZPOS`; restore, return `err`."
+  },
+  {
+   "n": "xt",
+   "at": "6488",
+   "pre": "rr",
+   "post": "rt",
+   "h": [
+    "RF",
+    "BS"
+   ],
+   "doc": "After `s_mp_toom_sqr`: `b->sign := MP_ZPOS`; restore, return `err`."
+  },
+  {
+   "n": "xf",
+   "at": "64a0",
+   "pre": "rr",
+   "post": "rt",
+   "h": [
+    "RF",
+    "BS"
+   ],
+   "doc": "After `s_mp_sqr_fast`: to the common exit."
+  }
+ ],
+ "imports": [
+  "Tom.Machine.Fn.MpSqrGK"
+ ]
+}

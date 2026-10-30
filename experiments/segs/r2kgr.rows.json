@@ -1,0 +1,34 @@
+{
+ "fn": "mp_reduce_2k", "mod": "Reduce2kGR", "src": "r2kgr", "pfx": "rkr", "imports": ["Tom.Machine.Kit.GenX_seg5a"],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "nat": "sp pa pn d e k r", "keep": "gp tp", "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pn a2:d",
+  "ci": "sp:sp-96 s0 s1:pa s2:pn s3:d s4 s5 s6 s7 s8 s9 s10 s11 a0:sp-88", "ir": "@ci a0:e",
+  "cb": "sp:sp-96 s0:e s1:pa s2:pn s3:d s4 s5 s6 s7 s8 s9 s10 s11 a0:pn", "pr": "@cb a0:k",
+  "lh": "sp:sp-96 s0:0 s1:pa s2:pn s3:d s4:k s5:1 s6:18446744073709551615 s7 s8 s9 s10 s11",
+  "dc": "@lh a0:pa a1:k a2:sp-88 a3:pa", "lr": "@lh a0:e", "mc": "@lh a0:sp-88 a1:d a2:sp-88",
+  "ac": "@lh a0:pa a1:sp-88 a2:pa", "cm": "@lh a0:pa a1:pn", "cq": "@lh a0:r", "sc": "@lh a0:pa a1:pn a2:pa",
+  "cl": "@lh s0:e a0:sp-88", "c0": "@cl -a0",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e"
+ },
+ "facts": {
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1", "bytesT8 M (sp - 32) = s2", "bytesT8 M (sp - 40) = s3"],
+  "RS": ["bytesT8 M (sp - 48) = s4", "bytesT8 M (sp - 56) = s5", "bytesT8 M (sp - 64) = s6"]
+ },
+ "segs": [
+  {"n": "pro", "at": "5e48", "pre": "ent", "post": "ci", "doc": "Save `ra`, `s0`–`s3`; `mp_init(&q)`."},
+  {"n": "ie", "at": "5e74 F", "pre": "ir", "post": "rt", "h": ["RF", "e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_init` failed: return its error."},
+  {"n": "cb", "at": "5e74 T", "pre": "ir{e:=0}", "post": "cb{e:=0}", "doc": "Save `s4`–`s6`; `mp_count_bits(n)`."},
+  {"n": "cr", "at": "5eb0", "to": "5f14", "pre": "pr{e:=0}", "post": "lh", "doc": "`p := mp_count_bits(n)`; the constants `1`, `MP_LT`; to `top`."},
+  {"n": "dh", "at": "5f14", "pre": "lh", "post": "dc", "doc": "`top`: `mp_div_2d(a, p, &q, a)`."},
+  {"n": "dk", "at": "5f28 T T", "pre": "lr{e:=0}", "post": "ac", "h": ["d = 1"], "doc": "`d = 1`: `s_mp_add(a, &q, a)`."},
+  {"n": "dm", "at": "5f28 T F", "pre": "lr{e:=0}", "post": "mc", "h": ["d ≠ 1", "d < 2 ^ 32"], "doc": "`d ≠ 1`: `mp_mul_d(&q, d, &q)`."},
+  {"n": "mo", "at": "5ec8 F", "pre": "lr{e:=0}", "post": "ac", "doc": "`s_mp_add(a, &q, a)`."},
+  {"n": "ao", "at": "5ee0 F", "pre": "lr{e:=0}", "post": "cm", "doc": "`mp_cmp_mag(a, n)`."},
+  {"n": "lt", "at": "5ef4 T", "pre": "cq", "post": "cl{e:=0}", "h": ["r = 18446744073709551615"], "doc": "`|a| < |n|`: done, `mp_clear(&q)`."},
+  {"n": "ge", "at": "5ef4 F", "pre": "cq", "post": "sc", "h": ["r ≠ 18446744073709551615", "r < 2 ^ 64"], "doc": "`|a| ≥ |n|`: `s_mp_sub(a, n, a)`."},
+  {"n": "sb", "at": "5f0c F", "to": "5f14", "pre": "lr{e:=0}", "post": "lh", "doc": "`goto top`."},
+  {"n": "ret", "at": "5f44", "pre": "c0", "post": "rt", "h": ["RF", "RS"], "doc": "Restore, return `err`."},
+  {"n": "df", "at": "5f28 F", "pre": "lr", "post": "cl", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_div_2d` failed (its `mp_copy` grows `q`): `mp_clear(&q)`."},
+  {"n": "mf", "at": "5ec8 T", "pre": "lr", "post": "cl", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_mul_d` failed (it grows `q`): `mp_clear(&q)`."},
+  {"n": "af", "at": "5ee0 T", "pre": "lr", "post": "cl", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`s_mp_add` failed (it grows `a`): `mp_clear(&q)`."}
+ ]}

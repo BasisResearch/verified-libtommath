@@ -1,0 +1,29 @@
+{
+ "fn": "mp_mod", "mod": "MpModG", "src": "mmodg", "pfx": "mmg", "imports": ["Tom.Machine.Kit.GenX_seg5a"],
+ "bv": "ra s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11", "nat": "sp pa pb pc ub e tu ts sb", "keep": "gp tp", "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:pa a1:pb a2:pc",
+  "B": "sp:sp-80 s0:pb s1:pa s2:pc s3 s4 s5 s6 s7 s8 s9 s10 s11",
+  "ci": "@B a0:sp-56 a1:ub", "ir": "@B a0:e", "dc": "@B a0:pa a1:pb a2:0 a3:sp-56",
+  "cx": "@B a0:sp-56 a1:pc", "ad": "@B a0:pb a1:sp-56 a2:pc", "cl": "@B a0:sp-56",
+  "rt": "ra sp s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 a0:e"
+ },
+ "facts": {
+  "RF": ["bytesT8 M (sp - 8) = ra", "bytesT8 M (sp - 16) = s0", "bytesT8 M (sp - 24) = s1", "bytesT8 M (sp - 32) = s2"],
+  "UB": ["bytesT4 M pb = BitVec.ofNat 32 ub", "Ram pb 24", "pb + 24 ≤ sp - 80 ∨ sp ≤ pb", "ub < 2 ^ 31"],
+  "TU": ["bytesT4 M (sp - 56) = BitVec.ofNat 32 tu", "tu < 2 ^ 31"],
+  "TS": ["bytesT4 M (sp - 48) = BitVec.ofNat 32 ts", "ts < 2 ^ 31"],
+  "SB": ["bytesT4 M (pb + 8) = BitVec.ofNat 32 sb", "Ram pb 24", "sb < 2 ^ 31"],
+  "ER": ["bytesT8 M (sp - 72) = BitVec.ofNat 64 e"]
+ },
+ "segs": [
+  {"n": "pro", "at": "1680", "pre": "ent", "post": "ci", "h": ["UB"], "doc": "Save `ra`, `s0`–`s2`; `mp_init_size(&t, b->used)`."},
+  {"n": "ie", "at": "16ac F", "pre": "ir", "post": "rt", "h": ["e ≠ 0", "e < 2 ^ 64", "RF"], "doc": "`mp_init_size` failed: return its error."},
+  {"n": "dv", "at": "16ac T", "pre": "ir{e:=0}", "post": "dc", "doc": "`mp_div(a, b, NULL, &t)`."},
+  {"n": "de", "at": "16e4 T", "pre": "ir", "post": "cl", "h": ["e ≠ 0", "e < 2 ^ 64"], "doc": "`mp_div` failed: spill `err`; `mp_clear(&t)`."},
+  {"n": "kz", "at": "16e4 F T", "pre": "ir{e:=0}", "post": "cx", "h": ["TU", "tu = 0"], "doc": "`t = 0`: spill `err`; `mp_exch(&t, c)`."},
+  {"n": "ks", "at": "16e4 F F F", "pre": "ir{e:=0}", "post": "cx", "h": ["TU", "tu ≠ 0", "TS", "SB", "ts = sb"], "doc": "`t.sign == b->sign`: spill `err`; `mp_exch(&t, c)`."},
+  {"n": "ka", "at": "16e4 F F T", "pre": "ir{e:=0}", "post": "ad", "h": ["TU", "tu ≠ 0", "TS", "SB", "ts ≠ sb"], "doc": "Otherwise `mp_add(b, &t, c)`."},
+  {"n": "kc", "at": "1710", "pre": "B", "post": "cl", "h": ["ER{e:=0}"], "stu": ["0"], "doc": "Reload and spill `err`; `mp_clear(&t)`."},
+  {"n": "kd", "at": "1750", "pre": "ir", "post": "cl", "doc": "`err := mp_add(…)`, spilled; `mp_clear(&t)`."},
+  {"n": "ret", "at": "1720", "pre": "B", "post": "rt", "h": ["RF", "ER"], "doc": "Restore, return `err`."}
+ ]}

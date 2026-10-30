@@ -1,0 +1,17 @@
+{"extends": "msubg.asm.json",
+ "subst": {"c": "b", "pc": "pb", "cdp": "bdp", "cS": "bS", "cD": "bD", "hsc": "hsb", "cpos": "bpos"},
+ "#": "mp_sub(a, b, b) growing b (s_mp_toom_mul's mp_sub(&a2, &a1, &a1), …): the tail callees s_mp_add(a, b, b), s_mp_sub(b, a, b), s_mp_sub(a, b, b) over b with the stored sign.",
+ "fn": "mp_sub(a, b, b) (growing)",
+ "R": ["stk", "aS", "aD", "bS", "bD", "code"], "rowdef": {"pc": "pb"}, "pos": ["hres.apos", "hres.bpos"],
+ "imports": ["Tom.Machine.Api.MpSubGB", "Tom.Machine.Api.Std_grow6", "Tom.Machine.Api.Std_r6c", "Tom.Machine.Fn.MpSubGG", "Tom.Machine.Kit.Run",
+             "Tom.Machine.Kit.Grow"],
+ "let": {"API": "MpSubGB", "BASEAPI": "MpAddGB", "CPRE": [], "HPC": ["simp only [Iv.Disj, Disj, lay, eF, textIv] at hpa hpb hco"]},
+ "families": {
+   "T": {"sAddGB": {"TF": "SAddGB", "TE": "0x8000219c", "PCD": [], "CC": [], "CR": []}},
+   "br": {
+   "diff": {"TC": "sAddGB", "TF": "SAddGB", "TA": "sp, pa, adp, pb, bdp, a, (b.withSign a.sign), H",
+            "TR": "⟨hres.stk, hva.toShape, hvb.toShape.withSign _, hsz, hres.apos, hres.bpos, hres.coff⟩"},
+   "lt": {"TC": "sSubGA", "TF": "SSubGA", "TA": "sp, pb, bdp, pa, adp, (b.withSign {FLIP}), a, H",
+          "TR": "⟨{STK}, hvb.toShape.withSign _, hva.toShape, by dsimp only [MpInt.withSign]; omega, hres.bpos, hres.apos, hres.coff, {LE_LT}⟩"},
+   "ge": {"TC": "sSubGB", "TF": "SSubGB", "TA": "sp, pa, adp, pb, bdp, a, (b.withSign b.sign), H",
+          "TR": "⟨{STK}, hva.toShape, hvb.toShape.withSign _, by dsimp only [MpInt.withSign]; omega, hres.apos, hres.bpos, hres.coff, {LE_GE}⟩"}}}}

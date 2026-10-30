@@ -1,0 +1,1825 @@
+{
+ "#": "mp_exptmod(G, X, P, Y): P negative: MP_VAL; X nonnegative: the dispatch over the three modulus predicates and a tail call of s_mp_exptmod_fast or s_mp_exptmod (over the contract's layout: St.flat); X negative: mp_init_multi(&tmpG, &tmpX) (temporaries dG, dX), mp_invmod(G, P, &tmpG), mp_abs(X, &tmpX), the recursive call on a nonnegative exponent, mp_clear_multi.",
+ "region": {
+  "api": "Api.Exptmod",
+  "temps": [
+   "dG",
+   "dX"
+  ],
+  "lay": {
+   "stk": "⟨p.sp - MpExptmod.F p, MpExptmod.F p⟩",
+   "_": "Api.Exptmod.lay (MpExptmod.F p) p"
+  },
+  "eqs": true,
+  "kind": "Api.Exptmod.kind p",
+  "gpre": {
+   "res": "MpExptmod.ResOf p",
+   "lay": "Api.Exptmod.lay (MpExptmod.F p)",
+   "isW": "Api.Exptmod.isW",
+   "kind": "Api.Exptmod.kind",
+   "hin": "Api.Exptmod.hin"
+  }
+ },
+ "fn": "mp_exptmod",
+ "mod": "MpExptmodMainG",
+ "ns": "Tom.Machine.Fn.MpExptmodG5",
+ "api": "MpExptmodOf",
+ "style": "pre",
+ "hdig": false,
+ "rows": "experiments/segs/mexpg.rows.json",
+ "code": "mpExptmod",
+ "isW": "isWG",
+ "imports": [
+  "Tom.Machine.Api.Std_mexp",
+  "Tom.Machine.Api.Std_capx",
+  "Tom.Machine.Kit.Run",
+  "Tom.Machine.Kit.HeapBlk",
+  "Tom.Machine.Fn.MpExptmodG"
+ ],
+ "opens": [
+  "open Tom.Machine.Fn.MpExptmodG Tom Tom.Exptmod Tom.MpExptmodStep",
+  "open Tom.Machine.Api.Exptmod (P)"
+ ],
+ "head_defs": [
+  "instance decO1 : DecidableEq (Option R) := inferInstance",
+  "instance decO2 : DecidableEq (Option (Option R)) := inferInstance",
+  "instance decO3 : DecidableEq (Option (Option (Option R))) := inferInstance",
+  "/-- `krfl` with the region cases split first. -/",
+  "macro \"krflc\" : tactic => `(tactic| (intro r; rcases r with _ | _ | _ | r <;> first | (cases r <;> rfl) | rfl))"
+ ],
+ "lay_t": "layG",
+ "kind_t": "kindG p m",
+ "kind_rest": "kindG z.p z.m r",
+ "frame_len_tac": [
+  "{FLT}",
+  "{FLT}",
+  "{FLT}"
+ ],
+ "R": [
+  "stk",
+  "gS",
+  "gD",
+  "xS",
+  "xD",
+  "nS",
+  "nD",
+  "yS",
+  "yD",
+  "ks",
+  "ts",
+  "kc",
+  "tc",
+  "code",
+  "dG",
+  "dX"
+ ],
+ "written": [
+  "stk",
+  "yS",
+  "yD",
+  "dG",
+  "dX"
+ ],
+ "frame": [
+  [
+   "nT",
+   48
+  ],
+  [
+   "nX",
+   24
+  ],
+  [
+   "nG",
+   24
+  ]
+ ],
+ "fits": {
+  "stk": "trivial",
+  "dG": "trivial",
+  "dX": "trivial"
+ },
+ "wit": {
+  "stk": "(hP.bund .stk).2",
+  "gS": "(hP.bund .gS).2",
+  "gD": "(hP.bund .gD).2",
+  "xS": "(hP.bund .xS).2",
+  "xD": "(hP.bund .xD).2",
+  "nS": "(hP.bund .nS).2",
+  "nD": "(hP.bund .nD).2",
+  "yS": "(hP.bund .yS).2",
+  "yD": "(hP.bund .yD).2",
+  "ks": "(hP.bund .ks).2",
+  "ts": "(hP.bund .ts).2",
+  "kc": "(hP.bund .kc).2",
+  "tc": "(hP.bund .tc).2",
+  "code": "(hP.bund .code).2",
+  "dG": "Ram.nil",
+  "dX": "Ram.nil"
+ },
+ "refs": {
+  "nG": "S sp - 96",
+  "nX": "S sp - 72",
+  "nR .dG": "D qG",
+  "nR .dX": "D qX",
+  "nR .gS": "S pg",
+  "nR .gD": "D gdp",
+  "nR .xS": "S px",
+  "nR .xD": "D xdp",
+  "nR .nS": "S pn",
+  "nR .nD": "D ndp",
+  "nR .yS": "S py",
+  "nR .yD": "D ydp",
+  "nR .ks": "D 2147587320",
+  "nR .ts": "D 2147587312",
+  "nR .kc": "D 2147587324",
+  "nR .tc": "D 2147587316"
+ },
+ "callees": {
+  "reduceIs2kLc": {
+   "heap": false,
+   "ctor": "Ob",
+   "params": [
+    "p",
+    "dp",
+    "a"
+   ],
+   "regions": [
+    [
+     "S",
+     "S p"
+    ],
+    [
+     "D",
+     "D dp"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x80001db4"
+  },
+  "drIsModc": {
+   "heap": false,
+   "ctor": "Ob",
+   "params": [
+    "p",
+    "dp",
+    "a"
+   ],
+   "regions": [
+    [
+     "S",
+     "S p"
+    ],
+    [
+     "D",
+     "D dp"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x80005594"
+  },
+  "reduceIs2kc": {
+   "heap": false,
+   "ctor": "Api.Un.R",
+   "params": [
+    "sp",
+    "pa",
+    "adp",
+    "a"
+   ],
+   "regions": [
+    [
+     "stk",
+     "stk"
+    ],
+    [
+     "aS",
+     "S pa"
+    ],
+    [
+     "aD",
+     "D adp"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x80001d14"
+  },
+  "sExptFastT": {
+   "heap": true,
+   "site": "yD",
+   "ctor": "Api.Exptmod.R",
+   "params": [
+    "sp",
+    "pg",
+    "gdp",
+    "px",
+    "xdp",
+    "pn",
+    "ndp",
+    "py",
+    "ydp",
+    "g",
+    "x",
+    "n",
+    "y",
+    "mode",
+    "H"
+   ],
+   "regions": [
+    [
+     "stk",
+     "stk"
+    ],
+    [
+     "gS",
+     "S pg"
+    ],
+    [
+     "gD",
+     "D gdp"
+    ],
+    [
+     "xS",
+     "S px"
+    ],
+    [
+     "xD",
+     "D xdp"
+    ],
+    [
+     "nS",
+     "S pn"
+    ],
+    [
+     "nD",
+     "D ndp"
+    ],
+    [
+     "yS",
+     "S py"
+    ],
+    [
+     "yD",
+     "D ydp"
+    ],
+    [
+     "ks",
+     "to nR .ks"
+    ],
+    [
+     "ts",
+     "to nR .ts"
+    ],
+    [
+     "kc",
+     "to nR .kc"
+    ],
+    [
+     "tc",
+     "to nR .tc"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x80002c5c"
+  },
+  "sExptT": {
+   "heap": true,
+   "site": "yD",
+   "ctor": "Api.Exptmod.R",
+   "params": [
+    "sp",
+    "pg",
+    "gdp",
+    "px",
+    "xdp",
+    "pn",
+    "ndp",
+    "py",
+    "ydp",
+    "g",
+    "x",
+    "n",
+    "y",
+    "mode",
+    "H"
+   ],
+   "regions": [
+    [
+     "stk",
+     "stk"
+    ],
+    [
+     "gS",
+     "S pg"
+    ],
+    [
+     "gD",
+     "D gdp"
+    ],
+    [
+     "xS",
+     "S px"
+    ],
+    [
+     "xD",
+     "D xdp"
+    ],
+    [
+     "nS",
+     "S pn"
+    ],
+    [
+     "nD",
+     "D ndp"
+    ],
+    [
+     "yS",
+     "S py"
+    ],
+    [
+     "yD",
+     "D ydp"
+    ],
+    [
+     "ks",
+     "to nR .ks"
+    ],
+    [
+     "ts",
+     "to nR .ts"
+    ],
+    [
+     "kc",
+     "to nR .kc"
+    ],
+    [
+     "tc",
+     "to nR .tc"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x8000261c"
+  },
+  "mpInvmodH": {
+   "heap": true,
+   "site": "cD",
+   "ctor": "Api.Invmod.R",
+   "params": [
+    "sp",
+    "pa",
+    "adp",
+    "pb",
+    "bdp",
+    "pc",
+    "cdp",
+    "a",
+    "b",
+    "c",
+    "H"
+   ],
+   "regions": [
+    [
+     "stk",
+     "stk"
+    ],
+    [
+     "aS",
+     "S pa"
+    ],
+    [
+     "aD",
+     "D adp"
+    ],
+    [
+     "bS",
+     "S pb"
+    ],
+    [
+     "bD",
+     "D bdp"
+    ],
+    [
+     "cS",
+     "S pc"
+    ],
+    [
+     "cD",
+     "D cdp"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x8000150c"
+  },
+  "mpExptmodNNH": {
+   "heap": true,
+   "site": "yD",
+   "ctor": "Api.Exptmod.R",
+   "params": [
+    "sp",
+    "pg",
+    "gdp",
+    "px",
+    "xdp",
+    "pn",
+    "ndp",
+    "py",
+    "ydp",
+    "g",
+    "x",
+    "n",
+    "y",
+    "mode",
+    "H"
+   ],
+   "regions": [
+    [
+     "stk",
+     "stk"
+    ],
+    [
+     "gS",
+     "S pg"
+    ],
+    [
+     "gD",
+     "D gdp"
+    ],
+    [
+     "xS",
+     "S px"
+    ],
+    [
+     "xD",
+     "D xdp"
+    ],
+    [
+     "nS",
+     "S pn"
+    ],
+    [
+     "nD",
+     "D ndp"
+    ],
+    [
+     "yS",
+     "S py"
+    ],
+    [
+     "yD",
+     "D ydp"
+    ],
+    [
+     "ks",
+     "to nR .ks"
+    ],
+    [
+     "ts",
+     "to nR .ts"
+    ],
+    [
+     "kc",
+     "to nR .kc"
+    ],
+    [
+     "tc",
+     "to nR .tc"
+    ],
+    [
+     "code",
+     "code"
+    ]
+   ],
+   "entry": "0x80000e94"
+  }
+ },
+ "ctx_vocab": {
+  "sp": "z.p.sp",
+  "pg": "z.p.pg",
+  "gdp": "z.p.gdp",
+  "px": "z.p.px",
+  "xdp": "z.p.xdp",
+  "pn": "z.p.pn",
+  "ndp": "z.p.ndp",
+  "py": "z.p.py",
+  "ydp": "z.p.ydp",
+  "G": "z.p.g",
+  "Xv": "z.p.x",
+  "N": "z.p.n",
+  "Yv": "z.p.y",
+  "H": "z.p.H",
+  "s1": "z.s.s1",
+  "s2": "z.s.s2",
+  "s3": "z.s.s3",
+  "s4": "z.s.s4",
+  "hin": "(Api.Exptmod.hin z.p)",
+  "Wr0": "(InAny (Api.Exptmod.lay (MpExptmod.F z.p) z.p) Api.Exptmod.ws)"
+ },
+ "rowdef": {
+  "ps": "N.sign",
+  "xs": "Xv.sign",
+  "pu": "N.used",
+  "d0": "N.digit 0"
+ },
+ "cx": [
+  [
+   "pre",
+   "GPre p m ra"
+  ]
+ ],
+ "intro": "intro p m v outp ra hra hres hS hB hH hoff c hc; obtain ⟨vsp, gp, tp, s0, s⟩ := v; have hsp := At.sp_eq hc (x := BitVec.ofNat 64 p.sp) rfl; have hgp := At.gp_eq hc (x := gpV) rfl; simp only at hsp hgp; subst hsp hgp; revert c hc; have hP : GPre p m ra := ⟨hra, hres, hS, hB, hH, hoff, soundG hS hB⟩",
+ "fxmk": "⟨p, m, tp, s0, s, outp, ra⟩",
+ "snaps": {
+  "F1": "W(m, pp)"
+ },
+ "post": "fun cf => ∃ x M, At ra (Api.Exptmod.rets p x ra) M v.keep o cf ∧ MpExptmod.Q p x ∧ HPost (Api.Exptmod.lay (MpExptmod.F p) p) Api.Exptmod.ws .yD (Api.Exptmod.out p x) (Api.Exptmod.site' (MpExptmod.F p) p x) hin (Api.Exptmod.hout p x) m M",
+ "prelude": [
+  "have hP := hc.pre; have hres := hP.res; have hS := hP.sound; have hB := hP.bund; have hoff := hP.off; have hra := hP.ra4",
+  "have hst := hres.stk; have := hst.al; have := hst.hi; have hlo := hst.lo; rw [show heapEnd = 0x87800000 from rfl] at hlo; have hF112 := MpExptmod.frame_lt_F z.p",
+  "have hvn := hres.vn; have hvx := hres.vx; have hvg := hres.vg; have := hvn.used_le; have := hvn.alloc_lt; have := hvx.used_le; have := hvx.alloc_lt",
+  "have eE : heapEnd = 0x87800000 := rfl; have eS : heapStart = 0x80019d10 := rfl; have eL : allocLo = 0x800188a0 := rfl",
+  "have eB : mpExptmodBase = 0x80000e94 := rfl; have eTB : textBase = 0x80000000 := rfl; have eTL : textLen = 0x18880 := rfl; have eN : Layout.mpNeg = 1 := rfl",
+  "have hps : N.sign < 2 ^ 31 := by rcases hvn.sign_ok with h | h <;> rw [h] <;> decide",
+  "have hxs : Xv.sign < 2 ^ 31 := by rcases hvx.sign_ok with h | h <;> rw [h] <;> decide",
+  "have hd0 : N.digit 0 < 2 ^ 31 := Nat.lt_of_lt_of_le (hvn.digit_lt 0) (by decide)",
+  "have hpn := hS .nS .stk (by decide); have hpx := hS .xS .stk (by decide); have hco := hS .stk .code (by decide)",
+  "simp only [Iv.Disj, Disj, Api.Exptmod.lay, textIv] at hpn hpx hco",
+  "have hR : RamH (sp - 96) 96 := ⟨Ram.sub (hB .stk).2 (by show sp - MpExptmod.F z.p ≤ sp - 96; omega) (by show sp - 96 + 96 ≤ sp - MpExptmod.F z.p + MpExptmod.F z.p; omega)⟩"
+ ],
+ "static": [
+  "theorem sub3 {pp : P} (hF : 96 ≤ (layG pp .stk).len) (y : Y) : (ρ3 pp y).Sub (layG pp (proj y)) := by\n  rcases y with _ | _ | _ | r\n  · unfold ρ3; simp [Split.lay, layG_stk, proj, Iv.Sub] at hF ⊢; omega\n  · unfold ρ3; simp [Split.lay, layG_stk, proj, Iv.Sub] at hF ⊢; omega\n  · unfold ρ3; simp [Split.lay, layG_stk, proj, Iv.Sub] at hF ⊢; omega\n  · exact (Split.sub_some _).trans ((Split.sub_some _).trans (Split.sub_some _))",
+  "theorem offG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (r : R) : Off (layG pp r) (Api.Exptmod.hin pp) := by\n  cases r\n  · exact hP.off .stk\n  · exact hP.off .gS\n  · exact hP.off .gD\n  · exact hP.off .xS\n  · exact hP.off .xD\n  · exact hP.off .nS\n  · exact hP.off .nD\n  · exact hP.off .yS\n  · exact hP.off .yD\n  · exact hP.off .ks\n  · exact hP.off .ts\n  · exact hP.off .kc\n  · exact hP.off .tc\n  · exact hP.off .code\n  all_goals exact Off.nil _",
+  "theorem posG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (y : Y) :\n    0 < (ρ3 pp y).len ∨ (ρ3 pp y).base < heapStart ∨ heapEnd ≤ (ρ3 pp y).base := by\n  have := hP.res.gpos; have := hP.res.xpos; have := hP.res.npos; have := hP.res.ypos; have := MpExptmod.frame_lt_F pp\n  rcases y with _ | _ | _ | r\n  rotate_left 3\n  · cases r\n    · left; unfold ρ3; simp [Split.lay, layG_stk]; omega\n    · left; show 0 < 24; decide\n    · left; show 0 < 4 * pp.g.alloc; omega\n    · left; show 0 < 24; decide\n    · left; show 0 < 4 * pp.x.alloc; omega\n    · left; show 0 < 24; decide\n    · left; show 0 < 4 * pp.n.alloc; omega\n    · left; show 0 < 24; decide\n    · left; show 0 < 4 * pp.y.alloc; omega\n    · left; show 0 < 4; decide\n    · left; show 0 < 4; decide\n    · left; show 0 < 4; decide\n    · left; show 0 < 4; decide\n    · left; show 0 < textLen; decide\n    all_goals (right; left; show Iv.nil.base < heapStart; decide)\n  all_goals (left; unfold ρ3; simp [Split.lay, layG_stk])",
+  "/-- The heap checkpoint at the entry. -/\ntheorem entry_hp {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) :\n    HP (ρX pp) wX (Api.Exptmod.hin pp) (Api.Exptmod.hin pp) (InAny (Api.Exptmod.lay (MpExptmod.F pp) pp) Api.Exptmod.ws) mm mm := by\n  have hF : 96 ≤ (layG pp .stk).len := by rw [layG_stk]; exact MpExptmod.frame_le_F pp\n  have hstk : Ram (layG pp .stk).base (layG pp .stk).len := (hP.bund .stk).2\n  refine HP.entry hP.heap (fun y => (offG hP (proj y)).sub (sub3 hF y) (posG hP y)) ?_ ?_\n  · intro y hy q hq\n    have hs := sub3 hF y\n    have hq2 : (ρ3 pp y).In q := hq\n    have hq' : (layG pp (proj y)).In q := by unfold Iv.Sub Iv.In at *; omega\n    rcases y with _ | _ | _ | r\n    rotate_left 3\n    · cases r <;> simp [wX, w3, Split.wr, isWG] at hy\n      · exact InAny.of_mem (w := Api.Exptmod.R.stk) (by decide) hq'\n      · exact InAny.of_mem (w := Api.Exptmod.R.yS) (by decide) hq'\n      · exact InAny.of_mem (w := Api.Exptmod.R.yD) (by decide) hq'\n      all_goals (exfalso; have h1 : 0x80000000 ≤ q := hq'.1; have h2 : q < 0x80000000 + 0 := hq'.2; omega)\n    all_goals exact InAny.of_mem (w := Api.Exptmod.R.stk) (by decide) hq'\n  · intro y hy\n    have hs := sub3 hF y\n    rcases y with _ | _ | _ | r\n    rotate_left 3\n    · cases r <;> simp [wX, w3, Split.wr, isWG] at hy\n      · exact Ram.sub hstk hs.1 hs.2\n      · show Ram pp.py 24\n        simpa [Layout.sizeofMpInt] using (Hdr.geom (show Hdr mm pp.py pp.ydp pp.y from (hP.bund .yS).2)).st\n      · show Ram pp.ydp (4 * pp.y.alloc)\n        exact (show Dig mm pp.ydp pp.y.alloc pp.y.digit from (hP.bund .yD).2).ram\n      all_goals exact Ram.nil\n    all_goals exact Ram.sub hstk hs.1 hs.2",
+  "/-- The written regions are RAM over the generated layout (`HP.flatE` before a tail call). -/\ntheorem ramG {pp : P} {mm : Mem} {rr : BitVec 64} (hP : GPre pp mm rr) (r : R) (hr : isWG r = true) :\n    Ram (layG pp r).base (layG pp r).len := by\n  cases r <;> simp [isWG] at hr\n  · exact (hP.bund .stk).2\n  · show Ram pp.py 24\n    simpa [Layout.sizeofMpInt] using (Hdr.geom (show Hdr mm pp.py pp.ydp pp.y from (hP.bund .yS).2)).st\n  · show Ram pp.ydp (4 * pp.y.alloc)\n    exact (show Dig mm pp.ydp pp.y.alloc pp.y.digit from (hP.bund .yD).2).ram\n  all_goals exact Ram.nil",
+  "/-- A callee's stack below the frame, in the callees' area. -/\ntheorem stkC {pp : P} (hle : MpExptmod.F pp ≤ pp.sp) {F' : Nat} (hF : 96 + F' ≤ MpExptmod.F pp) :\n    Iv.Sub ⟨pp.sp - 96 - F', F'⟩ (ρX pp (some (some (some .stk)))) := by\n  simp [ρX, ρ3, Split.lay, layG_stk, Iv.Sub]; omega",
+  "/-- The temporaries' structs in the frame. -/\ntheorem pieceG {pp : P} (hle : MpExptmod.F pp ≤ pp.sp) (h96 : 96 ≤ MpExptmod.F pp) :\n    Iv.Sub ⟨pp.sp - 96, 24⟩ (ρX pp none) := by\n  simp [ρX, ρ3, Split.lay, layG_stk, Iv.Sub]; omega\n\ntheorem pieceX {pp : P} (hle : MpExptmod.F pp ≤ pp.sp) (h96 : 96 ≤ MpExptmod.F pp) :\n    Iv.Sub ⟨pp.sp - 72, 24⟩ (ρX pp (some none)) := by\n  simp [ρX, ρ3, Split.lay, layG_stk, Iv.Sub]; omega"
+ ],
+ "let": {
+  "MEM": "18446744073709551614",
+  "VAL": "18446744073709551613",
+  "FLT": "simp [Split.lay, layG_stk] <;> have := MpExptmod.frame_lt_F z.p <;> omega",
+  "WIT": [
+   "  { wit := fun r hr hrs => by",
+   "      cases r with",
+   "      | stk => exact ⟨trivial, (hB .stk).2⟩",
+   "      | yS => exact ⟨Iv.sub_self _, _h.hdr (nR .yS) rfl⟩",
+   "      | yD => exact absurd rfl hrs",
+   "      | _ => simp [Api.Exptmod.ws] at hr"
+  ],
+  "FLAT": {
+   "kd": "kindG p m",
+   "ws": "wsG",
+   "sound": "hP.lay",
+   "hF": "by rw [layG_stk]; exact MpExptmod.frame_le_F z.p",
+   "hp": "HP.flatE (isW := isWG) (ws := wsG) hP.heap (offG hP) (ramG hP) (by intro r hr; cases r <;> first | exact absurd hr (by decide) | decide)"
+  },
+  "PP": "sp, pg, gdp, px, xdp, pn, ndp, py, ydp, G, Xv, N, Yv",
+  "IMR": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + MpInitMulti.F ≤ sp - 96; om, by show sp - 96 ≤ 0x100000000; om⟩, rfl, Std.fin_getD [sp - 96, sp - 72] (P := fun x => x % 8 = 0) ⟨by om, by om, trivial⟩, Std.fin_getD [sp - 96, sp - 72] (P := fun x => OffHeap x 24) ⟨by unfold OffHeap; om, by unfold OffHeap; om, trivial⟩, no_sargs (by decide), by om⟩",
+  "NEGF": "have hFn : MpExptmod.F z.p = 96 + MpExptmod.Fn N := MpExptmod.F_neg hX'; have := MpExptmod.initF_le_Fn N; have := MpExptmod.invF_le_Fn N; have := MpExptmod.absF_le_Fn N; have := MpExptmod.clearF_le_Fn N; have hle : MpExptmod.F z.p ≤ z.p.sp := (by omega); have eIF : Api.Invmod.F = 1232 := rfl; have eCM : MpClearMulti.F = 640 := rfl; have hspF : z.p.sp - MpExptmod.F z.p = z.p.sp - 96 - MpExptmod.Fn N := (by omega); have hspF2 : z.p.sp - MpExptmod.F z.p + MpExptmod.F z.p = z.p.sp := (by omega)",
+  "CLR": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + MpClearMulti.F ≤ sp - 96; om, by show sp - 96 ≤ 0x100000000; om⟩, rfl, Std.fin_argAt {ARGS} (P := fun x => OffHeap x.1 24) ⟨by show OffHeap _ 24; unfold OffHeap; om, by show OffHeap _ 24; unfold OffHeap; om, trivial⟩, Std.fin_argAt {ARGS} (P := fun x => 0 < x.2.2.alloc) ⟨{PG}, {PX}, trivial⟩, no_sargs (by decide), by om⟩",
+  "KEEPX": [
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .yD) rfl⟩, place := .keep, frame := hfr, heap := hh",
+   "    foot := fun _ h => .inl h, off := hoff .yD }⟩"
+  ],
+  "ETOI": "by unfold rt at hat; rw [show BitVec.ofNat 64 (BitVec.ofInt 64 r).toNat = BitVec.ofInt 64 r by rw [BitVec.ofNat_toNat, BitVec.setWidth_eq]] at hat; exact hat.sub rfl rfl"
+ },
+ "defs": [
+  "/-- The layout with the temporaries' digit arrays and `Y`'s at the given intervals. -/",
+  "def ρK (p : P) (IG IX IY : Iv) : X → Iv",
+  "  | some (some (some .dG)) => IG",
+  "  | some (some (some .dX)) => IX",
+  "  | some (some (some .yD)) => IY",
+  "  | r => ρX p r",
+  "/-- The written regions over the generated region type. -/",
+  "def wsG : List R := [.stk, .yS, .yD, .dG, .dX]",
+  "/-- The frame over the generated layout is the contract's (the temporaries at `Iv.nil`). -/",
+  "theorem hfrW {pp : P} {mm MM : Mem} (h : Keep (fun a => InAny (layG pp) wsG a ∨ Foot (Api.Exptmod.hin pp) a) mm MM) :",
+  "    HFrm (Api.Exptmod.lay (MpExptmod.F pp) pp) Api.Exptmod.ws (Api.Exptmod.hin pp) mm MM :=",
+  "  h.mono fun a ha => ha.imp_left fun h => by",
+  "    simp only [InAny, wsG, Api.Exptmod.ws] at h ⊢",
+  "    rcases h with h | h | h | h | h | h",
+  "    · exact .inl h",
+  "    · exact .inr (.inl h)",
+  "    · exact .inr (.inr (.inl h))",
+  "    · exact absurd h (by simp [layG, Iv.nil, Iv.In])",
+  "    · exact absurd h (by simp [layG, Iv.nil, Iv.In])",
+  "    · exact h.elim"
+ ],
+ "cuts": {
+  "E": {
+   "pc": "e94",
+   "regs": "ent",
+   "mu": "3, 0, 0",
+   "live": [],
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κX p m) m m"
+    ]
+   ],
+   "prelude": [
+    "have hp := entry_hp hP"
+   ],
+   "edge": [
+    [
+     "if",
+     "N.sign = 1",
+     [
+      [
+       "seg",
+       "pn",
+       "ws nT"
+      ],
+      [
+       "seg",
+       "pnr",
+       "0"
+      ],
+      [
+       "exit",
+       "val",
+       {
+        "_Q": "MpExptmod.Q_pneg (by rw [hb]; rfl)"
+       }
+      ]
+     ],
+     [
+      [
+       "if",
+       "Xv.sign = 1",
+       [
+        [
+         "have",
+         "hX' : Xv.sign = Layout.mpNeg",
+         "by rw [eN]; exact hx"
+        ],
+        [
+         "tac",
+         "{NEGF}"
+        ],
+        [
+         "forget",
+         "nX"
+        ],
+        [
+         "forget",
+         "nG"
+        ],
+        [
+         "seg",
+         "pxn",
+         "ws nT"
+        ],
+        [
+         "call",
+         "mpInitMulti2",
+         "sp - 96, [sp - 96, sp - 72], hin, m",
+         "xr",
+         {
+          "sites": [
+           "nR .dG",
+           "nR .dX"
+          ],
+          "hq": "hqM",
+          "res": "{IMR}"
+         }
+        ],
+        [
+         "cases",
+         "xr",
+         {
+          "none": [
+           [
+            "set",
+            {
+             "e": "{MEM}"
+            }
+           ],
+           [
+            "seg",
+            "ie",
+            "0"
+           ],
+           [
+            "exit",
+            "mem"
+           ]
+          ],
+          "some qs": [
+           [
+            "tac",
+            "obtain ⟨qG, qX, rfl⟩ : ∃ u1 u2, qs = [u1, u2] := by match qs, hqM with | [u1, u2], _ => exact ⟨u1, u2, rfl⟩"
+           ],
+           [
+            "live",
+            {
+             "G": [
+              "qG",
+              "defPrec",
+              "(MpInt.zeroN defPrec)"
+             ],
+             "X": [
+              "qX",
+              "defPrec",
+              "(MpInt.zeroN defPrec)"
+             ]
+            },
+            {
+             "order": [
+              "G",
+              "X"
+             ]
+            }
+           ],
+           [
+            "tac",
+            "have @H := @H.congrL (ρ' := {LAY}) (by krflc)"
+           ],
+           [
+            "tac",
+            "have @HP := @HP.congrL (ρ' := {LAY}) (by krflc)"
+           ],
+           [
+            "tac",
+            "have @HP : HP ({LAY}) wX hin ({HEAP}) Wr0 m @M := @HP"
+           ],
+           [
+            "set",
+            {
+             "e": "0"
+            }
+           ],
+           [
+            "seg",
+            "ok",
+            "0"
+           ],
+           [
+            "jump",
+            "N",
+            {
+             "norm": true,
+             "vars": {
+              "Mk": "@M"
+             },
+             "hX": "hX'",
+             "hps1": "by rw [eN]; exact hb"
+            }
+           ]
+          ]
+         }
+        ]
+       ],
+       [
+        [
+         "seg",
+         "pp",
+         "ws nT"
+        ],
+        [
+         "call",
+         "reduceIs2kLc",
+         "pn, ndp, N",
+         "_",
+         {
+          "res": "hvn.toShape"
+         }
+        ],
+        [
+         "set",
+         {
+          "l2": "isReduce2kL N"
+         }
+        ],
+        [
+         "have",
+         "hl2b",
+         "MpExptmod.is2kL_lt N"
+        ],
+        [
+         "have",
+         "hps1 : N.sign ≠ Layout.mpNeg",
+         "by rw [eN]; exact hb"
+        ],
+        [
+         "have",
+         "hxs1 : Xv.sign ≠ Layout.mpNeg",
+         "by rw [eN]; exact hx"
+        ],
+        [
+         "jump",
+         "L2",
+         {}
+        ]
+       ],
+       "hx"
+      ]
+     ],
+     "hb"
+    ]
+   ]
+  },
+  "L2": {
+   "pc": "edc",
+   "regs": "c2lr",
+   "regs_over": {
+    "l2": "isReduce2kL N"
+   },
+   "vars": "M : Mem",
+   "mu": "2, 3, 0",
+   "live": [],
+   "kinds": {
+    "nT": ".frz F1",
+    "nX": ".frz m",
+    "nG": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κL2 z x) m M"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin Wr0 m m"
+    ]
+   ],
+   "prem": [
+    [
+     "hps1",
+     "N.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hxs1",
+     "Xv.sign ≠ Layout.mpNeg"
+    ]
+   ],
+   "edge": [
+    [
+     "set",
+     {
+      "l2": "isReduce2kL N"
+     }
+    ],
+    [
+     "have",
+     "hl2b",
+     "MpExptmod.is2kL_lt N"
+    ],
+    [
+     "if",
+     "isReduce2kL N = 1",
+     [
+      [
+       "seg",
+       "l2y",
+       "0"
+      ],
+      [
+       "tail",
+       "sExptT",
+       "sp, pg, gdp, px, xdp, pn, ndp, py, ydp, G, Xv, N, Yv, 1, H",
+       "x",
+       {
+        "flat": "{FLAT}",
+        "hq": "hq",
+        "K'": "v.keep",
+        "res": "Std.MpExptmod.slowRes hres hxs1 (fun hf => hf.1 hl) (by decide)",
+        "hsub": "by intro r; cases r <;> exact Iv.sub_self _"
+       }
+      ],
+      [
+       "exit",
+       "tail",
+       {
+        "_Q": "MpExptmod.Q_l2k hvn hps1 hxs1 hl hq"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "l2n",
+       "0"
+      ],
+      [
+       "call",
+       "drIsModc",
+       "pn, ndp, N",
+       "_",
+       {
+        "res": "hvn.toShape"
+       }
+      ],
+      [
+       "set",
+       {
+        "dr": "if IsDrModulus N then 1 else 0"
+       }
+      ],
+      [
+       "have",
+       "hdrb",
+       "MpExptmod.dr_lt N"
+      ],
+      [
+       "jump",
+       "D2",
+       {}
+      ]
+     ],
+     "hl"
+    ]
+   ]
+  },
+  "D2": {
+   "pc": "ee8",
+   "regs": "c2dr",
+   "regs_over": {
+    "dr": "if IsDrModulus N then 1 else 0"
+   },
+   "vars": "M : Mem",
+   "mu": "2, 2, 0",
+   "live": [],
+   "kinds": {
+    "nT": ".frz F1",
+    "nX": ".frz m",
+    "nG": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κD2 z x) m M"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin Wr0 m m"
+    ]
+   ],
+   "prem": [
+    [
+     "hps1",
+     "N.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hxs1",
+     "Xv.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hl",
+     "¬ isReduce2kL N = 1"
+    ]
+   ],
+   "edge": [
+    [
+     "set",
+     {
+      "dr": "if IsDrModulus N then 1 else 0"
+     }
+    ],
+    [
+     "have",
+     "hdrb",
+     "MpExptmod.dr_lt N"
+    ],
+    [
+     "if",
+     "IsDrModulus N",
+     [
+      [
+       "have",
+       "hdr1 : (if IsDrModulus N then 1 else 0) = 1",
+       "if_pos hd"
+      ],
+      [
+       "seg",
+       "dry",
+       "0"
+      ],
+      [
+       "tail",
+       "sExptFastT",
+       "{PP}, 1, H",
+       "x",
+       {
+        "flat": "{FLAT}",
+        "hq": "hq",
+        "K'": "v.keep",
+        "res": "Std.MpExptmod.fastRes hres hxs1 ⟨hl, .inr (by rw [MpExptmod.drC_dr hd]; decide)⟩ (MpExptmod.drC_dr hd)",
+        "hsub": "by intro r; cases r <;> exact Iv.sub_self _"
+       }
+      ],
+      [
+       "exit",
+       "tail",
+       {
+        "_Q": "MpExptmod.Q_fast hvn hps1 hxs1 ⟨hl, .inr (by rw [MpExptmod.drC_dr hd]; decide)⟩ (by rw [MpExptmod.drC_dr hd]; exact hq)"
+       }
+      ]
+     ],
+     [
+      [
+       "have",
+       "hdr0 : (if IsDrModulus N then 1 else 0) = 0",
+       "if_neg hd"
+      ],
+      [
+       "seg",
+       "drn",
+       "0"
+      ],
+      [
+       "call",
+       "reduceIs2kc",
+       "sp - 96, pn, ndp, N",
+       "_",
+       {
+        "res": "⟨hvn, hres.nbits, by om, by om⟩"
+       }
+      ],
+      [
+       "set",
+       {
+        "k2": "isReduce2k N"
+       }
+      ],
+      [
+       "have",
+       "hk2b",
+       "MpExptmod.is2k_lt N"
+      ],
+      [
+       "jump",
+       "K2",
+       {}
+      ]
+     ],
+     "hd"
+    ]
+   ]
+  },
+  "K2": {
+   "pc": "f28",
+   "regs": "c2kr",
+   "regs_over": {
+    "k2": "isReduce2k N"
+   },
+   "vars": "M : Mem",
+   "mu": "2, 1, 0",
+   "live": [],
+   "kinds": {
+    "nT": ".frz F1",
+    "nX": ".frz m",
+    "nG": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κK2 z x) m M"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin Wr0 m m"
+    ]
+   ],
+   "prem": [
+    [
+     "hps1",
+     "N.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hxs1",
+     "Xv.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hl",
+     "¬ isReduce2kL N = 1"
+    ],
+    [
+     "hd",
+     "¬ IsDrModulus N"
+    ]
+   ],
+   "edge": [
+    [
+     "set",
+     {
+      "k2": "isReduce2k N"
+     }
+    ],
+    [
+     "have",
+     "hk2b",
+     "MpExptmod.is2k_lt N"
+    ],
+    [
+     "if",
+     "isReduce2k N = 1",
+     [
+      [
+       "seg",
+       "k2y",
+       "0"
+      ],
+      [
+       "tail",
+       "sExptFastT",
+       "{PP}, 2, H",
+       "x",
+       {
+        "flat": "{FLAT}",
+        "hq": "hq",
+        "K'": "v.keep",
+        "res": "Std.MpExptmod.fastRes hres hxs1 ⟨hl, .inr (by rw [MpExptmod.drC_2k hd hk]; decide)⟩ (MpExptmod.drC_2k hd hk)",
+        "hsub": "by intro r; cases r <;> exact Iv.sub_self _"
+       }
+      ],
+      [
+       "exit",
+       "tail",
+       {
+        "_Q": "MpExptmod.Q_fast hvn hps1 hxs1 ⟨hl, .inr (by rw [MpExptmod.drC_2k hd hk]; decide)⟩ (by rw [MpExptmod.drC_2k hd hk]; exact hq)"
+       }
+      ]
+     ],
+     [
+      [
+       "have",
+       "hc0 : MpExptmodStep.drC N = 0",
+       "MpExptmod.drC_0 hd hk"
+      ],
+      [
+       "if",
+       "N.used = 0",
+       [
+        [
+         "seg",
+         "bz",
+         "0"
+        ],
+        [
+         "tail",
+         "sExptT",
+         "{PP}, 0, H",
+         "x",
+         {
+          "flat": "{FLAT}",
+          "hq": "hq",
+          "K'": "v.keep",
+          "res": "Std.MpExptmod.slowRes hres hxs1 (fun hf => hf.2.elim (fun h => absurd h.1 (by omega)) (fun h => h hc0)) (by decide)",
+          "hsub": "by intro r; cases r <;> exact Iv.sub_self _"
+         }
+        ],
+        [
+         "exit",
+         "tail",
+         {
+          "_Q": "MpExptmod.Q_barrett hvn hps1 hxs1 hl (fun h => h.elim (fun h => absurd h.1 (by omega)) (fun h => h hc0)) hq"
+         }
+        ]
+       ],
+       [
+        [
+         "seg",
+         "kd",
+         "0"
+        ],
+        [
+         "jump",
+         "KD",
+         {}
+        ]
+       ],
+       "hu"
+      ]
+     ],
+     "hk"
+    ]
+   ]
+  },
+  "KD": {
+   "pc": "f3c",
+   "regs": "pd",
+   "vars": "M : Mem",
+   "mu": "2, 0, 0",
+   "live": [],
+   "kinds": {
+    "nT": ".frz F1",
+    "nX": ".frz m",
+    "nG": ".frz m"
+   },
+   "state": [
+    [
+     "st",
+     "St (ρX p) wX WX (κKD z x) m M"
+    ],
+    [
+     "hp",
+     "HP (ρX p) wX hin hin Wr0 m m"
+    ]
+   ],
+   "prem": [
+    [
+     "hps1",
+     "N.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hxs1",
+     "Xv.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hl",
+     "¬ isReduce2kL N = 1"
+    ],
+    [
+     "hd",
+     "¬ IsDrModulus N"
+    ],
+    [
+     "hk",
+     "¬ isReduce2k N = 1"
+    ],
+    [
+     "hc0",
+     "MpExptmodStep.drC N = 0"
+    ],
+    [
+     "hu",
+     "¬ N.used = 0"
+    ]
+   ],
+   "edge": [
+    [
+     "if",
+     "N.digit 0 % 2 = 1",
+     [
+      [
+       "seg",
+       "odd",
+       "0"
+      ],
+      [
+       "tail",
+       "sExptFastT",
+       "{PP}, 0, H",
+       "x",
+       {
+        "flat": "{FLAT}",
+        "hq": "hq",
+        "K'": "v.keep",
+        "res": "Std.MpExptmod.fastRes hres hxs1 ⟨hl, .inl ⟨by omega, ho⟩⟩ hc0",
+        "hsub": "by intro r; cases r <;> exact Iv.sub_self _"
+       }
+      ],
+      [
+       "exit",
+       "tail",
+       {
+        "_Q": "MpExptmod.Q_fast hvn hps1 hxs1 ⟨hl, .inl ⟨by omega, ho⟩⟩ (by rw [hc0]; exact hq)"
+       }
+      ]
+     ],
+     [
+      [
+       "seg",
+       "ev",
+       "0"
+      ],
+      [
+       "tail",
+       "sExptT",
+       "{PP}, 0, H",
+       "x",
+       {
+        "flat": "{FLAT}",
+        "hq": "hq",
+        "K'": "v.keep",
+        "res": "Std.MpExptmod.slowRes hres hxs1 (fun hf => hf.2.elim (fun h => absurd h.2 ho) (fun h => h hc0)) (by decide)",
+        "hsub": "by intro r; cases r <;> exact Iv.sub_self _"
+       }
+      ],
+      [
+       "exit",
+       "tail",
+       {
+        "_Q": "MpExptmod.Q_barrett hvn hps1 hxs1 hl (fun h => h.elim (fun h => absurd h.2 ho) (fun h => h hc0)) hq"
+       }
+      ]
+     ],
+     "ho"
+    ]
+   ]
+  },
+  "N": {
+   "pc": "fe4",
+   "regs": "iv",
+   "vars": "M Mk : Mem; qG qX : Nat",
+   "mu": "1, 2, 0",
+   "live": [
+    [
+     "G",
+     "qG",
+     "defPrec",
+     "(MpInt.zeroN defPrec)"
+    ],
+    [
+     "X",
+     "qX",
+     "defPrec",
+     "(MpInt.zeroN defPrec)"
+    ]
+   ],
+   "prem": [
+    [
+     "hX",
+     "Xv.sign = Layout.mpNeg"
+    ],
+    [
+     "hps1",
+     "N.sign ≠ Layout.mpNeg"
+    ]
+   ],
+   "prelude": [
+    "have hX' := hX; {NEGF}"
+   ],
+   "edge": [
+    [
+     "call",
+     "mpInvmodH",
+     "sp - 96, pg, gdp, pn, ndp, sp - 96, qG, G, N, (MpInt.zeroN defPrec), {REST}",
+     "xi",
+     {
+      "front": "G",
+      "hq": "hqi",
+      "res": "⟨⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + 1232 ≤ sp - 96; rw [eE]; omega, by show sp - 96 ≤ 0x100000000; om⟩, hvg, hvn, by have := hres.gu; om, by show 0 < defPrec; decide, by simp [Api.Exptmod.hin, hres.gblk], by simp [Api.Exptmod.hin, hres.nblk], hres.gpos, hres.npos, hres.goff, hres.noff, by show OffHeap (sp - 96) 24; unfold OffHeap; om⟩, hres.inv⟩",
+      "hsub": "by intro r; cases r; exact stkC hle (F' := 1232) (by rw [hFn]; omega); exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact pieceG hle (MpExptmod.frame_le_F z.p); exact Iv.sub_self _; exact Iv.sub_self _"
+     }
+    ],
+    [
+     "tac",
+     "obtain ⟨hqi, hqip⟩ := hqi"
+    ],
+    [
+     "cases",
+     "xi",
+     {
+      "err r": [
+       [
+        "back",
+        "G"
+       ],
+       [
+        "have",
+        "hrv",
+        "Std.MpExptmod.inv_err hps1 hres.arith.gt1 hvg hqi"
+       ],
+       [
+        "set",
+        {
+         "e": "(BitVec.ofInt 64 r).toNat"
+        }
+       ],
+       [
+        "have",
+        "he0 : (BitVec.ofInt 64 r).toNat ≠ 0",
+        "by rcases hrv with h | h <;> rw [h] <;> decide"
+       ],
+       [
+        "have",
+        "he1 : (BitVec.ofInt 64 r).toNat < 2 ^ 64",
+        "BitVec.isLt _"
+       ],
+       [
+        "seg",
+        "ive",
+        "0",
+        {
+         "_hL": "by simp only [ivr, BitVec.ofNat_toNat, BitVec.setWidth_eq]; exact rfl"
+        }
+       ],
+       [
+        "call",
+        "mpClearMulti2",
+        "sp - 96, [(sp - 96, qG, (MpInt.zeroN defPrec)), (sp - 72, qX, (MpInt.zeroN defPrec))], hin, m",
+        "_",
+        {
+         "perm": "show List.Perm _ (Multi.blocks [(sp - 96, qG, (MpInt.zeroN defPrec)), (sp - 72, qX, (MpInt.zeroN defPrec))] ++ hin) by simp only [Multi.blocks, List.map, digBlk, List.cons_append, List.nil_append]; exact List.Perm.refl _",
+         "res": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + MpClearMulti.F ≤ sp - 96; om, by show sp - 96 ≤ 0x100000000; om⟩, rfl, Std.fin_argAt [(sp - 96, qG, (MpInt.zeroN defPrec)), (sp - 72, qX, (MpInt.zeroN defPrec))] (P := fun x => OffHeap x.1 24) ⟨by show OffHeap _ 24; unfold OffHeap; om, by show OffHeap _ 24; unfold OffHeap; om, trivial⟩, Std.fin_argAt [(sp - 96, qG, (MpInt.zeroN defPrec)), (sp - 72, qX, (MpInt.zeroN defPrec))] (P := fun x => 0 < x.2.2.alloc) ⟨by show 0 < defPrec; decide, by show 0 < defPrec; decide, trivial⟩, no_sargs (by decide), by om⟩",
+         "hsub": "by mr_split; (exact stkC hle (F' := 640) (by rw [hFn]; omega)); mr_iv; (exact pieceG hle (MpExptmod.frame_le_F z.p)); (exact pieceX hle (MpExptmod.frame_le_F z.p)); all_goals first | exact Iv.sub_self _ | mr_iv"
+        }
+       ],
+       [
+        "live",
+        {
+         "G": null,
+         "X": null
+        }
+       ],
+       [
+        "seg",
+        "fin",
+        "0"
+       ],
+       [
+        "exit",
+        "ierr"
+       ]
+      ],
+      "ok ⟨q, c1⟩": [
+       [
+        "live",
+        {
+         "G": [
+          "q",
+          "c1.alloc",
+          "c1",
+          "⟨rfl, hqip q c1 rfl⟩"
+         ]
+        }
+       ],
+       [
+        "bind",
+        {
+         "qG": "q"
+        }
+       ],
+       [
+        "back",
+        "G"
+       ],
+       [
+        "tac",
+        "have @H := @H.congrL (ρ' := {LAY}) (by krflc)"
+       ],
+       [
+        "tac",
+        "have @HP := @HP.congrL (ρ' := {LAY}) (by krflc)"
+       ],
+       [
+        "have",
+        "hvG",
+        "Std.MpExptmod.inv_ok hvn hps1 hres.arith.gt1 hvg hqi"
+       ],
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "seg",
+        "ivo",
+        "0"
+       ],
+       [
+        "call",
+        "mpAbsGH",
+        "sp - 96, px, xdp, sp - 72, qX, Xv, (MpInt.zeroN defPrec), {REST}",
+        "xa",
+        {
+         "front": "X",
+         "hq": "habs",
+         "hsub": "by intro r; cases r; exact stkC hle (F' := 608) (by rw [hFn]; omega); exact Iv.sub_self _; exact Iv.sub_self _; exact pieceX hle (MpExptmod.frame_le_F z.p); exact Iv.sub_self _; exact Iv.sub_self _",
+         "res": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + 608 ≤ sp - 96; rw [eE]; omega, by show sp - 96 ≤ 0x100000000; om⟩, hvx.toShape, (MpInt.zeroN_valid (by decide)).toShape, hvx.sign_ok, hres.xpos, by om, by show 0 < defPrec; decide, by show OffHeap (sp - 72) 24; unfold OffHeap; om⟩"
+        }
+       ],
+       [
+        "cases",
+        "xa",
+        {
+         "none": [
+          ["back", "X"],
+          ["set", {"e": "18446744073709551614"}],
+          ["seg", "abf", "0"],
+          [
+           "call",
+           "mpClearMulti2",
+           "sp - 96, [(sp - 96, qG, c1), (sp - 72, qX, (MpInt.zeroN defPrec))], hin, m",
+           "_",
+           {
+            "perm": "show List.Perm _ (Multi.blocks [(sp - 96, qG, c1), (sp - 72, qX, (MpInt.zeroN defPrec))] ++ hin) by simp only [Multi.blocks, List.map, digBlk, List.cons_append, List.nil_append]; exact List.Perm.refl _",
+            "res": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + MpClearMulti.F ≤ sp - 96; om, by show sp - 96 ≤ 0x100000000; om⟩, rfl, Std.fin_argAt [(sp - 96, qG, c1), (sp - 72, qX, (MpInt.zeroN defPrec))] (P := fun x => OffHeap x.1 24) ⟨by show OffHeap _ 24; unfold OffHeap; om, by show OffHeap _ 24; unfold OffHeap; om, trivial⟩, Std.fin_argAt [(sp - 96, qG, c1), (sp - 72, qX, (MpInt.zeroN defPrec))] (P := fun x => 0 < x.2.2.alloc) ⟨hqip q c1 rfl, by show 0 < defPrec; decide, trivial⟩, no_sargs (by decide), by om⟩",
+            "hsub": "by mr_split; (exact stkC hle (F' := 640) (by rw [hFn]; omega)); mr_iv; (exact pieceG hle (MpExptmod.frame_le_F z.p)); (exact pieceX hle (MpExptmod.frame_le_F z.p)); all_goals first | exact Iv.sub_self _ | mr_iv"
+           }
+          ],
+          ["live", {"G": null, "X": null}],
+          ["seg", "fin", "0"],
+          ["exit", "aerr"]
+         ],
+         "some ⟨q4, tX⟩": [
+          ["live", {"X": ["q4", "tX.alloc", "tX", "⟨rfl, Std.MpExptmod.abs_pos hvx.toShape habs⟩"]}],
+          ["bind", {"qX": "q4"}],
+          ["back", "X"],
+          ["tac", "have @H := @H.congrL (ρ' := {LAY}) (by krflc)"],
+          ["tac", "have @HP := @HP.congrL (ρ' := {LAY}) (by krflc)"],
+          ["set", {"e": "0"}],
+          ["seg", "rec", "0"],
+       [
+        "jump",
+        "R",
+        {
+         "norm": true,
+         "hinv": "hqi",
+         "hvG": "hvG",
+         "hGa": "hqip q c1 rfl"
+        }
+       ]
+      ]
+     }
+    ]
+         ]}]
+   ]
+  },
+  "R": {
+   "pc": "1048",
+   "regs": "rc",
+   "vars": "M Mk : Mem; qG qX : Nat; Gi tX : MpInt",
+   "mu": "1, 1, 0",
+   "live": [
+    [
+     "G",
+     "qG",
+     "Gi.alloc",
+     "Gi",
+     "⟨rfl, hGa⟩"
+    ],
+    [
+     "X",
+     "qX",
+     "tX.alloc",
+     "tX",
+     "⟨rfl, Std.MpExptmod.abs_pos hvx.toShape habs⟩"
+    ]
+   ],
+   "prem": [
+    [
+     "hX",
+     "Xv.sign = Layout.mpNeg"
+    ],
+    [
+     "hps1",
+     "N.sign ≠ Layout.mpNeg"
+    ],
+    [
+     "hinv",
+     "InvmodPost G N (MpInt.zeroN defPrec) Gi Layout.mpOkay"
+    ],
+    [
+     "habs",
+     "AbsPost Xv (copyIn Xv (MpInt.zeroN defPrec)) tX"
+    ],
+    [
+     "hvG",
+     "Gi.Valid ∧ Gi.used ≤ N.used"
+    ],
+    [
+     "hGa",
+     "0 < Gi.alloc"
+    ]
+   ],
+   "prelude": [
+    "have hX' := hX; {NEGF}",
+    "have hts : tX.sign ≠ Layout.mpNeg := by rw [habs.sign]; decide",
+    "have hFi := Std.MpExptmod.innerF (p := z.p) (q := qG) (qX := qX) (H' := [(qG, 4 * Gi.alloc), (qX, 4 * tX.alloc)] ++ H) hts hvG.2"
+   ],
+   "edge": [
+    [
+     "call",
+     "mpExptmodNNH",
+     "sp - 96, sp - 96, qG, sp - 72, qX, pn, ndp, py, ydp, Gi, tX, N, Yv, 0, [(qG, 4 * Gi.alloc), (qX, 4 * tX.alloc)] ++ H",
+     "xr",
+     {
+      "hq": "hqr",
+      "perm": "by show List.Perm ([(qG, 4 * Gi.alloc), (qX, 4 * tX.alloc)] ++ (digBlk ydp Yv :: H)) _; exact List.perm_middle",
+      "hsub": "by intro r; cases r; exact stkC hle (by rw [hFn]; omega); exact pieceG hle (MpExptmod.frame_le_F z.p); exact Iv.sub_self _; exact pieceX hle (MpExptmod.frame_le_F z.p); exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _; exact Iv.sub_self _",
+      "res": "Std.MpExptmod.innerRes hres hX hvG.1 hvG.2 hGa habs (by simp) (by simp [hres.nblk])"
+     }
+    ],
+    [
+     "tac",
+     "obtain ⟨hqr, hqrp⟩ := hqr"
+    ],
+    [
+     "cases",
+     "xr",
+     {
+      "err r": [
+       [
+        "set",
+        {
+         "e": "(BitVec.ofInt 64 r).toNat"
+        }
+       ],
+       [
+        "tac",
+        "have @HP := @HP.perm (List.perm_middle (l₁ := [(qG, 4 * Gi.alloc), (qX, 4 * tX.alloc)])).symm"
+       ],
+       [
+        "seg",
+        "rce",
+        "0",
+        {
+         "_hL": "by simp only [abr, BitVec.ofNat_toNat, BitVec.setWidth_eq]; exact rfl"
+        }
+       ],
+       [
+        "call",
+        "mpClearMulti2",
+        "sp - 96, [(sp - 96, qG, Gi), (sp - 72, qX, tX)], hin, m",
+        "_",
+        {
+         "perm": "show List.Perm _ (Multi.blocks [(sp - 96, qG, Gi), (sp - 72, qX, tX)] ++ hin) by simp only [Multi.blocks, List.map, digBlk, List.cons_append, List.nil_append]; exact List.Perm.refl _",
+         "res": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + MpClearMulti.F ≤ sp - 96; om, by show sp - 96 ≤ 0x100000000; om⟩, rfl, Std.fin_argAt [(sp - 96, qG, Gi), (sp - 72, qX, tX)] (P := fun x => OffHeap x.1 24) ⟨by show OffHeap _ 24; unfold OffHeap; om, by show OffHeap _ 24; unfold OffHeap; om, trivial⟩, Std.fin_argAt [(sp - 96, qG, Gi), (sp - 72, qX, tX)] (P := fun x => 0 < x.2.2.alloc) ⟨by show 0 < Gi.alloc; exact hGa, Std.MpExptmod.abs_pos hvx.toShape habs, trivial⟩, no_sargs (by decide), by om⟩",
+         "hsub": "by mr_split; (exact stkC hle (F' := 640) (by rw [hFn]; omega)); mr_iv; (exact pieceG hle (MpExptmod.frame_le_F z.p)); (exact pieceX hle (MpExptmod.frame_le_F z.p)); all_goals first | exact Iv.sub_self _ | mr_iv"
+        }
+       ],
+       [
+        "live",
+        {
+         "G": null,
+         "X": null
+        }
+       ],
+       [
+        "seg",
+        "fin",
+        "0"
+       ],
+       [
+        "exit",
+        "rerr"
+       ]
+      ],
+      "ok ⟨q', y'⟩": [
+       [
+        "tac",
+        "have @HP := @HP.perm (List.perm_middle (l₁ := [(qG, 4 * Gi.alloc), (qX, 4 * tX.alloc)])).symm"
+       ],
+       [
+        "live",
+        {},
+        {
+         "tail": "(q', 4 * y'.alloc) :: H",
+         "bI": "⟨q', 4 * y'.alloc⟩"
+        }
+       ],
+       [
+        "tac",
+        "have @H := @H.congrL (ρ' := {LAY}) (by krflc)"
+       ],
+       [
+        "tac",
+        "have @HP := @HP.congrL (ρ' := {LAY}) (by krflc)"
+       ],
+       [
+        "set",
+        {
+         "e": "0"
+        }
+       ],
+       [
+        "seg",
+        "rce",
+        "0"
+       ],
+       [
+        "call",
+        "mpClearMulti2",
+        "sp - 96, [(sp - 96, qG, Gi), (sp - 72, qX, tX)], (q', 4 * y'.alloc) :: H, m",
+        "_",
+        {
+         "perm": "show List.Perm _ (Multi.blocks [(sp - 96, qG, Gi), (sp - 72, qX, tX)] ++ (q', 4 * y'.alloc) :: H) by simp only [Multi.blocks, List.map, digBlk, List.cons_append, List.nil_append]; exact List.Perm.refl _",
+         "res": "⟨⟨by show (sp - 96) % 16 = 0; om, by show heapEnd + MpClearMulti.F ≤ sp - 96; om, by show sp - 96 ≤ 0x100000000; om⟩, rfl, Std.fin_argAt [(sp - 96, qG, Gi), (sp - 72, qX, tX)] (P := fun x => OffHeap x.1 24) ⟨by show OffHeap _ 24; unfold OffHeap; om, by show OffHeap _ 24; unfold OffHeap; om, trivial⟩, Std.fin_argAt [(sp - 96, qG, Gi), (sp - 72, qX, tX)] (P := fun x => 0 < x.2.2.alloc) ⟨by show 0 < Gi.alloc; exact hGa, Std.MpExptmod.abs_pos hvx.toShape habs, trivial⟩, no_sargs (by decide), by om⟩",
+         "hsub": "by mr_split; (exact stkC hle (F' := 640) (by rw [hFn]; omega)); mr_iv; (exact pieceG hle (MpExptmod.frame_le_F z.p)); (exact pieceX hle (MpExptmod.frame_le_F z.p)); all_goals first | exact Iv.sub_self _ | mr_iv"
+        }
+       ],
+       [
+        "live",
+        {
+         "G": null,
+         "X": null
+        }
+       ],
+       [
+        "seg",
+        "fin",
+        "0"
+       ],
+       [
+        "exit",
+        "rok"
+       ]
+      ]
+     }
+    ]
+   ]
+  }
+ },
+ "exits": {
+  "stub": [
+   "exact (by omega : False).elim"
+  ],
+  "val": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err Layout.mpVal, _M, hat.sub rfl rfl, _Q,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .yD) rfl⟩, place := .keep, frame := hfr, heap := hh",
+   "    foot := fun _ h => .inl h, off := hoff .yD }⟩"
+  ],
+  "tail": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨x, _M, hat.sub rfl rfl, _Q, { hpo with frame := hfrW hfr }⟩"
+  ],
+  "mem": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err Layout.mpMem, _M, hat.sub rfl rfl, Or.inl rfl,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .yD) rfl⟩, place := .keep, frame := hfr, heap := hh",
+   "    foot := fun _ h => .inl h, off := hoff .yD }⟩"
+  ],
+  "ierr": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err r, _M, {ETOI}, MpExptmod.Q_inv_err hps1 hX hqi (by rcases hrv with h | h <;> rw [h] <;> decide),",
+   "{WIT}",
+   "{KEEPX}"
+  ],
+  "aerr": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err Layout.mpMem, _M, hat.sub rfl rfl, Or.inl rfl,",
+   "{WIT}",
+   "{KEEPX}"
+  ],
+  "rerr": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "exact Lbl.exit fun cf hat => ⟨.err r, _M, {ETOI}, MpExptmod.Q_rec hvx.toShape hps1 hX hinv habs hqr,",
+   "{WIT}",
+   "{KEEPX}"
+  ],
+  "rok": [
+   "obtain ⟨hfr, hh⟩ := _hp.fin _h",
+   "have hpos : 0 < 4 * y'.alloc := by have := hqrp q' y' rfl; omega",
+   "exact Lbl.exit fun cf hat => ⟨.ok q' y', _M, hat.sub rfl rfl, MpExptmod.Q_rec hvx.toShape hps1 hX hinv habs hqr,",
+   "{WIT}",
+   "    wsite := ⟨Iv.sub_self _, _h.dig (nR .yD) rfl⟩, place := .regrow (Heap.fresh_front hh.heap) hpos rfl, frame := hfr, heap := hh",
+   "    foot := fun _ hx => (foot_uncons (e := digBlk ydp Yv) (Foot.of_cons hx)).imp id id, off := _hp.off (nR .yD) }⟩"
+  ]
+ },
+ "temps": {
+  "names": [
+   "G",
+   "X"
+  ],
+  "S": "n{t}",
+  "D": "nR .d{t}",
+  "addr": {
+   "G": "sp - 96",
+   "X": "sp - 72"
+  },
+  "N": {
+   "G": "defPrec",
+   "X": "defPrec"
+  },
+  "zero": "(MpInt.zeroN {N})",
+  "lay": "ρK p {IV} {IB}",
+  "IB": "(Api.Exptmod.lay (MpExptmod.F p) p .yD)",
+  "base": "hin",
+  "heap_form": "append",
+  "kinds_pre": {
+   "nT": ".frz F1"
+  },
+  "state": [
+   [
+    "st",
+    "St ({LAY}) wX WX (κ{cut} z x) Mk M"
+   ],
+   [
+    "hp",
+    "HP ({LAY}) wX hin ({HEAP}) Wr0 m Mk"
+   ]
+  ],
+  "recon": [
+   "have @H := @H.congrL (ρ' := {LAY}) (by krflc)",
+   "have @HP := @HP.congrL (ρ' := {LAY}) (by krflc)"
+  ],
+  "jst": "(@H.congrL (by krflc)).congrK (by krflc)",
+  "jhp": "@HP.congrL (by krflc)",
+  "jvars_all": true
+ }
+}

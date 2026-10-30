@@ -1,0 +1,611 @@
+{
+ "fn": "s_mp_karatsuba_sqr",
+ "mod": "KSqrG",
+ "src": "ksqrg",
+ "pfx": "ksq",
+ "bv": "ra s0 s1 s2 s3 s4",
+ "nat": "sp pa pb ua nb e er adp x0d x1d i k xa a x",
+ "keep": "gp tp s5 s6 s7 s8 s9 s10 s11",
+ "regs": {
+  "ent": "ra sp s0 s1 s2 s3 s4 a0:pa a1:pb",
+  "i1": "sp:sp-192 s0:nb s1:pa s2 s3:pb s4 a0:sp-192 a1:nb",
+  "r1": "@i1 -a1 a0:e",
+  "i0": "ra sp:sp-192 s0:nb a0:pa a1:pb s2 s4",
+  "rt": "ra sp s0 s1 s2 s3 s4 a0:er",
+  "bq": "sp:sp-192 s0:nb s1:pa s2:er s3:pb s4",
+  "r2": "@bq a0:e",
+  "k0": "@bq a0:sp-192",
+  "k1": "@bq a0:sp-168",
+  "k2": "@bq a0:sp-144",
+  "i2": "@bq a0:sp-168 a1:ua-nb",
+  "i3": "@bq a0:sp-144 a1:2*ua",
+  "i4": "@bq a0:sp-120 a1:2*ua",
+  "bt": "@bq s4:2*nb",
+  "rb": "@bt a0:e",
+  "i5": "@bt a0:sp-96 a1:2*nb",
+  "i6": "@bt a0:sp-72 a1:2*(ua-nb)",
+  "k3": "@bt a0:sp-120",
+  "k4": "@bt a0:sp-96",
+  "k5": "@bt a0:sp-72",
+  "j1": "@bt a4:adp+4*nb",
+  "l1": "@bt a1:x0d+4*nb a3:adp+4*i a4:adp a5:x0d+4*i",
+  "j2": "@bt a2:ua",
+  "l2": "@bt a3:x1d+4*k a4:adp+4*(nb+k) a5:nb+k",
+  "q0": "@bt a0:sp-192",
+  "qs1": "@bt a0:sp-192 a1:sp-96",
+  "qs2": "@bt a0:sp-168 a1:sp-72",
+  "qa1": "@bt a0:sp-168 a1:sp-192 a2:sp-144",
+  "qs3": "@bt a0:sp-144 a1:sp-144",
+  "qa2": "@bt a0:sp-96 a1:sp-72 a2:sp-120",
+  "qsb": "@bt a0:sp-144 a1:sp-120 a2:sp-144",
+  "qh1": "@bt a0:sp-144 a1:nb",
+  "qh2": "@bt a0:sp-72 a1:2*nb",
+  "qa3": "@bt a0:sp-96 a1:sp-144 a2:sp-144",
+  "qa4": "@bt a0:sp-144 a1:sp-72 a2:pb"
+ },
+ "facts": {
+  "AS": [
+   "bytesT4 M pa = BitVec.ofNat 32 ua",
+   "ua < 2 ^ 30",
+   "Ram pa 24",
+   "pa % 8 = 0",
+   "pa + 24 ≤ sp - 192 ∨ sp ≤ pa"
+  ],
+  "RF": [
+   "bytesT8 M (sp - 8) = ra",
+   "bytesT8 M (sp - 16) = s0",
+   "bytesT8 M (sp - 24) = s1",
+   "bytesT8 M (sp - 32) = s2",
+   "bytesT8 M (sp - 40) = s3"
+  ],
+  "RS": [
+   "bytesT8 M (sp - 48) = s4"
+  ],
+  "AD": [
+   "bytesT8 M (pa + 16) = BitVec.ofNat 64 adp",
+   "Ram pa 24",
+   "pa % 8 = 0",
+   "pa + 24 ≤ sp - 192 ∨ sp ≤ pa"
+  ],
+  "X0": [
+   "bytesT8 M (sp - 192 + 16) = BitVec.ofNat 64 x0d",
+   "Ram x0d (4 * nb)"
+  ],
+  "X1": [
+   "bytesT8 M (sp - 168 + 16) = BitVec.ofNat 64 x1d",
+   "Ram x1d (4 * (ua - nb))"
+  ],
+  "W0": [
+   "Ram x0d (4 * nb)",
+   "x0d % 4 = 0",
+   "x0d + 4 * nb ≤ sMpKaratsubaSqrBase ∨ sMpKaratsubaSqrBase + 588 ≤ x0d"
+  ],
+  "W1": [
+   "Ram x1d (4 * (ua - nb))",
+   "x1d % 4 = 0",
+   "x1d + 4 * (ua - nb) ≤ sMpKaratsubaSqrBase ∨ sMpKaratsubaSqrBase + 588 ≤ x1d",
+   "x1d + 4 * (ua - nb) ≤ pa ∨ pa + 24 ≤ x1d"
+  ],
+  "DG": [
+   "bytesT4 M a = BitVec.ofNat 32 x",
+   "x < 2 ^ 31",
+   "Ram a 4"
+  ]
+ },
+ "segs": [
+  {
+   "n": "pro",
+   "at": "6794",
+   "to": "67ac",
+   "pre": "ent",
+   "post": "i0{nb:=ua/2}",
+   "h": [
+    "AS"
+   ],
+   "doc": "Save `s0`, `s1`, `s3`; `B := a->used >> 1` (cut after the `sraiw`: the code pins of later instructions in its block, on a nest of `stepMemM`s over its value, give a kernel deep recursion)."
+  },
+  {
+   "n": "pr2",
+   "at": "67ac",
+   "pre": "i0",
+   "post": "i1",
+   "doc": "Save `ra`, `s2`; `mp_init_size(&x0, B)`."
+  },
+  {
+   "n": "e0",
+   "at": "67c8 T",
+   "pre": "r1",
+   "post": "rt{er:=18446744073709551614}",
+   "h": [
+    "RF",
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x0)` failed: return `MP_MEM`."
+  },
+  {
+   "n": "ix1",
+   "at": "67c8 F",
+   "pre": "r1{e:=0}",
+   "post": "i2{er:=18446744073709551614}",
+   "h": [
+    "AS",
+    "2 * nb ≤ ua"
+   ],
+   "doc": "`mp_init_size(&x1, a->used - B)`."
+  },
+  {
+   "n": "ex1",
+   "at": "67e0 F",
+   "pre": "r2{er:=18446744073709551614}",
+   "post": "k0{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x1)` failed: `mp_clear(&x0)`."
+  },
+  {
+   "n": "ret",
+   "at": "67ec",
+   "pre": "bq",
+   "post": "rt",
+   "h": [
+    "RF"
+   ],
+   "doc": "After `mp_clear(&x0)`: restore, return `err`."
+  },
+  {
+   "n": "it1",
+   "at": "67e0 T",
+   "pre": "r2{er:=18446744073709551614, e:=0}",
+   "post": "i3{er:=18446744073709551614}",
+   "h": [
+    "AS"
+   ],
+   "doc": "`mp_init_size(&t1, 2 a->used)`."
+  },
+  {
+   "n": "ex2",
+   "at": "681c T",
+   "pre": "r2{er:=18446744073709551614}",
+   "post": "k1{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&t1)` failed: `mp_clear(&x1)`."
+  },
+  {
+   "n": "c1",
+   "at": "6844",
+   "pre": "bq",
+   "post": "k0",
+   "doc": "After `mp_clear(&x1)`: `mp_clear(&x0)`."
+  },
+  {
+   "n": "it2",
+   "at": "681c F",
+   "pre": "r2{er:=18446744073709551614, e:=0}",
+   "post": "i4{er:=18446744073709551614}",
+   "h": [
+    "AS"
+   ],
+   "doc": "`mp_init_size(&t2, 2 a->used)`."
+  },
+  {
+   "n": "ex3",
+   "at": "6830 F",
+   "pre": "r2{er:=18446744073709551614}",
+   "post": "k2{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&t2)` failed: `mp_clear(&t1)`."
+  },
+  {
+   "n": "c2",
+   "at": "683c",
+   "pre": "bq",
+   "post": "k1",
+   "doc": "After `mp_clear(&t1)`: `mp_clear(&x1)`."
+  },
+  {
+   "n": "ix0",
+   "at": "6830 T",
+   "pre": "r2{er:=18446744073709551614, e:=0}",
+   "post": "i5{er:=18446744073709551614}",
+   "h": [
+    "nb < 2 ^ 30"
+   ],
+   "doc": "Save `s4`; `mp_init_size(&x0x0, 2 B)`."
+  },
+  {
+   "n": "ex4",
+   "at": "685c T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k3{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x0x0)` failed: `mp_clear(&t2)`."
+  },
+  {
+   "n": "c3",
+   "at": "69c8",
+   "pre": "bt",
+   "post": "k2",
+   "h": [
+    "RS"
+   ],
+   "doc": "After `mp_clear(&t2)`: restore `s4`; `mp_clear(&t1)`."
+  },
+  {
+   "n": "ix2",
+   "at": "685c F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "i6{er:=18446744073709551614}",
+   "h": [
+    "AS",
+    "2 * nb ≤ ua"
+   ],
+   "doc": "`mp_init_size(&x1x1, 2 (a->used - B))`."
+  },
+  {
+   "n": "ex5",
+   "at": "6874 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k4{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_init_size(&x1x1)` failed: `mp_clear(&x0x0)`."
+  },
+  {
+   "n": "c4",
+   "at": "69c0",
+   "pre": "bt",
+   "post": "k3",
+   "doc": "After `mp_clear(&x0x0)`: `mp_clear(&t2)`."
+  },
+  {
+   "n": "cz",
+   "at": "6874 F T",
+   "to": "68b8",
+   "pre": "rb{er:=18446744073709551614, e:=0, nb:=0}",
+   "post": "j1{er:=18446744073709551614, nb:=0}",
+   "h": [
+    "AD"
+   ],
+   "doc": "`B = 0`: no low digits to copy."
+  },
+  {
+   "n": "cl",
+   "at": "6874 F F",
+   "to": "6890",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "l1{er:=18446744073709551614, i:=0}",
+   "h": [
+    "AD",
+    "X0",
+    "0 < nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "The low copy loop's set-up (`src = a->dp`, `dst = x0.dp`)."
+  },
+  {
+   "n": "lb1",
+   "at": "6890 T",
+   "to": "6890",
+   "pre": "l1{er:=18446744073709551614}",
+   "post": "l1{er:=18446744073709551614, i:=i+1}",
+   "st": [
+    "xa"
+   ],
+   "h": [
+    "DG{a:=adp+4*i, x:=xa}",
+    "W0",
+    "i + 1 < nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "`*dst++ = *src++` (low digits), back edge."
+  },
+  {
+   "n": "lx1",
+   "at": "6890 F",
+   "to": "68b8",
+   "pre": "l1{er:=18446744073709551614}",
+   "post": "j1{er:=18446744073709551614}",
+   "st": [
+    "xa"
+   ],
+   "h": [
+    "DG{a:=adp+4*i, x:=xa}",
+    "W0",
+    "i + 1 = nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "The last low digit; `src = a->dp + B`."
+  },
+  {
+   "n": "g2",
+   "at": "68b8 T",
+   "to": "68e4",
+   "pre": "j1{er:=18446744073709551614}",
+   "post": "j2{er:=18446744073709551614}",
+   "h": [
+    "AS",
+    "ua ≤ nb",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "No high digits to copy."
+  },
+  {
+   "n": "g2f",
+   "at": "68b8 F",
+   "to": "68c8",
+   "pre": "j1{er:=18446744073709551614}",
+   "post": "l2{er:=18446744073709551614, k:=0}",
+   "h": [
+    "AS",
+    "X1",
+    "nb < ua",
+    "nb < 2 ^ 30"
+   ],
+   "doc": "The high copy loop's set-up (`dst = x1.dp`)."
+  },
+  {
+   "n": "lb2",
+   "at": "68c8 T",
+   "to": "68c8",
+   "pre": "l2{er:=18446744073709551614}",
+   "post": "l2{er:=18446744073709551614, k:=k+1}",
+   "st": [
+    "xa"
+   ],
+   "h": [
+    "DG{a:=adp+4*(nb+k), x:=xa}",
+    "W1",
+    "AS",
+    "nb + k + 1 < ua"
+   ],
+   "doc": "`*dst++ = *src++` (high digits), back edge."
+  },
+  {
+   "n": "lx2",
+   "at": "68c8 F",
+   "to": "68e4",
+   "pre": "l2{er:=18446744073709551614}",
+   "post": "j2{er:=18446744073709551614}",
+   "st": [
+    "xa"
+   ],
+   "h": [
+    "DG{a:=adp+4*(nb+k), x:=xa}",
+    "W1",
+    "AS",
+    "ua = nb + k + 1"
+   ],
+   "doc": "The last high digit."
+  },
+  {
+   "n": "cpa",
+   "at": "68e4",
+   "to": "68f0",
+   "pre": "j2{er:=18446744073709551614}",
+   "post": "q0{er:=18446744073709551614}",
+   "st": [
+    "ua - nb"
+   ],
+   "h": [
+    "nb ≤ ua",
+    "ua < 2 ^ 30"
+   ],
+   "doc": "`x1.used := a->used - B`."
+  },
+  {
+   "n": "cpb",
+   "at": "68f0",
+   "pre": "q0{er:=18446744073709551614}",
+   "post": "q0{er:=18446744073709551614}",
+   "doc": "`x0.used := B`; `mp_clamp(&x0)`."
+  },
+  {
+   "n": "cq",
+   "at": "68f8",
+   "pre": "bt{er:=18446744073709551614}",
+   "post": "qs1{er:=18446744073709551614}",
+   "doc": "`mp_sqr(&x0, &x0x0)`."
+  },
+  {
+   "n": "f1",
+   "at": "6904 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr(&x0)` failed: `mp_clear(&x1x1)`."
+  },
+  {
+   "n": "o1",
+   "at": "6904 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qs2{er:=18446744073709551614}",
+   "doc": "`mp_sqr(&x1, &x1x1)`."
+  },
+  {
+   "n": "f2",
+   "at": "6914 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr(&x1)` failed."
+  },
+  {
+   "n": "o2",
+   "at": "6914 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa1{er:=18446744073709551614}",
+   "doc": "`s_mp_add(&x1, &x0, &t1)`."
+  },
+  {
+   "n": "f3",
+   "at": "6928 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`s_mp_add` failed."
+  },
+  {
+   "n": "o3",
+   "at": "6928 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qs3{er:=18446744073709551614}",
+   "doc": "`mp_sqr(&t1, &t1)`."
+  },
+  {
+   "n": "f4",
+   "at": "6938 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_sqr(&t1)` failed."
+  },
+  {
+   "n": "o4",
+   "at": "6938 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa2{er:=18446744073709551614}",
+   "doc": "`s_mp_add(&x0x0, &x1x1, &t2)`."
+  },
+  {
+   "n": "f5",
+   "at": "694c T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`s_mp_add` failed."
+  },
+  {
+   "n": "o5",
+   "at": "694c F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qsb{er:=18446744073709551614}",
+   "doc": "`s_mp_sub(&t1, &t2, &t1)`."
+  },
+  {
+   "n": "f6",
+   "at": "6960 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`s_mp_sub` failed."
+  },
+  {
+   "n": "o6",
+   "at": "6960 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qh1{er:=18446744073709551614}",
+   "doc": "`mp_lshd(&t1, B)`."
+  },
+  {
+   "n": "f7",
+   "at": "6970 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_lshd(&t1)` failed."
+  },
+  {
+   "n": "o7",
+   "at": "6970 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qh2{er:=18446744073709551614}",
+   "doc": "`mp_lshd(&x1x1, 2 B)`."
+  },
+  {
+   "n": "f8",
+   "at": "6980 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_lshd(&x1x1)` failed."
+  },
+  {
+   "n": "o8",
+   "at": "6980 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa3{er:=18446744073709551614}",
+   "doc": "`mp_add(&x0x0, &t1, &t1)`."
+  },
+  {
+   "n": "f9",
+   "at": "6994 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "`mp_add` failed."
+  },
+  {
+   "n": "o9",
+   "at": "6994 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "qa4{er:=18446744073709551614}",
+   "doc": "`mp_add(&t1, &x1x1, b)`."
+  },
+  {
+   "n": "fa",
+   "at": "69a8 T",
+   "pre": "rb{er:=18446744073709551614}",
+   "post": "k5{er:=18446744073709551614}",
+   "h": [
+    "e ≠ 0",
+    "e < 2 ^ 64"
+   ],
+   "doc": "The last `mp_add` failed."
+  },
+  {
+   "n": "ok",
+   "at": "69a8 F",
+   "pre": "rb{er:=18446744073709551614, e:=0}",
+   "post": "k5{er:=0}",
+   "doc": "`err := MP_OKAY`; `mp_clear(&x1x1)`."
+  },
+  {
+   "n": "c5",
+   "at": "69b8",
+   "pre": "bt",
+   "post": "k4",
+   "doc": "After `mp_clear(&x1x1)`: `mp_clear(&x0x0)`."
+  }
+ ]
+}
