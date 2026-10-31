@@ -18,13 +18,13 @@ open Tom.Machine.Api.Un
 /-- **`mp_reduce_is_2k(a)`**: `isReduce2k a` (`1` iff `|a| = 2^p - d` for one digit `d`, the C's bit
 test). Only the stack is written. -/
 theorem _root_.Specs.mp_reduce_is_2k {sp pa adp : Nat} {a : MpInt} {s0 : BitVec 64}
-    (cv : ConvS m ra sp 16) (sound : Sound (lay sp pa adp a) fun | R.stk => true | _ => false)
+    (cv : ConvS m ra sp 16 (lay sp pa adp a) (fun | R.stk => true | _ => false))
     (ha : MpVal m pa adp a) (fa : Fits a) :
     Triple (At entry ((1, ra) :: (2, BitVec.ofNat 64 sp) :: (8, s0) :: callArgs 10 [pa]) m v.keepR outp)
       fun cf => ∃ M, At ra [(1, ra), (2, BitVec.ofNat 64 sp), (8, s0),
         (10, BitVec.ofNat 64 (isReduce2k a))] M v.keepR outp cf ∧ Frm (lay sp pa adp a) [R.stk] m M :=
   Fn.Reduce2k.correct ⟨ha.mpAt, ha.valid, ha.geom, fa, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al,
-    cv.img, sound⟩
+    cv.img, cv.sound⟩
 
 end Tom.Machine.Api.Reduce2k
 

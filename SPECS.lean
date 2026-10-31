@@ -79,25 +79,30 @@ compiled for RV64I (c/tommath-arith.elf): for each, alphabetically, its main con
 form, then the aliasing forms such as `mp_add(a, b, a)`), over Int/Nat, in the conventions of
 Tom/Machine/Conventions.lean (read it once). The allocating functions read
 
-  theorem Specs.f {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-      (a : MpOwn m p.H p.pa p.adp p.a) ... (c : MpOut m p.pc p.cdp p.c) (side conditions) :
-      ApiTriple m v outp ra entry p.sp [p.pa, ..., p.pc] ret fun x M =>
-        OptRes x (when MP_MEM) (fun c' => c'.Valid ∧ c'.val = ...) ∧ HPost ... m M
+  def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
+  theorem Specs.f {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a) ...
+      (c : MpOut m p.pc p.cdp p.c) (side conditions) :
+      ApiTriple m v outp ra entry p.sp [p.pa, ..., p.pc] (eff p) (mem := when MP_MEM)
+        fun c' => c'.Valid ∧ c'.val = ...
 
 * `ApiTriple`: total correctness on the Sail RISC-V model: from `entry` with `a0, a1, ...` holding
-  the arguments, the run returns to `ra` with `a0 = ret x` (`MP_OKAY`, `MP_MEM`, ...) for an
-  outcome `x` and memory `M`. `m v outp ra` (the `variable`s below): the memory, the callee-saved
-  registers, the console output, the return address.
+  the arguments, the run returns to `ra` with `a0` `MP_MEM` (then `mem`, by default no claim) or
+  `MP_OKAY` and the result `c'` meaning what the `fun` says. `m v outp ra` (the `variable`s below):
+  the memory, the callee-saved registers, the console output, the return address.
 * `p : P` (the structure `P` of the namespace above the theorem) names the `mp_int`s (`p.a : MpInt`;
   `.val`/`.mag` its Int/Nat value) and where they are: `p.pa` the struct, `p.adp` its digits, `p.sp`
   the stack pointer, `p.H` the live heap blocks.
+* `eff p` (`Eff`): the contract's regions `lay`, written ones `isW`/`ws`, outcomes `out`, the
+  result's site and heap blocks before/after (`site'`, `hin`, `hout`), and the result an outcome
+  gives the caller (`optView`, `okView`, or the module's `res`); the memory frame it implies
+  (`HPost`: only the written regions and the allocator's footprint change) is part of `ApiTriple`.
 * `MpOwn`/`MpOut`: an `mp_int` argument read/written (struct and digits in memory, valid/initialized,
   digits a live heap block); `Conv`: the stack of `F` bytes, the program image, the allocator's
-  heap with the blocks `hin p`; `Sound`: the written regions are disjoint from all others.
-* The post: the result over Int/Nat (`OptRes`/`OkRes`, or a `match` on the contract's outcome),
-  then the frame `HPost`: only the written regions `ws` and the allocator's footprint change, the
-  result's digits are the new front heap block (`out`, `site'`, `hout`: the contract's).
-* The functions that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvS`,
+  heap, the written regions disjoint from all others (`Sound`).
+* `CInt n` (`n < 2^31`), `CIdx n` (`n < 2^30`), `FitsBits n`, `Fits a`: the C's `int` arithmetic on
+  sizes stays in range.
+* The functions that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvM`/`ConvS`,
   `ApiPure` (a value in `a0`, memory unchanged), `ApiTripleS` (the frame-pointer calls; `Post`, the
   contract's: the result in memory and the frame).
 Each proof bridges from the machine contract (`Fn.….correct : Api.….Statement`) and the `.spec`
@@ -118,13 +123,14 @@ variable {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}
 
 namespace Tom.Machine.Api.Expt2G
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_2expt(a, b)`**: `a ← 2^b`, growing `a`; `MP_MEM` only when `a` had to grow. -/
-theorem _root_.Specs.mp_2expt {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (hb : p.b < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.b] optRet fun x M =>
-      OptRes x (p.a.alloc < p.b / Layout.digitBits + 1) (fun a' => a'.Valid ∧ a'.val = 2 ^ p.b) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
-  ApiTriple.of (Reg.call (Fn.Expt2GG5.correct cv.ra_al ⟨cv.stk, a.shape, hb, a.pos, a.off⟩ sound)
+theorem _root_.Specs.mp_2expt {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOut m p.pa p.adp p.a)
+    (hb : CInt p.b) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.b] (eff p)
+      (mem := p.a.alloc < p.b / Layout.digitBits + 1) fun a' => a'.Valid ∧ a'.val = 2 ^ p.b :=
+  ApiTriple.of (Reg.call (Fn.Expt2GG5.correct cv.ra_al ⟨cv.stk, a.shape, hb, a.pos, a.off⟩ cv.sound)
     cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Expt2Post.specG a.shape.alloc_lt hb hq.post).imp_right And.right
@@ -133,14 +139,15 @@ end Tom.Machine.Api.Expt2G
 
 namespace Tom.Machine.Api.MpAbsG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_abs(a, b)`**: `b ← |a|`, growing `b`; `MP_MEM` only when `b` had to grow. -/
-theorem _root_.Specs.mp_abs {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (ne : p.pa ≠ p.pb) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] optRet fun x M =>
-      OptRes x (p.b.alloc < p.a.used) (fun b' => b'.Valid ∧ b'.val = p.a.mag) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_abs {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOut m p.pb p.bdp p.b) (ne : p.pa ≠ p.pb) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      (mem := p.b.alloc < p.a.used) fun b' => b'.Valid ∧ b'.val = p.a.mag :=
   ApiTriple.of (Reg.call (Fn.MpAbsGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ sound)
+    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ cv.sound)
     cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (AbsPost.spec a.valid (copyIn_grown b.shape
@@ -151,27 +158,29 @@ end Tom.Machine.Api.MpAbsG
 namespace Tom.Machine.Api.MpAbs
 
 /-- **`mp_abs(a, a)`**: `a ← |a|` (in place: the sign cleared). -/
-theorem _root_.Specs.mp_abs_alias {sp pa adp : Nat}
-    {a : MpInt} {s0 : BitVec 64} (cv : ConvL m ra) (sound : Sound (Un.lay 0 sp pa adp a) Un.isW)
-    (ha : MpVal m pa adp a) :
+theorem _root_.Specs.mp_abs_alias {sp pa adp : Nat} {a : MpInt} {s0 : BitVec 64}
+    (cv : ConvM m ra (Un.lay 0 sp pa adp a) Un.isW) (ha : MpVal m pa adp a) :
     ApiTripleS m v outp ra s0 entry sp [pa, pa] 0#64 fun a' M =>
       (a'.Valid ∧ a'.val = a.mag) ∧ APost m sp pa adp a a' M :=
-  ApiTripleS.of (Fn.MpAbs.alias_correct ⟨ha.mpAt, ha.valid.toShape, ha.geom, cv.ra_al, cv.img, sound⟩)
+  ApiTripleS.of (Fn.MpAbs.alias_correct ⟨ha.mpAt, ha.valid.toShape, ha.geom, cv.ra_al, cv.img,
+    cv.sound⟩)
     fun _ _ h => (AbsPost.spec ha.valid ha.valid.toShape ha.valid.used_le h.abs).imp_right And.right
 
 end Tom.Machine.Api.MpAbs
 
 namespace Tom.Machine.Api.MpAddG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_add(a, b, c)`**: `c ← a + b`, growing `c`; `MP_MEM` only when `c` had to grow. -/
-theorem _root_.Specs.mp_add {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (size : max p.a.used p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] optRet fun x M =>
-      OptRes x (p.c.alloc < addSize p.a p.b) (fun c' => c'.Valid ∧ c'.val = p.a.val + p.b.val) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_add {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
+    (size : CInt (max p.a.used p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] (eff p)
+      (mem := p.c.alloc < addSize p.a p.b) fun c' => c'.Valid ∧ c'.val = p.a.val + p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpAddGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, b.valid, c.shape, size, a.pos, b.pos, c.pos, c.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.valid, b.valid, c.shape, size, a.pos, b.pos, c.pos, c.off⟩
+    cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Tom.AddG.spec a.valid b.valid c.shape size hq).imp_right And.left
 
@@ -179,15 +188,15 @@ end Tom.Machine.Api.MpAddG
 
 namespace Tom.Machine.Api.MpAddGA
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_add(a, b, a)`**: `a ← a + b` (`mp_add` with `c := a`). -/
-theorem _root_.Specs.mp_add_ca {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (b : MpOwn m p.H p.pb p.bdp p.b)
-    (size : max p.a.used p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pa] optRet fun x M =>
-      OptRes x (p.a.alloc < addSize p.a p.b) (fun a' => a'.Valid ∧ a'.val = p.a.val + p.b.val) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_add_ca {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOut m p.pa p.adp p.a)
+    (va : p.a.Valid) (b : MpOwn m p.H p.pb p.bdp p.b) (size : CInt (max p.a.used p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pa] (eff p)
+      (mem := p.a.alloc < addSize p.a p.b) fun a' => a'.Valid ∧ a'.val = p.a.val + p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpAddGAG5.correct cv.ra_al
-    ⟨cv.stk, va, b.valid, size, a.pos, b.pos, a.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, va, b.valid, size, a.pos, b.pos, a.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Tom.AddG.specA va b.valid size hq).imp_right And.left
 
@@ -195,15 +204,16 @@ end Tom.Machine.Api.MpAddGA
 
 namespace Tom.Machine.Api.MpAddGB
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_add(a, b, b)`**: `b ← a + b` (`mp_add` with `c := b`). -/
-theorem _root_.Specs.mp_add_cb {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_add_cb {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (vb : p.b.Valid)
-    (size : max p.a.used p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pb] optRet fun x M =>
-      OptRes x (p.b.alloc < addSize p.a p.b) (fun b' => b'.Valid ∧ b'.val = p.a.val + p.b.val) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    (size : CInt (max p.a.used p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pb] (eff p)
+      (mem := p.b.alloc < addSize p.a p.b) fun b' => b'.Valid ∧ b'.val = p.a.val + p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpAddGBG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, vb, size, a.pos, b.pos, b.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.valid, vb, size, a.pos, b.pos, b.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Tom.AddG.specB a.valid vb size hq).imp_right And.left
 
@@ -213,13 +223,13 @@ namespace Tom.Machine.Api.AddD
 open Tom.Machine.Api.Two
 
 /-- **`mp_add_d(a, b, c)`**: `c ← a + b` for a digit `b`, `c` with room. -/
-theorem _root_.Specs.mp_add_d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp 128) (sound : Sound (lay 128 sp pa adp pc cdp a c) isW)
-    (ha : MpVal m pa adp a) (hc : MpOut m pc cdp c) (hb : b < radix) (room : a.used + 1 ≤ c.alloc) :
+theorem _root_.Specs.mp_add_d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 128 (lay 128 sp pa adp pc cdp a c) isW) (ha : MpVal m pa adp a)
+    (hc : MpOut m pc cdp c) (hb : b < radix) (room : a.used + 1 ≤ c.alloc) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pc] 0#64 fun c' M =>
       (c'.Valid ∧ c'.val = a.val + b) ∧ Post 128 m sp pa adp pc cdp a b c c' M :=
   ApiTripleS.of (Fn.AddD.correct ⟨ha.mpAt, hc.mpAt, ha.valid, hc.shape, hb, ha.geom, hc.geom, room,
-    cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     AddDPost.spec ha.valid hb room hc.shape.alloc_lt h.addd
 
 end Tom.Machine.Api.AddD
@@ -320,14 +330,15 @@ end Tom.Machine.Api.CountBits
 
 namespace Tom.Machine.Api.MpCopyG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_copy(a, b)`**: `b ← a`, growing `b`; `MP_MEM` only when `b` had to grow. -/
-theorem _root_.Specs.mp_copy {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_copy {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (ne : p.pa ≠ p.pb) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] optRet fun x M =>
-      OptRes x (p.b.alloc < p.a.used) (fun b' => b'.Valid ∧ b'.val = p.a.val) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      (mem := p.b.alloc < p.a.used) fun b' => b'.Valid ∧ b'.val = p.a.val :=
   ApiTriple.of (Reg.call (Fn.MpCopyGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ sound)
+    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ cv.sound)
     cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (CopyPost.specG a.valid b.shape hq).imp_right And.right
@@ -348,23 +359,29 @@ end Tom.Machine.Api.MpCopy
 
 namespace Tom.Machine.Api.MpDiv
 
+/-- The effect: `Post2`, `HPost` with two results (`c`'s and `d`'s digits). -/
+def eff (p : P) : Eff Out (MpInt × MpInt) where
+  lay := lay p
+  isW := isW
+  hin := hin p
+  res | .mem => none | .small c' d' | .big _ c' _ d' => some (c', d')
+  frame x m M := Post2 (lay p) ws .cD .dD (out p x) (siteC p x) (siteD p x) (hin p) (hout p x) m M
+
 /-- **`mp_div(a, b, c, d)`**: `c ← a / b`, `d ← a mod b` (truncated: `a = b·c + d`, `d` with the
 sign of `a`), for `b ≠ 0`, growing `c` and `d`; `MP_MEM` only when `|a| ≥ |b|`. -/
-theorem _root_.Specs.mp_div {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (d : MpOut m p.pd p.ddp p.d) (cnn : p.pc ≠ 0) (dnn : p.pd ≠ 0) (fb : Fits p.b)
-    (bnz : 0 < p.b.used) (au : p.a.used + 3 < 2 ^ 30) (droom : p.a.used ≤ p.d.alloc) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc, p.pd]
-      (fun | .mem => MpInit.memBV | _ => 0#64) fun x M =>
-      (match x with
-        | .mem => p.b.mag ≤ p.a.mag
-        | .small c' d' | .big _ c' _ d' => c'.Valid ∧ c'.val = p.a.val.tdiv p.b.val ∧
-            d'.Valid ∧ d'.val = p.a.val.tmod p.b.val) ∧
-      Post2 (lay p) ws .cD .dD (out p x) (siteC p x) (siteD p x) (hin p) (hout p x) m M :=
-  have quot := fun {c'} h => (DivQuot.spec a.valid b.valid bnz (by omega) c.shape.alloc_lt h (c' := c'))
+theorem _root_.Specs.mp_div {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c) (d : MpOut m p.pd p.ddp p.d)
+    (cnn : p.pc ≠ 0) (dnn : p.pd ≠ 0) (fb : Fits p.b) (bnz : 0 < p.b.used)
+    (au : CIdx (p.a.used + 3)) (droom : p.a.used ≤ p.d.alloc) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc, p.pd] (eff p)
+      (mem := p.b.mag ≤ p.a.mag) fun (c', d') =>
+      c'.Valid ∧ c'.val = p.a.val.tdiv p.b.val ∧ d'.Valid ∧ d'.val = p.a.val.tmod p.b.val :=
+  have quot := fun {c'} h => (DivQuot.spec a.valid b.valid bnz (by unfold CIdx at au; omega)
+    c.shape.alloc_lt h (c' := c'))
   have rem := fun {d'} h => (DivRem.spec a.valid b.valid bnz droom d.shape.alloc_lt h (d' := d'))
   ApiTriple.of (Reg.call (Fn.MpDivG5.correct cv.ra_al ⟨cv.stk, a.valid, b.valid, bnz, fb, au, droom,
-    c.pos, d.pos, cnn, dnn, a.off, b.off, c.off, d.off, c.shape, d.shape, a.blk, a.pos, b.blk⟩ sound)
+    c.pos, d.pos, cnn, dnn, a.off, b.off, c.off, d.off, c.shape, d.shape, a.blk, a.pos, b.blk⟩
+    cv.sound)
     cv.heap (by mp_regions)) fun
     | .mem, hq => hq
     | .small .., hq | .big .., hq =>
@@ -377,21 +394,21 @@ open Tom.Machine.Api.Two
 
 /-- **`mp_div_2(a, b)`**: `b ← a / 2` (truncated), `b` with room. -/
 theorem _root_.Specs.mp_div_2 {sp pa adp pb bdp : Nat} {a b : MpInt} {s0 : BitVec 64}
-    (cv : ConvS m ra sp 32) (sound : Sound (lay sp pa adp pb bdp a b) isW)
-    (ha : MpVal m pa adp a) (hb : MpOut m pb bdp b) (room : a.used ≤ b.alloc) :
+    (cv : ConvS m ra sp 32 (lay sp pa adp pb bdp a b) isW) (ha : MpVal m pa adp a)
+    (hb : MpOut m pb bdp b) (room : a.used ≤ b.alloc) :
     ApiTripleS m v outp ra s0 entry sp [pa, pb] 0#64 fun b' M =>
       (b'.Valid ∧ b'.val = a.val.tdiv 2) ∧ Post m sp pa adp pb bdp a b b' M :=
   ApiTripleS.of (Fn.Div2.correct ⟨ha.mpAt, hb.mpAt, ha.valid, hb.shape, ha.geom, hb.geom, room,
-    cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     (Div2Post.spec ha.valid room hb.shape.alloc_lt h.div2).imp_right And.right
 
 /-- **`mp_div_2(a, a)`**: `a ← a / 2` (truncated). -/
 theorem _root_.Specs.mp_div_2_inplace {sp pa adp : Nat} {a : MpInt} {s0 : BitVec 64}
-    (cv : ConvS m ra sp 32) (sound : Sound (Un.lay 32 sp pa adp a) Un.isW) (ha : MpVal m pa adp a) :
+    (cv : ConvS m ra sp 32 (Un.lay 32 sp pa adp a) Un.isW) (ha : MpVal m pa adp a) :
     ApiTripleS m v outp ra s0 entry sp [pa, pa] 0#64 fun a' M =>
       (a'.Valid ∧ a'.val = a.val.tdiv 2) ∧ PostI m sp pa adp a a' M :=
   ApiTripleS.of (Fn.Div2.correct_inplace ⟨ha.mpAt, ha.valid, ha.geom, ha.valid.used_le, cv.stk.ram,
-    cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     (Div2Post.spec ha.valid ha.valid.used_le ha.valid.alloc_lt h.div2).imp_right And.right
 
 end Tom.Machine.Api.Div2
@@ -400,59 +417,61 @@ namespace Tom.Machine.Api.MpDiv2d
 
 /-- **`mp_div_2d(a, b, c, NULL)`**: `c ← a / 2^b` (truncated: `|c| = ⌊|a| / 2^b⌋`, the sign of `a`),
 `c` with room. -/
-theorem _root_.Specs.mp_div_2d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp 96) (sound : Sound (lay sp pa adp pc cdp a c) Two.isW)
-    (ha : MpVal m pa adp a) (hc : MpOut m pc cdp c) (hb : b < 2 ^ 31) (room : a.used ≤ c.alloc) :
+theorem _root_.Specs.mp_div_2d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 96 (lay sp pa adp pc cdp a c) Two.isW) (ha : MpVal m pa adp a)
+    (hc : MpOut m pc cdp c) (hb : CInt b) (room : a.used ≤ c.alloc) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pc, 0] 0#64 fun c' M =>
       (c'.Valid ∧ c'.mag = a.mag / 2 ^ b) ∧ Post m sp pa adp pc cdp a b c c' M :=
   ApiTripleS.of (Fn.MpDiv2d.correct ⟨ha.mpAt, hc.mpAt, ha.valid, hc.shape, ha.geom, hc.geom, hb,
-    room, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    room, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     let s := Div2dPost.spec ha.valid room hc.shape.alloc_lt h.div; ⟨s.1, s.2.1⟩
 
 /-- **`mp_div_2d(a, b, a, NULL)`**: `a ← a / 2^b` (truncated). -/
-theorem _root_.Specs.mp_div_2d_inplace {sp pa adp : Nat} {a : MpInt} {b : Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp 96) (sound : Sound (layI sp pa adp a) Un.isW)
-    (ha : MpVal m pa adp a) (hb : b < 2 ^ 31) :
+theorem _root_.Specs.mp_div_2d_inplace {sp pa adp : Nat} {a : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 96 (layI sp pa adp a) Un.isW) (ha : MpVal m pa adp a) (hb : CInt b) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pa, 0] 0#64 fun a' M =>
       (a'.Valid ∧ a'.mag = a.mag / 2 ^ b) ∧ PostI m sp pa adp a b a' M :=
   ApiTripleS.of (Fn.MpDiv2d.correct_inplace ⟨ha.mpAt, ha.valid, ha.geom, hb, cv.stk.ram, cv.stk.al,
-    cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     let s := Div2dPost.spec ha.valid ha.valid.used_le ha.valid.alloc_lt h.div; ⟨s.1, s.2.1⟩
 
 end Tom.Machine.Api.MpDiv2d
 
 namespace Tom.Machine.Api.MpDivD
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_div_d(a, b, c, d)`**: `c ← a / b` (truncated), `*d ← |a| mod b` (`rem p`, in `out`), for a
-digit `b > 0` and `c` with room (`a0`: `retv`, `MP_VAL` for `b = 0`). -/
-theorem _root_.Specs.mp_div_d {p : P}
-    {dv : Nat} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+digit `b > 0` and `c` with room (`MP_VAL` for `b = 0`: `retv`, SPECS_UNFOLDED.lean). -/
+theorem _root_.Specs.mp_div_d {p : P} {dv : Nat} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (c : MpOut m p.pc p.cdp p.c) (d : DigOut m p.pd dv)
     (c_nn : p.pc ≠ 0) (hv : 0 < p.v) (hb : p.v < radix) (room : p.a.used ≤ p.c.alloc) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.v, p.pc, p.pd] (retv p) fun x M =>
-      OptRes x True (fun c' => c'.Valid ∧ c'.val = p.a.val.tdiv p.v) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.v, p.pc, p.pd] (eff p)
+      fun c' => c'.Valid ∧ c'.val = p.a.val.tdiv p.v :=
   ApiTriple.of (Reg.call (Fn.MpDivDG5.correct cv.ra_al
     ⟨cv.stk, a.valid, c.shape, a.pos, c.pos, a.off, c.off, c_nn, d.nn, d.dig.al, d.off, hb, room⟩
-    sound) cv.heap (by mp_regions)) fun
+    cv.sound) cv.heap (by mp_regions)) (fun
     | none, _ => trivial
-    | some _, hq => (DivDQuot.spec a.valid hv room c.shape.alloc_lt hq).imp_right And.right
+    | some _, hq => (DivDQuot.spec a.valid hv room c.shape.alloc_lt hq).imp_right And.right)
+    (hr := fun x _ => by
+      cases x <;> simp [rets, retv, Nat.pos_iff_ne_zero.mp hv, eff, Eff.heap, optView, memRet])
 
 end Tom.Machine.Api.MpDivD
 
 namespace Tom.Machine.Api.MpDivDI
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_div_d(a, b, a, d)`**: `a ← a / b` (truncated), `*d ← |a| mod b`, for a digit `b ≥ 2` and
 `a ≠ 0`. -/
-theorem _root_.Specs.mp_div_d_inplace {p : P}
-    {dv : Nat} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (d : DigOut m p.pd dv)
-    (hv : 2 ≤ p.v) (hb : p.v < radix) (ha : 0 < p.a.used) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.v, p.pa, p.pd] optRet fun x M =>
-      OptRes x True (fun a' => a'.Valid ∧ a'.val = p.a.val.tdiv p.v) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_div_d_inplace {p : P} {dv : Nat} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (d : DigOut m p.pd dv) (hv : 2 ≤ p.v)
+    (hb : p.v < radix) (ha : 0 < p.a.used) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.v, p.pa, p.pd] (eff p)
+      fun a' => a'.Valid ∧ a'.val = p.a.val.tdiv p.v :=
   ApiTriple.of (Reg.call (Fn.MpDivDIG5.correct cv.ra_al
-    ⟨cv.stk, va, a.pos, a.off, hv, ha, d.nn, d.dig.al, d.off, hb⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, va, a.pos, a.off, hv, ha, d.nn, d.dig.al, d.off, hb⟩
+    cv.sound) cv.heap (by mp_regions)) fun
     | none, _ => trivial
     | some _, hq => (DivDQuot.spec va (by omega) va.used_le a.shape.alloc_lt hq).imp_right And.right
 
@@ -473,19 +492,20 @@ namespace Tom.Machine.Api.DrReduceG
 open Tom.Reduce
 open Tom.Machine.Api.MpReduce2k (R P kind)
 
+def eff (p : P) := Eff.heap (lay p) MpReduce2k.isW MpReduce2k.ws .aD (out p) (site' p) (hin p) (hout
+  p) okView
+
 /-- **`mp_dr_reduce(a, n, d)`**: `|a| ← |a| mod n` for a diminished-radix `n = radix^k - d`
 (`hk`: for the meaning only), `|a| < radix^(2k)`. -/
-theorem _root_.Specs.mp_dr_reduce {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) MpReduce2k.isW)
+theorem _root_.Specs.mp_dr_reduce {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (n : MpOwn m p.H p.pn p.ndp p.n)
     (npos : 0 < p.n.mag) (hb : p.d < radix) (hx : p.a.mag < radix ^ (2 * p.n.used))
     (hk : p.n.mag + p.d = radix ^ p.n.used) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag) ∧
-      HPost (lay p) MpReduce2k.ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] (eff p)
+      fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag :=
   ApiTriple.of (Reg.call (Fn.DrReduceGG5.correct cv.ra_al
-    ⟨cv.stk, va, n.valid, npos, hb, hx, a.pos, a.off, n.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => DrReducePost.spec npos hk hx (ReduxG.Out.post hq h)
+    ⟨cv.stk, va, n.valid, npos, hb, hx, a.pos, a.off, n.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => DrReducePost.spec npos hk hx (ReduxG.Out.post hq h)
 
 end Tom.Machine.Api.DrReduceG
 
@@ -494,11 +514,11 @@ namespace Tom.Machine.Api.DrSetup
 /-- **`mp_dr_setup(a, d)`**: `*d ← drSetupDigit a` (`radix - a[0]`, the diminished-radix `d`;
 `Post`, `void`). -/
 theorem _root_.Specs.mp_dr_setup {pa adp pd dv : Nat} {a : MpInt}
-    (cv : ConvL m ra) (sound : Sound (lay pd pa adp a) isW) (ha : MpOut m pa adp a)
-    (d : DigOut m pd dv) :
+    (cv : ConvM m ra (lay pd pa adp a) isW) (ha : MpOut m pa adp a) (d : DigOut m pd dv) :
     Triple (At entry ((1, ra) :: callArgs 10 [pa, pd]) m v.keep outp) fun cf =>
       ∃ M, At ra [(1, ra)] M v.keep outp cf ∧ Post m pa adp pd a M :=
-  Fn.DrSetup.correct ⟨ha.mpAt, ha.shape, ha.geom, ha.pos, d.dig.ram, d.dig.al, cv.ra_al, cv.img, sound⟩
+  Fn.DrSetup.correct ⟨ha.mpAt, ha.shape, ha.geom, ha.pos, d.dig.ram, d.dig.al, cv.ra_al, cv.img,
+    cv.sound⟩
 
 end Tom.Machine.Api.DrSetup
 
@@ -508,12 +528,12 @@ open Tom.Machine.Api.Two
 /-- **`mp_exch(a, b)`**: swaps the structs: after, `a`'s struct holds `b` (digits at `bdp`) and
 `b`'s holds `a` (`Post`; `void`). -/
 theorem _root_.Specs.mp_exch {sp pa adp pb bdp : Nat} {a b : MpInt}
-    (cv : ConvL m ra) (sound : Sound (lay sp pa adp pb bdp a b) isW2)
-    (ha : MpVal m pa adp a) (hb : MpVal m pb bdp b) :
+    (cv : ConvM m ra (lay sp pa adp pb bdp a b) isW2) (ha : MpVal m pa adp a)
+    (hb : MpVal m pb bdp b) :
     Triple (At entry ((1, ra) :: callArgs 10 [pa, pb]) m v.keep outp) fun cf =>
       ∃ M, At ra [(1, ra)] M v.keep outp cf ∧ Post m sp pa adp pb bdp a b M :=
   Fn.Exch.correct ⟨ha.mpAt, hb.mpAt, ha.geom, hb.geom,
-    by rcases ha.valid.sign_ok with h | h <;> rw [h] <;> decide, cv.ra_al, cv.img, sound⟩
+    by rcases ha.valid.sign_ok with h | h <;> rw [h] <;> decide, cv.ra_al, cv.img, cv.sound⟩
 
 end Tom.Machine.Api.Exch
 
@@ -530,58 +550,53 @@ theorem not_lossy {n : MpInt} (hv : n.Valid) (h : isReduce2k n = 1 → SMpExptmo
   have := Nat.mod_lt (2 ^ Mont.nbits n.mag - n.mag) (show 0 < radix by decide)
   omega
 
+def eff (p : P) := Eff.heap (lay (F p) p) isW ws .yD (out p) (site' (F p) p) (hin p) (hout p)
+  fun | .err r => errView r p.y | .ok _ y' => some y'
+
 /-- **`mp_exptmod(G, X, P, Y)`**: `Y ← G^X mod P`, for `X ≥ 0` and `P > 1` (`MP_MEM` leaves `Y`
 as it was). `r2k`: for a `2^k`-reduction modulus the setup is exact (README, bug 1). -/
-theorem _root_.Specs.mp_exptmod {p : P}
-    (cv : Conv m ra p.sp (F p) (hin p)) (cut : Cutoffs m) (sound : Sound (lay (F p) p) isW)
+theorem _root_.Specs.mp_exptmod {p : P} (cv : Conv m ra p.sp (F p) (eff p)) (cut : Cutoffs m)
     (g : MpOwn m p.H p.pg p.gdp p.g) (x : MpOwn m p.H p.px p.xdp p.x)
-    (n : MpOwn m p.H p.pn p.ndp p.n) (y : MpOut m p.py p.ydp p.y)
-    (hx : 0 ≤ p.x.val) (hn : 1 < p.n.val) (r2k : isReduce2k p.n = 1 → SMpExptmodFast.Exact2k p.n)
-    (fx : Fits p.x) (fn : Layout.digitBits * (2 * p.n.used + 1) < 2 ^ 31)
-    (gu : p.g.used + p.n.used + 3 < 2 ^ 30) :
-    ApiTriple m v outp ra entry p.sp [p.pg, p.px, p.pn, p.py]
-      (fun | .err r => BitVec.ofInt 64 r | .ok .. => 0#64) fun o M =>
-      (match o with
-        | .err r => r = Layout.mpMem ∨ r = Layout.mpOkay ∧ p.y.Valid ∧ p.y.val = p.g.val ^ p.x.mag % p.n.val
-        | .ok _ y' => y'.Valid ∧ y'.val = p.g.val ^ p.x.mag % p.n.val) ∧
-      HPost (lay (F p) p) ws .yD (out p o) (site' (F p) p o) (hin p) (hout p o) m M := by
+    (n : MpOwn m p.H p.pn p.ndp p.n) (y : MpOut m p.py p.ydp p.y) (hx : 0 ≤ p.x.val)
+    (hn : 1 < p.n.val) (r2k : isReduce2k p.n = 1 → SMpExptmodFast.Exact2k p.n) (fx : Fits p.x)
+    (fn : FitsBits (2 * p.n.used + 1)) (gu : CIdx (p.g.used + p.n.used + 3)) :
+    ApiTriple m v outp ra entry p.sp [p.pg, p.px, p.pn, p.py] (eff p)
+      fun y' => y'.Valid ∧ y'.val = p.g.val ^ p.x.mag % p.n.val := by
   have nz : p.n.sign = Layout.mpZpos := DivStep.sign_of_val_nonneg n.valid (by omega)
   have n1 : 1 < p.n.mag := by have := MpInt.val_pos_of_sign (P := p.n) (by rw [nz]; decide); omega
   have xs : p.x.sign ≠ Layout.mpNeg := by rw [DivStep.sign_of_val_nonneg x.valid hx]; decide
   have nb : Layout.digitBits * p.n.used < 2 ^ 31 := by
-    have e : Layout.digitBits = 28 := rfl; rw [e] at fn ⊢; omega
+    have e : Layout.digitBits = 28 := rfl; unfold FitsBits at fn; rw [e] at fn ⊢; omega
   have nl := not_lossy n.valid r2k
   have spec := fun {Y Y' : MpInt} {r : Int} (h : ExptmodPost p.g p.x p.n Y Y' r) =>
     ExptmodPost.spec_nonneg x.valid.toShape n.valid (by rw [nz]; decide) n1 xs nl h
   exact ApiTriple.of (Reg.call (Fn.MpExptmod.correct (p := { p with mode := 0 }) cv.ra_al
     ⟨⟨cv.stk, g.valid, x.valid, n.valid, y.shape, nz, fx, nb, gu, show 0 < 2 ^ 31 by decide,
-      g.pos, x.pos, n.pos, y.pos, g.off, x.off, n.off, y.off, g.blk, n.blk⟩, ⟨n1, fn, r2k⟩⟩ sound)
-    cv.heap (by mp_regions)) fun
-    | .err _, hq => hq.imp_right fun h => (spec h).1 ▸ ⟨rfl, (spec h).2⟩
-    | .ok .., hq => (spec hq).2
+      g.pos, x.pos, n.pos, y.pos, g.off, x.off, n.off, y.off, g.blk, n.blk⟩, ⟨n1, fn, r2k⟩⟩ cv.sound)
+    cv.heap (by mp_regions)) (fun | .err _, hq => .errView (hq.imp_right spec) | .ok .., hq => (spec hq).2)
+    (hr := fun
+      | .err _, hq => congrArg (fun b => [(1, ra), (10, b)]) (errView_ret (hq.imp_right spec))
+      | .ok .., _ => rfl)
 
 end Tom.Machine.Api.MpExptmod
 
 namespace Tom.Machine.Api.MpGcd
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p)
+  fun | .ok c' => some c' | _ => none
+
 /-- **`mp_gcd(a, b, c)`**: `c ← gcd(a, b)` (`c` with room, its digits a live block of `H`);
-`MP_MEM` from the second `mp_init_copy` leaks the first copy's block `q` (README, bug 6). -/
-theorem _root_.Specs.mp_gcd {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (cb : digBlk p.cdp p.c ∈ p.H) (fa : Fits p.a) (fb : Fits p.b)
-    (room : max p.a.used p.b.used + 1 ≤ p.c.alloc) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc]
-      (fun | .ok _ => 0#64 | _ => MpInit.memBV) fun x M =>
-      (match x with
-        | .ok c' => c'.Valid ∧ c'.val = Int.gcd p.a.val p.b.val
-        | .memU => True
-        | .memV q => Fresh p.H q (4 * initPrec p.a.used)) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+`MP_MEM` from the second `mp_init_copy` leaks the first copy's block (README, bug 6; its `Fresh`
+block: SPECS_UNFOLDED.lean). -/
+theorem _root_.Specs.mp_gcd {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c) (cb : digBlk p.cdp p.c ∈ p.H)
+    (fa : Fits p.a) (fb : Fits p.b) (room : max p.a.used p.b.used + 1 ≤ p.c.alloc) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] (eff p)
+      fun c' => c'.Valid ∧ c'.val = Int.gcd p.a.val p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpGcdG5.correct cv.ra_al ⟨cv.stk, a.valid, b.valid, c.shape, fa, fb,
-    room, a.blk, b.blk, a.pos, b.pos, a.off, b.off, c.off⟩ sound) cv.heap (by mp_regions)) fun
+    room, a.blk, b.blk, a.pos, b.pos, a.off, b.off, c.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | .ok _, hq => ⟨(GcdPost.spec hq.1).1, GcdPost.spec_int hq.1⟩
-    | .memU, hq => hq
-    | .memV _, hq => hq
+    | .memU, _ | .memV _, _ => trivial
 
 end Tom.Machine.Api.MpGcd
 
@@ -613,7 +628,7 @@ theorem _root_.Specs.mp_init {H : List (Nat × Nat)} {sp pa : Nat} (pre : Pre m 
 
 /-- **`mp_init_size(a, size)`**: as `mp_init` with `max(size, MP_MIN_PREC)` digits (`initPrec`). -/
 theorem _root_.Specs.mp_init_size {H : List (Nat × Nat)} {sp pa size : Nat}
-    (pre : Pre m v H sp pa Fsize ra) (hs : size < 2 ^ 31) :
+    (pre : Pre m v H sp pa Fsize ra) (hs : CInt size) :
     Triple (At Fn.MpInit.sizeEntry ((1, ra) :: callArgs 10 [pa, size]) m v.keep outp) fun cf =>
       ∃ r M, At ra [(1, ra), (10, r)] M v.keep outp cf ∧ Post m M H sp pa Fsize (initPrec size) r :=
   Fn.MpInit.size_correct pre hs
@@ -650,40 +665,42 @@ end Tom.Machine.Api.MpInitMulti
 namespace Tom.Machine.Api.MpInvmodG
 open Tom.Machine.Api.Invmod
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p)
+  fun | .err r => errView r p.c | .ok _ c' => some c'
+
 /-- **`mp_invmod(a, b, c)`**: `c ← a⁻¹ mod b` (in `[0, b)`), for `b > 1` and `a` invertible mod
 `b`, `a ≥ 0` or `b` even (README, bug 2: `a < 0` with odd `b` returns a negative `c`). -/
-theorem _root_.Specs.mp_invmod {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_invmod {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (au : p.a.used + 3 < 2 ^ 30) (hb : 1 < p.b.val) (hg : (invmodRem p.a p.b).gcd p.b.mag = 1)
+    (au : CIdx (p.a.used + 3)) (hb : 1 < p.b.val) (hg : (invmodRem p.a p.b).gcd p.b.mag = 1)
     (hs : 0 ≤ p.a.val ∨ p.b.mag % 2 = 0) :
-    ApiTriple m v outp ra MpInvmod.entry p.sp [p.pa, p.pb, p.pc]
-      (fun | .err r => BitVec.ofInt 64 r | .ok .. => 0#64) fun x M =>
-      (match x with
-        | .err r => r = Layout.mpMem ∨ r = Layout.mpOkay ∧ p.c.Valid ∧ 0 ≤ p.c.val ∧
-            p.c.val < p.b.val ∧ p.a.val * p.c.val % p.b.val = 1
-        | .ok _ c' => c'.Valid ∧ 0 ≤ c'.val ∧ c'.val < p.b.val ∧ p.a.val * c'.val % p.b.val = 1) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra MpInvmod.entry p.sp [p.pa, p.pb, p.pc] (eff p)
+      fun c' => c'.Valid ∧ 0 ≤ c'.val ∧ c'.val < p.b.val ∧ p.a.val * c'.val % p.b.val = 1 :=
   have spec := fun {c' : MpInt} {r : Int} (h : InvmodPost p.a p.b p.c c' r) =>
     InvmodPost.spec_ok a.valid hb hg hs h
-  ApiTriple.of (Reg.call (Fn.Invmod.correctG cv.ra_al ⟨cv.stk, a.valid, b.valid, au, c.pos, a.blk,
-    b.blk, a.pos, b.pos, a.off, b.off, c.off⟩ sound) cv.heap (by mp_regions)) fun
-    | .err _, hq => hq.imp_right fun h => (spec h).1 ▸ ⟨rfl, (spec h).2⟩
-    | .ok .., hq => (spec hq).2
+  ApiTriple.of (Reg.call (Fn.Invmod.correctG cv.ra_al ⟨cv.stk, a.valid, b.valid, au, c.pos,
+    a.blk, b.blk, a.pos, b.pos, a.off, b.off, c.off⟩ cv.sound) cv.heap (by mp_regions))
+    (fun | .err _, hq => .errView (hq.imp_right spec) | .ok .., hq => (spec hq).2)
+    (hr := fun
+      | .err _, hq => congrArg (fun b => [(1, ra), (10, b)]) (errView_ret (hq.imp_right spec))
+      | .ok .., _ => rfl)
 
 end Tom.Machine.Api.MpInvmodG
 
 namespace Tom.Machine.Api.MpLshdG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_lshd(a, k)`**: `a ← a · radix^k` (`k` digits shifted in), growing `a`; `MP_MEM` only when
 `a` had to grow. -/
-theorem _root_.Specs.mp_lshd {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (size : p.a.used + p.k < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.k] optRet fun x M =>
-      OptRes x (p.a.alloc < p.a.used + p.k)
-        (fun a' => a'.Valid ∧ a'.mag = p.a.mag * radix ^ p.k ∧ a'.sign = p.a.sign) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_lshd {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOut m p.pa p.adp p.a)
+    (va : p.a.Valid) (size : CInt (p.a.used + p.k)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.k] (eff p)
+      (mem := p.a.alloc < p.a.used + p.k) fun a' =>
+      a'.Valid ∧ a'.mag = p.a.mag * radix ^ p.k ∧ a'.sign = p.a.sign :=
   ApiTriple.of (Reg.call (Fn.MpLshdGG5.correct cv.ra_al
-    ⟨cv.stk, a.shape, by omega, size, a.pos, a.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.shape, by unfold CInt at size; omega, size, a.pos, a.off⟩
+    cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => let h := LshdPost.grown_spec va size hq; ⟨h.1, h.2.1, h.2.2.1⟩
 
@@ -691,21 +708,20 @@ end Tom.Machine.Api.MpLshdG
 
 namespace Tom.Machine.Api.MpMod
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p)
+  fun | .mem _ => none | .ok _ c' => some c'
+
 /-- **`mp_mod(a, b, c)`**: `c ← a mod b` (floored: the sign of `b`), for `b ≠ 0`, growing `c`
-(`MP_MEM` changes at most `c`'s sign). -/
-theorem _root_.Specs.mp_mod {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (fb : Fits p.b) (bnz : 0 < p.b.used) (au : p.a.used + 3 < 2 ^ 30)
-    (bsize : p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc]
-      (fun | .mem _ => MpInit.memBV | .ok .. => 0#64) fun x M =>
-      (match x with
-        | .mem c' => c' = { p.c with sign := c'.sign }
-        | .ok _ c' => c'.Valid ∧ c'.val = p.a.val.fmod p.b.val) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+(`MP_MEM` changes at most `c`'s sign: SPECS_UNFOLDED.lean). -/
+theorem _root_.Specs.mp_mod {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c) (fb : Fits p.b)
+    (bnz : 0 < p.b.used) (au : CIdx (p.a.used + 3)) (bsize : CInt (p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] (eff p)
+      fun c' => c'.Valid ∧ c'.val = p.a.val.fmod p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpModG5.correct cv.ra_al ⟨cv.stk, a.valid, b.valid, bnz, fb, au,
-    c.shape, bsize, c.pos, a.off, b.off, c.off, a.blk, a.pos, b.blk⟩ sound) cv.heap (by mp_regions)) fun
-    | .mem _, hq => hq
+    c.shape, bsize, c.pos, a.off, b.off, c.off, a.blk, a.pos, b.blk⟩
+    cv.sound) cv.heap (by mp_regions)) fun
+    | .mem _, _ => trivial
     | .ok .., hq => let s := ModPost.spec a.valid b.valid bnz hq; ⟨s.valid, s.val⟩
 
 end Tom.Machine.Api.MpMod
@@ -714,14 +730,13 @@ namespace Tom.Machine.Api.MpMod2d
 open Tom.Machine.Api.Two
 
 /-- **`mp_mod_2d(a, b, c)`**: `c ← a mod 2^b` (`|c| = |a| mod 2^b`, the sign of `a`), `c` with room. -/
-theorem _root_.Specs.mp_mod_2d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp 80) (sound : Sound (lay sp pa adp pc cdp a c) isW)
-    (ha : MpVal m pa adp a) (hc : MpOut m pc cdp c) (fa : Fits a) (hb : b < 2 ^ 31)
-    (room : a.used ≤ c.alloc) :
+theorem _root_.Specs.mp_mod_2d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 80 (lay sp pa adp pc cdp a c) isW) (ha : MpVal m pa adp a)
+    (hc : MpOut m pc cdp c) (fa : Fits a) (hb : CInt b) (room : a.used ≤ c.alloc) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pc] 0#64 fun c' M =>
       (c'.Valid ∧ c'.mag = a.mag % 2 ^ b) ∧ Post m sp pa adp pc cdp a b c c' M :=
   ApiTripleS.of (Fn.MpMod2d.correct ⟨ha.mpAt, hc.mpAt, ha.valid, hc.shape, ha.geom, hc.geom, hb, fa,
-    room, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    room, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     let s := Mod2dPost.spec ha.valid room hc.shape.alloc_lt h.mod; ⟨s.1, s.2.1⟩
 
 end Tom.Machine.Api.MpMod2d
@@ -729,31 +744,32 @@ end Tom.Machine.Api.MpMod2d
 namespace Tom.Machine.Api.MpMod2dI
 
 /-- **`mp_mod_2d(a, b, a)`**: `a ← a mod 2^b`, for `b > 0`. -/
-theorem _root_.Specs.mp_mod_2d_inplace {sp pa adp : Nat} {a : MpInt} {b : Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp 48) (sound : Sound (lay sp pa adp a) Un.isW)
-    (ha : MpVal m pa adp a) (fa : Fits a) (hb0 : 0 < b) (hb : b < 2 ^ 31) :
+theorem _root_.Specs.mp_mod_2d_inplace {sp pa adp : Nat} {a : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 48 (lay sp pa adp a) Un.isW) (ha : MpVal m pa adp a) (fa : Fits a)
+    (hb0 : 0 < b) (hb : CInt b) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pa] 0#64 fun a' M =>
       (a'.Valid ∧ a'.mag = a.mag % 2 ^ b) ∧ Post m sp pa adp a b a' M :=
   ApiTripleS.of (Fn.MpMod2dIG5.correct ⟨ha.mpAt, ha.valid, ha.geom, hb0, hb, fa, cv.stk.ram,
-    cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     let s := Mod2dPost.spec ha.valid ha.valid.used_le ha.valid.alloc_lt h.mod; ⟨s.1, s.2.1⟩
 
 end Tom.Machine.Api.MpMod2dI
 
 namespace Tom.Machine.Api.MontNormG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_montgomery_calc_normalization(a, b)`**: `a ← radix^k mod b`, `k = b.used`, for odd
 `b > 1`, growing `a`. -/
-theorem _root_.Specs.mp_montgomery_calc_normalization {p : P} (cv : Conv m ra p.sp F (hin p))
-    (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_montgomery_calc_normalization {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOut m p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (fb : Fits p.b)
     (odd : p.b.mag % 2 = 1) (gt1 : 1 < p.b.mag) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.val = (radix ^ p.b.used % p.b.mag : Nat)) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      fun a' => a'.Valid ∧ a'.val = (radix ^ p.b.used % p.b.mag : Nat) :=
   ApiTriple.of (Reg.call (Fn.MontNormGG5.correct cv.ra_al
-    ⟨cv.stk, a.shape, b.valid, odd, gt1, fb, a.pos, a.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => let s := Mont.NormPost.spec b.valid odd gt1 (hq.post h); ⟨s.1, s.2.2⟩
+    ⟨cv.stk, a.shape, b.valid, odd, gt1, fb, a.pos, a.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => let s := Mont.NormPost.spec b.valid odd gt1 (hq.post h); ⟨s.1,
+      s.2.2⟩
 
 end Tom.Machine.Api.MontNormG
 
@@ -761,20 +777,20 @@ namespace Tom.Machine.Api.MontRedGr
 open Tom.Mont
 open Tom.Machine.Api.MpReduce2k (R P kind)
 
+def eff (p : P) := Eff.heap (lay p) MpReduce2k.isW MpReduce2k.ws .aD (out p) (site' p) (hin p) (hout
+  p) okView
+
 /-- **`mp_montgomery_reduce(x, n, rho)`**: `x ← x · radix^(-k) mod n` (`k = n.used`, `rho = -1/n`
 mod the radix), for `|x| < n · radix^k`. -/
-theorem _root_.Specs.mp_montgomery_reduce {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) MpReduce2k.isW)
+theorem _root_.Specs.mp_montgomery_reduce {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (n : MpOwn m p.H p.pn p.ndp p.n)
     (rho : (p.n.mag * p.d + 1) % radix = 0) (hr : p.d < radix)
     (hx : p.a.mag < p.n.mag * radix ^ p.n.used) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.mag < p.n.mag ∧
-        a'.mag * radix ^ p.n.used % p.n.mag = p.a.mag % p.n.mag) ∧
-      HPost (lay p) MpReduce2k.ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] (eff p) fun a' =>
+      a'.Valid ∧ a'.mag < p.n.mag ∧ a'.mag * radix ^ p.n.used % p.n.mag = p.a.mag % p.n.mag :=
   ApiTriple.of (Reg.call (Fn.MontRedGrG5.correct cv.ra_al
-    ⟨cv.stk, va, n.valid, rho, hr, hx, a.pos, a.off, n.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => MontRedFastGStep.RedcV.spec rho hx (ReduxG.Out.post hq h)
+    ⟨cv.stk, va, n.valid, rho, hr, hx, a.pos, a.off, n.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => MontRedFastGStep.RedcV.spec rho hx (ReduxG.Out.post hq h)
 
 end Tom.Machine.Api.MontRedGr
 
@@ -783,7 +799,7 @@ namespace Tom.Machine.Api.MpMontSetup
 /-- **`mp_montgomery_setup(n, rho)`**: for odd `n`, `*rho ← -1/n mod radix` and `MP_OKAY` (`MP_VAL`
 for even `n`). -/
 theorem _root_.Specs.mp_montgomery_setup {sp p dp rp rv : Nat} {n : MpInt}
-    (cv : ConvS m ra sp 48) (sp_v : v.sp = BitVec.ofNat 64 sp) (sound : Sound (lay sp p dp rp n) isW)
+    (cv : ConvS m ra sp 48 (lay sp p dp rp n) isW) (sp_v : v.sp = BitVec.ofNat 64 sp)
     (hn : MpOut m p dp n) (r : DigOut m rp rv) :
     Triple (At Fn.MpMontSetup.entry ((1, ra) :: callArgs 10 [p, rp]) m v.keep outp) fun cf =>
       ∃ ret rho M, At ra [(1, ra), (10, BitVec.ofInt 64 ret)] M v.keep outp cf ∧
@@ -792,40 +808,41 @@ theorem _root_.Specs.mp_montgomery_setup {sp p dp rp rv : Nat} {n : MpInt}
   Triple.rmap (fun _ ⟨ret, rho, M, hat, h⟩ => ⟨ret, rho, M, hat,
       fun hodd => Mont.SetupPost.spec hn.shape h.setup hodd, h⟩)
     (Fn.MpMontSetup.correct ⟨hn.mpAt, hn.shape, hn.pos, hn.geom, r.dig.ram, r.dig.al, cv.stk.ram,
-      cv.stk.al, cv.sp_ge, sp_v, cv.ra_al, cv.img, sound⟩)
+      cv.stk.al, cv.sp_ge, sp_v, cv.ra_al, cv.img, cv.sound⟩)
 
 end Tom.Machine.Api.MpMontSetup
 
 namespace Tom.Machine.Api.MpMul
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_mul(a, b, c)`**: `c ← a · b`, growing `c`. -/
-theorem _root_.Specs.mp_mul {p : P}
-    (cv : Conv m ra p.sp (F p) (hin p)) (cut : Cutoffs m) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_mul {p : P} (cv : Conv m ra p.sp (F p) (eff p)) (cut : Cutoffs m)
     (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (size : μ p.a p.b < 2 ^ 30) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] okRet fun x M =>
-      OkRes x (fun c' => c'.Valid ∧ c'.val = p.a.val * p.b.val) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    (size : CIdx (μ p.a p.b)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] (eff p)
+      fun c' => c'.Valid ∧ c'.val = p.a.val * p.b.val :=
   ApiTriple.of (Reg.call (Fn.MulGroupB.mulCorrectU p cv.ra_al ⟨cv.stk, a.valid.toU, b.valid.toU,
-    c.shape, c.sign, size, a.pos, b.pos, c.pos, a.off, b.off, c.off⟩ sound) cv.heap (by mp_regions))
-    fun | (_, _, _), hq => fun h => ⟨(hq.post h).valid, (hq.post h).val⟩
+    c.shape, c.sign, size, a.pos, b.pos, c.pos, a.off, b.off, c.off⟩
+    cv.sound) cv.heap (by mp_regions))
+    fun | (_, _, _), hq => .okView fun h => ⟨(hq.post h).valid, (hq.post h).val⟩
 
 end Tom.Machine.Api.MpMul
 
 namespace Tom.Machine.Api.MpMulA
 open Tom.Machine.Api.MpMul (entry kcAddr tcAddr μ Fm kcV tcV X)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_mul(a, b, a)`**: `a ← a · b` (`mp_mul` with `c := a`). -/
-theorem _root_.Specs.mp_mul_inplace {p : P}
-    (cv : Conv m ra p.sp (F p) (hin p)) (cut : Cutoffs m) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_mul_inplace {p : P} (cv : Conv m ra p.sp (F p) (eff p)) (cut : Cutoffs m)
     (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (b : MpOwn m p.H p.pb p.bdp p.b)
-    (size : μ p.a p.b < 2 ^ 30) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pa] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.val = p.a.val * p.b.val) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    (size : CIdx (μ p.a p.b)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pa] (eff p)
+      fun a' => a'.Valid ∧ a'.val = p.a.val * p.b.val :=
   ApiTriple.of (Reg.call (Fn.MulGroupB.mulCorrect.2 p cv.ra_al
-    ⟨cv.stk, va, b.valid, size, a.pos, b.pos, a.off, b.off⟩ sound) cv.heap (by mp_regions))
-    fun | (_, _, _), hq => fun h => ⟨(hq.post h).valid, (hq.post h).val⟩
+    ⟨cv.stk, va, b.valid, size, a.pos, b.pos, a.off, b.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun | (_, _, _), hq => .okView fun h => ⟨(hq.post h).valid, (hq.post h).val⟩
 
 end Tom.Machine.Api.MpMulA
 
@@ -833,15 +850,16 @@ namespace Tom.Machine.Api.Mul2HD
 open Tom.Machine.Api.Two (R isW ws)
 open Tom.Machine.Api.MpSqr (X)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_mul_2(a, b)`**: `b ← 2a`, growing `b`. -/
-theorem _root_.Specs.mp_mul_2 {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (ua : p.a.used + 1 < 2 ^ 30) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] okRet fun x M =>
-      OkRes x (fun b' => b'.Valid ∧ b'.val = 2 * p.a.val) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_mul_2 {p : P} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (ua : CIdx (p.a.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      fun b' => b'.Valid ∧ b'.val = 2 * p.a.val :=
   ApiTriple.of (Reg.call (Fn.Mul2HDG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, b.shape, ua, a.pos, b.pos, b.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => ⟨hq.valid h, hq.val h⟩
+    ⟨cv.stk, a.valid, b.shape, ua, a.pos, b.pos, b.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => ⟨hq.valid h, hq.val h⟩
 
 end Tom.Machine.Api.Mul2HD
 
@@ -849,15 +867,15 @@ namespace Tom.Machine.Api.Mul2H
 open Tom.Machine.Api.Un (R isW ws)
 open Tom.Machine.Api.MpSqr (X)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_mul_2(a, a)`**: `a ← 2a` (`mp_mul_2` with `b := a`). -/
-theorem _root_.Specs.mp_mul_2_inplace {p : P}
-    (cv : Conv m ra p.sp 576 (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (ua : p.a.used + 1 < 2 ^ 30) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pa] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.val = 2 * p.a.val) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
-  ApiTriple.of (Reg.call (Fn.Mul2HG5.correct cv.ra_al ⟨cv.stk, va, ua, a.pos, a.off⟩ sound)
-    cv.heap (by mp_regions)) fun _ hq h => ⟨hq.valid h, hq.val h⟩
+theorem _root_.Specs.mp_mul_2_inplace {p : P} (cv : Conv m ra p.sp 576 (eff p))
+    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (ua : CIdx (p.a.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pa] (eff p)
+      fun a' => a'.Valid ∧ a'.val = 2 * p.a.val :=
+  ApiTriple.of (Reg.call (Fn.Mul2HG5.correct cv.ra_al ⟨cv.stk, va, ua, a.pos, a.off⟩ cv.sound)
+    cv.heap (by mp_regions)) fun _ hq => .okView fun h => ⟨hq.valid h, hq.val h⟩
 
 end Tom.Machine.Api.Mul2H
 
@@ -865,30 +883,30 @@ namespace Tom.Machine.Api.MpMul2d
 open Tom.Machine.Api.Two
 
 /-- **`mp_mul_2d(a, b, c)`**: `c ← a · 2^b`, `c` with room. -/
-theorem _root_.Specs.mp_mul_2d {sp pa adp pc cdp : Nat}
-    {a c : MpInt} {b : Nat} {s0 : BitVec 64} (cv : ConvS m ra sp 80)
-    (sound : Sound (lay sp pa adp pc cdp a c) isW) (ha : MpVal m pa adp a) (hc : MpOut m pc cdp c)
-    (hb : b < 2 ^ 31) (room : a.used + b / Layout.digitBits + 1 ≤ c.alloc) :
+theorem _root_.Specs.mp_mul_2d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 80 (lay sp pa adp pc cdp a c) isW) (ha : MpVal m pa adp a)
+    (hc : MpOut m pc cdp c) (hb : CInt b) (room : a.used + b / Layout.digitBits + 1 ≤ c.alloc) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pc] 0#64 fun c' M =>
       (c'.Valid ∧ c'.val = a.val * 2 ^ b) ∧ Post m sp pa adp pc cdp a b c c' M :=
   ApiTripleS.of (Fn.MpMul2d.correct ⟨ha.mpAt, hc.mpAt, ha.valid, hc.shape, ha.geom, hc.geom, hb,
-    room, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    room, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     (Mul2dPost.spec ha.valid room hc.shape.alloc_lt h.mul).imp_right And.right
 
 end Tom.Machine.Api.MpMul2d
 
 namespace Tom.Machine.Api.MpMul2dI
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_mul_2d(a, b, a)`**: `a ← a · 2^b`, growing `a`; `MP_MEM` only when `a` had to grow. -/
-theorem _root_.Specs.mp_mul_2d_inplace {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (hb : p.b < 2 ^ 31)
-    (size : p.a.used + p.b / 28 + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.b, p.pa] optRet fun x M =>
-      OptRes x (p.a.alloc < p.a.used + p.b / 28 + 1) (fun a' => a'.Valid ∧ a'.val = p.a.val * 2 ^ p.b) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_mul_2d_inplace {p : P} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (hb : CInt p.b)
+    (size : CInt (p.a.used + p.b / 28 + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.b, p.pa] (eff p)
+      (mem := p.a.alloc < p.a.used + p.b / 28 + 1) fun a' =>
+      a'.Valid ∧ a'.val = p.a.val * 2 ^ p.b :=
   ApiTriple.of (Reg.call (Fn.MpMul2dIG5.correct cv.ra_al
-    ⟨cv.stk, a.shape, hb, size, a.pos, a.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.shape, hb, size, a.pos, a.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Mul2dPost.spec va (mul2dIn_room _ _)
         (mul2dIn_grown a.shape size).shape.alloc_lt hq).imp_right And.right
@@ -897,16 +915,17 @@ end Tom.Machine.Api.MpMul2dI
 
 namespace Tom.Machine.Api.MulDG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_mul_d(a, b, c)`**: `c ← a · b` for a digit `b`, growing `c`; `MP_MEM` only when `c` had
 to grow. -/
-theorem _root_.Specs.mp_mul_d {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_mul_d {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (c : MpOut m p.pc p.cdp p.c) (hb : p.b < radix)
-    (size : p.a.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.b, p.pc] optRet fun x M =>
-      OptRes x (p.c.alloc < p.a.used + 1) (fun c' => c'.Valid ∧ c'.val = p.a.val * p.b) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    (size : CInt (p.a.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.b, p.pc] (eff p)
+      (mem := p.c.alloc < p.a.used + 1) fun c' => c'.Valid ∧ c'.val = p.a.val * p.b :=
   ApiTriple.of (Reg.call (Fn.MulDGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid.toShape, a.pos, a.valid.sign_ok, c.shape, hb, size, c.pos, c.off⟩ sound)
+    ⟨cv.stk, a.valid.toShape, a.pos, a.valid.sign_ok, c.shape, hb, size, c.pos, c.off⟩ cv.sound)
     cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (MulDPost.spec a.valid hb (mulDIn_room _ _)
@@ -916,15 +935,15 @@ end Tom.Machine.Api.MulDG
 
 namespace Tom.Machine.Api.MulDGA
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_mul_d(a, b, a)`**: `a ← a · b` (`mp_mul_d` with `c := a`). -/
-theorem _root_.Specs.mp_mul_d_inplace {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (hb : p.b < radix) (size : p.a.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.b, p.pa] optRet fun x M =>
-      OptRes x (p.a.alloc < p.a.used + 1) (fun a' => a'.Valid ∧ a'.val = p.a.val * p.b) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_mul_d_inplace {p : P} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (hb : p.b < radix) (size : CInt (p.a.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.b, p.pa] (eff p)
+      (mem := p.a.alloc < p.a.used + 1) fun a' => a'.Valid ∧ a'.val = p.a.val * p.b :=
   ApiTriple.of (Reg.call (Fn.MulDGAG5.correct cv.ra_al
-    ⟨cv.stk, a.shape, a.pos, va.sign_ok, hb, size, a.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.shape, a.pos, va.sign_ok, hb, size, a.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (MulDPost.spec va hb (mulDIn_room _ _)
         (mulDIn_grown a.shape size).shape.alloc_lt hq).imp_right And.right
@@ -933,27 +952,26 @@ end Tom.Machine.Api.MulDGA
 
 namespace Tom.Machine.Api.MpMulmod
 
+def eff (p : P) := Eff.heap (lay p) isW ws .dD (out p) (site' p) (hin p) (hout p)
+  fun | .mem _ => none | .ok _ d' => some d'
+
 /-- **`mp_mulmod(a, b, c, d)`**: `d ← a · b mod c` (in `[0, c)`), for `c > 0`, growing `d`
-(`MP_MEM` changes at most `d`'s sign). -/
+(`MP_MEM` changes at most `d`'s sign: SPECS_UNFOLDED.lean). -/
 theorem _root_.Specs.mp_mulmod {p : P}
-    (cv : Conv m ra p.sp (2864 + 8 * (p.a.used + p.b.used)) (hin p)) (cut : Cutoffs m)
-    (sound : Sound (lay p) isW) (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b)
+    (cv : Conv m ra p.sp (2864 + 8 * (p.a.used + p.b.used)) (eff p)) (cut : Cutoffs m)
+    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b)
     (c : MpOwn m p.H p.pc p.cdp p.c) (d : MpOut m p.pd p.ddp p.d) (hc : 0 < p.c.val) (fc : Fits p.c)
-    (uab : p.a.used + p.b.used + 3 < 2 ^ 30) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc, p.pd]
-      (fun | .mem _ => MpInit.memBV | .ok .. => 0#64) fun x M =>
-      (match x with
-        | .mem d' => d' = { p.d with sign := d'.sign }
-        | .ok _ d' => d'.Valid ∧ d'.val = p.a.val * p.b.val % p.c.val) ∧
-      HPost (lay p) ws .dD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    (uab : CIdx (p.a.used + p.b.used + 3)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc, p.pd] (eff p)
+      fun d' => d'.Valid ∧ d'.val = p.a.val * p.b.val % p.c.val :=
   have cz : p.c.sign = Layout.mpZpos := DivStep.sign_of_val_nonneg c.valid (by omega)
   have c0 : 0 < p.c.used := Nat.pos_of_ne_zero fun h => by
     have : p.c.mag = 0 := by simp [MpInt.mag, h, natUpTo]
     unfold MpInt.val at hc; split at hc <;> omega
   ApiTriple.of (Reg.call (Fn.MpMulmodG5.correct cv.ra_al ⟨cv.stk, Fn.MulGroupB.mulCorrect.1,
     a.valid, b.valid, uab, a.pos, b.pos, c.valid, c0, cz, fc, d.shape, d.pos, a.off, b.off, c.off,
-    d.off, c.blk⟩ sound) cv.heap (by mp_regions)) fun
-    | .mem _, hq => hq
+    d.off, c.blk⟩ cv.sound) cv.heap (by mp_regions)) fun
+    | .mem _, _ => trivial
     | .ok .., hq => let s := Reduce.MulmodPost.spec hc hq; ⟨s.1, s.2.2.2⟩
 
 end Tom.Machine.Api.MpMulmod
@@ -965,13 +983,13 @@ open Tom.Radix
 digits up to the first invalid character, `'-'` first for a negative), returning `readRet radix s`
 (`MP_VAL` for a bad radix), `a` with room. -/
 theorem _root_.Specs.mp_read_radix {sp pa adp pstr radix : Nat} {a : MpInt} {s : List Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp F) (sound : Sound (lay sp pa adp pstr a s) isW)
-    (ha : MpOut m pa adp a) (str : StrAt m pstr s) (hr : radix < 2 ^ 31)
+    {s0 : BitVec 64} (cv : ConvS m ra sp F (lay sp pa adp pstr a s) isW) (ha : MpOut m pa adp a)
+    (str : StrAt m pstr s) (hr : CInt radix)
     (room : 6 * s.length ≤ Layout.digitBits * (a.alloc - 1)) :
     ApiTripleS m v outp ra s0 entry sp [pa, pstr, radix] (BitVec.ofInt 64 (readRet radix s))
       fun a' M => (a'.Valid ∧ a'.val = readVal radix s) ∧ Post m sp pa adp pstr a s radix a' M :=
   ApiTripleS.of (Fn.ReadRadixG5.correct ⟨ha.mpAt, ha.shape, ha.geom, str, hr, room, cv.stk.ram,
-    cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     let s := ReadRadixPost.spec h.read; ⟨s.1, s.2.1⟩
 
 end Tom.Machine.Api.ReadRadix
@@ -980,21 +998,21 @@ namespace Tom.Machine.Api.MpReduce
 open Tom.Reduce
 open Tom.Machine.Api.MpSqr (X)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .xD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_reduce(x, n, mu)`** (Barrett): `x ← x mod n`, for `0 ≤ x < radix^(2k)`, `k = n.used`,
 `mu = ⌊radix^(2k) / n⌋` (`hmu`, `hx`: for the meaning only). -/
-theorem _root_.Specs.mp_reduce {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (x : MpOut m p.px p.xdp p.x) (vx : p.x.Valid) (n : MpOwn m p.H p.pn p.ndp p.n)
-    (mu : MpOwn m p.H p.pu p.udp p.mu) (fx : Fits p.x) (xz : p.x.sign = Layout.mpZpos)
-    (nz : p.n.sign = Layout.mpZpos) (muz : p.mu.sign = Layout.mpZpos) (k1 : 0 < p.n.used)
-    (fn : Layout.digitBits * (p.n.used + 1) < 2 ^ 31) (xu : p.x.used ≤ 2 * p.n.used)
-    (mul : p.n.used ≤ p.mu.used) (muh : p.mu.used ≤ p.n.used + 2)
+theorem _root_.Specs.mp_reduce {p : P} (cv : Conv m ra p.sp F (eff p)) (x : MpOut m p.px p.xdp p.x)
+    (vx : p.x.Valid) (n : MpOwn m p.H p.pn p.ndp p.n) (mu : MpOwn m p.H p.pu p.udp p.mu)
+    (fx : Fits p.x) (xz : p.x.sign = Layout.mpZpos) (nz : p.n.sign = Layout.mpZpos)
+    (muz : p.mu.sign = Layout.mpZpos) (k1 : 0 < p.n.used) (fn : FitsBits (p.n.used + 1))
+    (xu : p.x.used ≤ 2 * p.n.used) (mul : p.n.used ≤ p.mu.used) (muh : p.mu.used ≤ p.n.used + 2)
     (hmu : p.mu.mag = radix ^ (2 * p.n.used) / p.n.mag) (hx : p.x.mag < radix ^ (2 * p.n.used)) :
-    ApiTriple m v outp ra entry p.sp [p.px, p.pn, p.pu] okRet fun o M =>
-      OkRes o (fun x' => x'.Valid ∧ x'.val = (p.x.mag % p.n.mag : Nat)) ∧
-      HPost (lay p) ws .xD (out p o) (site' p o) (hin p) (hout p o) m M :=
+    ApiTriple m v outp ra entry p.sp [p.px, p.pn, p.pu] (eff p)
+      fun x' => x'.Valid ∧ x'.val = (p.x.mag % p.n.mag : Nat) :=
   ApiTriple.of (Reg.call (Fn.MpReduceG5.correct cv.ra_al ⟨cv.stk, vx, xz, n.valid, nz, mu.valid,
-    muz, k1, fn, fx, xu, mul, muh, x.pos, n.pos, mu.pos, x.off, n.off, mu.off⟩ sound) cv.heap
-    (by mp_regions)) fun _ hq h =>
+    muz, k1, fn, fx, xu, mul, muh, x.pos, n.pos, mu.pos, x.off, n.off, mu.off⟩ cv.sound) cv.heap
+    (by mp_regions)) fun _ hq => .okView fun h =>
       let s := ReducePost.spec vx.toShape n.valid mu.valid.toShape k1 hmu hx (hq.post h); ⟨s.1, s.2.2⟩
 
 end Tom.Machine.Api.MpReduce
@@ -1003,18 +1021,20 @@ namespace Tom.Machine.Api.MpReduce2kG
 open Tom.Reduce Tom.Mont
 open Tom.Machine.Api.MpReduce2k (R P kind)
 
+def eff (p : P) := Eff.heap (lay p) MpReduce2k.isW MpReduce2k.ws .aD (out p) (site' p) (hin p) (hout
+  p) okView
+
 /-- **`mp_reduce_2k(a, n, d)`**: `|a| ← |a| mod n` for `n = 2^⌈log₂ n⌉ - d`, `d` a digit. -/
-theorem _root_.Specs.mp_reduce_2k {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) MpReduce2k.isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (n : MpOwn m p.H p.pn p.ndp p.n)
-    (fa : Fits p.a) (fn : Fits p.n) (npos : 0 < p.n.mag) (hb : p.d < radix)
+theorem _root_.Specs.mp_reduce_2k {p : P} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (n : MpOwn m p.H p.pn p.ndp p.n) (fa : Fits p.a)
+    (fn : Fits p.n) (npos : 0 < p.n.mag) (hb : p.d < radix)
     (hd : p.n.mag + p.d = 2 ^ nbits p.n.mag) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag) ∧
-      HPost (lay p) MpReduce2k.ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] (eff p)
+      fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag :=
   ApiTriple.of (Reg.call (Fn.MpReduce2kGG5.correct cv.ra_al
-    ⟨cv.stk, va, n.valid, npos, hb, hd, fn, fa, a.pos, a.off, n.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => Reduce2kPost.spec npos hd (ReduxG.Out.post hq h)
+    ⟨cv.stk, va, n.valid, npos, hb, hd, fn, fa, a.pos, a.off, n.off⟩
+    cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => Reduce2kPost.spec npos hd (ReduxG.Out.post hq h)
 
 end Tom.Machine.Api.MpReduce2kG
 
@@ -1022,36 +1042,34 @@ namespace Tom.Machine.Api.MpReduce2kLG
 open Tom.Reduce Tom.Mont
 open Tom.Machine.Api.MpReduce2kL (entry R all P kind isW ws args)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_reduce_2k_l(a, n, d)`**: `|a| ← |a| mod n` for `n = 2^⌈log₂ n⌉ - d`, `d` an `mp_int`. -/
-theorem _root_.Specs.mp_reduce_2k_l {p : P}
-    (cv : Conv m ra p.sp (F (p := p)) (hin p)) (cut : Cutoffs m)
-    (sound : Sound (lay p) isW) (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid)
-    (n : MpOwn m p.H p.pn p.ndp p.n) (d : MpOwn m p.H p.pd p.ddp p.d) (fa : Fits p.a)
-    (fn : Fits p.n) (npos : 0 < p.n.mag) (hd : p.n.mag + p.d.mag = 2 ^ nbits p.n.mag)
-    (usz : p.a.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.pd] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_reduce_2k_l {p : P} (cv : Conv m ra p.sp (F (p := p)) (eff p))
+    (cut : Cutoffs m) (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (n : MpOwn m p.H p.pn p.ndp p.n)
+    (d : MpOwn m p.H p.pd p.ddp p.d) (fa : Fits p.a) (fn : Fits p.n) (npos : 0 < p.n.mag)
+    (hd : p.n.mag + p.d.mag = 2 ^ nbits p.n.mag) (usz : CInt (p.a.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.pd] (eff p)
+      fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag :=
   ApiTriple.of (Reg.call (Fn.MpReduce2kLGG5.correct cv.ra_al ⟨cv.stk, va, n.valid, d.valid, npos,
-    hd, fn, fa, usz, a.pos, d.pos, a.off, n.off, d.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => Reduce2kPost.spec npos hd (hq.post h)
+    hd, fn, fa, usz, a.pos, d.pos, a.off, n.off, d.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => Reduce2kPost.spec npos hd (hq.post h)
 
 end Tom.Machine.Api.MpReduce2kLG
 
 namespace Tom.Machine.Api.Reduce2kSetupGr
 open Tom.Machine.Api.Reduce2kSetup (R P)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .dD (out p) (fun _ => lay p .dD) p.H (fun _ => p.H) id
+
 /-- **`mp_reduce_2k_setup(a, &d)`**: `*d ← 2^⌈log₂ a⌉ - |a|` when that is one digit (README, bug 1: it
 is the low digit otherwise). -/
-theorem _root_.Specs.mp_reduce_2k_setup {p : P}
-    (cv : Conv m ra p.sp F p.H) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_reduce_2k_setup {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (d : DigOut m p.pd p.d.v) (fa : Fits p.a) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] optRet fun x M =>
-      (match x with
-        | none => True
-        | some d' => 2 ^ Mont.nbits p.a.mag - p.a.mag < radix → p.a.mag + d' = 2 ^ Mont.nbits p.a.mag) ∧
-      HPost (lay p) ws .dD (out p x) (lay p .dD) p.H p.H m M :=
-  ApiTriple.of (Reg.call (Fn.Reduce2kSetupGrG5.correct cv.ra_al ⟨cv.stk, a.valid, fa, a.pos⟩ sound)
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] (eff p)
+      fun d' => 2 ^ Mont.nbits p.a.mag - p.a.mag < radix → p.a.mag + d' = 2 ^ Mont.nbits p.a.mag :=
+  ApiTriple.of (Reg.call (Fn.Reduce2kSetupGrG5.correct cv.ra_al ⟨cv.stk, a.valid, fa, a.pos⟩
+  cv.sound)
     cv.heap (by mp_regions)) fun
     | none, _ => trivial
     | some _, hq => fun hs => Reduce.Setup2kPost.spec hq hs
@@ -1062,15 +1080,16 @@ namespace Tom.Machine.Api.Reduce2kSetupLG
 open Tom.Reduce Tom.Mont
 open Tom.Machine.Api.Reduce2kSetupL (entry P R all isW ws args)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .dD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_reduce_2k_setup_l(a, d)`**: `d ← 2^⌈log₂ a⌉ - |a|`; `MP_MEM` leaves `d` as it was. -/
-theorem _root_.Specs.mp_reduce_2k_setup_l {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_reduce_2k_setup_l {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (d : MpOut m p.pd p.ddp p.d) (fa : Fits p.a) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] optRet fun x M =>
-      OptRes x True (fun d' => p.a.mag + d'.mag = 2 ^ Mont.nbits p.a.mag) ∧
-      HPost (lay p) ws .dD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] (eff p)
+      fun d' => p.a.mag + d'.mag = 2 ^ Mont.nbits p.a.mag :=
   ApiTriple.of (Reg.call (Fn.Reduce2kSetupLGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, fa, d.shape, d.sign, a.pos, d.pos, d.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.valid, fa, d.shape, d.sign, a.pos, d.pos, d.off⟩
+    cv.sound) cv.heap (by mp_regions)) fun
     | none, _ => trivial
     | some _, hq => Reduce.Setup2kLPost.spec hq
 
@@ -1082,13 +1101,13 @@ open Tom.Machine.Api.Un
 /-- **`mp_reduce_is_2k(a)`**: `isReduce2k a` (`1` iff `|a| = 2^p - d` for one digit `d`, the C's bit
 test). Only the stack is written. -/
 theorem _root_.Specs.mp_reduce_is_2k {sp pa adp : Nat} {a : MpInt} {s0 : BitVec 64}
-    (cv : ConvS m ra sp 16) (sound : Sound (lay sp pa adp a) fun | R.stk => true | _ => false)
+    (cv : ConvS m ra sp 16 (lay sp pa adp a) (fun | R.stk => true | _ => false))
     (ha : MpVal m pa adp a) (fa : Fits a) :
     Triple (At entry ((1, ra) :: (2, BitVec.ofNat 64 sp) :: (8, s0) :: callArgs 10 [pa]) m v.keepR outp)
       fun cf => ∃ M, At ra [(1, ra), (2, BitVec.ofNat 64 sp), (8, s0),
         (10, BitVec.ofNat 64 (isReduce2k a))] M v.keepR outp cf ∧ Frm (lay sp pa adp a) [R.stk] m M :=
   Fn.Reduce2k.correct ⟨ha.mpAt, ha.valid, ha.geom, fa, cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al,
-    cv.img, sound⟩
+    cv.img, cv.sound⟩
 
 end Tom.Machine.Api.Reduce2k
 
@@ -1106,22 +1125,21 @@ end Tom.Machine.Api.Reduce2kL
 namespace Tom.Machine.Api.MpReduceSetupG
 open Tom.Machine.Api.MpReduceSetup (entry P R lay kind isW ws args)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p)
+  fun | .mem .. => none | .ok _ a' => some a'
+
 /-- **`mp_reduce_setup(a, b)`**: `a ← ⌊radix^(2k) / b⌋` (`k = b.used`, Barrett's `mu`), for `b > 0`,
 growing `a`. -/
-theorem _root_.Specs.mp_reduce_setup {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b)
-    (b0 : 0 < p.b.used) (bz : p.b.sign = Layout.mpZpos)
-    (k_lt : p.b.used * 2 * Layout.digitBits < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb]
-      (fun | .mem .. => MpInit.memBV | .ok .. => 0#64) fun x M =>
-      (match x with
-        | .mem _ a' => 0 < a'.alloc
-        | .ok _ a' => a'.Valid ∧ a'.val = (radix ^ (2 * p.b.used) / p.b.mag : Nat)) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_reduce_setup {p : P} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOut m p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (b0 : 0 < p.b.used)
+    (bz : p.b.sign = Layout.mpZpos) (k_lt : FitsBits (2 * p.b.used)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      fun a' => a'.Valid ∧ a'.val = (radix ^ (2 * p.b.used) / p.b.mag : Nat) :=
   ApiTriple.of (Reg.call (Fn.MpReduceSetupGG5.correct cv.ra_al
-    ⟨cv.stk, a.shape, b.valid, b0, bz, k_lt, a.pos, a.off, b.off, b.blk⟩ sound) cv.heap (by mp_regions)) fun
-    | .mem .., hq => hq
+    ⟨cv.stk, a.shape, b.valid, b0, bz,
+      (by have e : Layout.digitBits = 28 := rfl; unfold FitsBits at k_lt; rw [e] at k_lt ⊢; omega),
+      a.pos, a.off, b.off, b.blk⟩ cv.sound) cv.heap (by mp_regions)) fun
+    | .mem .., _ => trivial
     | .ok .., hq => ⟨hq.valid, by simp [MpInt.val, hq.sign, hq.mag, Layout.mpZpos, Layout.mpNeg]⟩
 
 end Tom.Machine.Api.MpReduceSetupG
@@ -1131,14 +1149,13 @@ open Tom.Machine.Api.Un
 
 /-- **`mp_rshd(a, b)`**: `|a| ← ⌊|a| / radix^b⌋` (`b` digits shifted out; `void`). -/
 theorem _root_.Specs.mp_rshd {sp pa adp : Nat} {a : MpInt} {b : Nat} {s0 : BitVec 64}
-    (cv : ConvS m ra sp 32) (sound : Sound (lay sp pa adp a) isW) (ha : MpVal m pa adp a)
-    (hb : b < 2 ^ 31) :
+    (cv : ConvS m ra sp 32 (lay sp pa adp a) isW) (ha : MpVal m pa adp a) (hb : CInt b) :
     Triple (At entry ((1, ra) :: (2, BitVec.ofNat 64 sp) :: (8, s0) :: callArgs 10 [pa, b]) m v.keepR outp)
       fun cf => ∃ a' M, At ra [(1, ra), (2, BitVec.ofNat 64 sp), (8, s0)] M v.keepR outp cf ∧
         (a'.Valid ∧ a'.mag = a.mag / radix ^ b) ∧ Post m sp pa adp a b a' M :=
   Triple.rmap (fun _ ⟨a', M, hat, h⟩ => ⟨a', M, hat, RshdPost.spec ha.valid h.rshd, h⟩)
     (Fn.MpRshd.correct ⟨ha.mpAt, ha.valid.toShape, ha.geom, hb, cv.stk.ram, cv.stk.al, cv.sp_ge,
-      cv.ra_al, cv.img, sound⟩)
+      cv.ra_al, cv.img, cv.sound⟩)
 
 end Tom.Machine.Api.MpRshd
 
@@ -1147,62 +1164,66 @@ open Tom.Machine.Api.Un
 
 /-- **`mp_set(a, b)`**: `a ← b mod radix` (`void`). -/
 theorem _root_.Specs.mp_set {sp pa adp : Nat} {a : MpInt} {bn : Nat}
-    (cv : ConvL m ra) (sound : Sound (lay sp pa adp a) isW) (ha : MpOut m pa adp a) :
+    (cv : ConvM m ra (lay sp pa adp a) isW) (ha : MpOut m pa adp a) :
     Triple (At entry ((1, ra) :: callArgs 10 [pa, bn]) m v.keep outp) fun cf =>
       ∃ a' M, At ra [(1, ra)] M v.keep outp cf ∧
         (a'.Valid ∧ a'.val = ((bn % radix : Nat) : Int)) ∧ Post m sp pa adp a bn a' M :=
   Triple.rmap (fun _ ⟨a', M, hat, h⟩ => ⟨a', M, hat,
       let s := SetPost.spec ha.shape ha.pos (Nat.mod_lt _ (by decide)) h.set; ⟨s.1, s.2.2⟩, h⟩)
-    (Fn.MpSet.correct ⟨ha.mpAt, ha.shape, ha.geom, ha.pos, cv.ra_al, cv.img, sound⟩)
+    (Fn.MpSet.correct ⟨ha.mpAt, ha.shape, ha.geom, ha.pos, cv.ra_al, cv.img, cv.sound⟩)
 
 end Tom.Machine.Api.MpSet
 
 namespace Tom.Machine.Api.MpSqr
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_sqr(a, b)`**: `b ← a²`, growing `b` (`room`: the fast path's room below the Karatsuba
 cut-off). -/
-theorem _root_.Specs.mp_sqr {p : P}
-    (cv : Conv m ra p.sp (F p) (hin p)) (cut : Cutoffs m) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b)
-    (au : p.a.used < 2 ^ 29) (room : p.a.used < 120 → 2 * p.a.used ≤ p.b.alloc) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] okRet fun x M =>
-      OkRes x (fun b' => b'.Valid ∧ b'.val = p.a.val * p.a.val) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_sqr {p : P} (cv : Conv m ra p.sp (F p) (eff p)) (cut : Cutoffs m)
+    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (au : CIdx (2 * p.a.used))
+    (room : p.a.used < 120 → 2 * p.a.used ≤ p.b.alloc) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      fun b' => b'.Valid ∧ b'.val = p.a.val * p.a.val :=
   ApiTriple.of (Reg.call (Fn.MulGroupB.sqrCorrect.1 p cv.ra_al
-    ⟨cv.stk, a.valid, b.shape, b.sign, au, room, a.pos, b.pos, a.off, b.off⟩ sound) cv.heap
-    (by mp_regions)) fun _ hq h => ⟨(hq.post h).valid, (hq.post h).val⟩
+    ⟨cv.stk, a.valid, b.shape, b.sign, (by unfold CIdx at au; omega), room, a.pos, b.pos, a.off,
+      b.off⟩ cv.sound) cv.heap
+    (by mp_regions)) fun _ hq => .okView fun h => ⟨(hq.post h).valid, (hq.post h).val⟩
 
 end Tom.Machine.Api.MpSqr
 
 namespace Tom.Machine.Api.MpSqrA
 open Tom.Machine.Api.MpSqr (entry ksAddr tsAddr kmAddr tmAddr ksV tsV kmV tmV Fs X)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) okView
+
 /-- **`mp_sqr(a, a)`**: `a ← a²` (`mp_sqr` with `b := a`). -/
-theorem _root_.Specs.mp_sqr_inplace {p : P}
-    (cv : Conv m ra p.sp (F p) (hin p)) (cut : Cutoffs m) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid)
-    (au : p.a.used < 2 ^ 29) (room : p.a.used < 120 → 2 * p.a.used ≤ p.a.alloc) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pa] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.val = p.a.val * p.a.val) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_sqr_inplace {p : P} (cv : Conv m ra p.sp (F p) (eff p)) (cut : Cutoffs m)
+    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (au : CIdx (2 * p.a.used))
+    (room : p.a.used < 120 → 2 * p.a.used ≤ p.a.alloc) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pa] (eff p)
+      fun a' => a'.Valid ∧ a'.val = p.a.val * p.a.val :=
   ApiTriple.of (Reg.call (Fn.MulGroupB.sqrCorrect.2 p cv.ra_al
-    ⟨cv.stk, va, au, room, a.pos, a.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => ⟨(hq.post h).valid, (hq.post h).val⟩
+    ⟨cv.stk, va, (by unfold CIdx at au; omega), room, a.pos, a.off⟩
+    cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => ⟨(hq.post h).valid, (hq.post h).val⟩
 
 end Tom.Machine.Api.MpSqrA
 
 namespace Tom.Machine.Api.MpSubG
 open Tom.Machine.Api.MpAddG (P R lay kind isW ws args Res)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_sub(a, b, c)`**: `c ← a - b`, growing `c`; `MP_MEM` only when `c` had to grow. -/
-theorem _root_.Specs.mp_sub {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
-    (size : max p.a.used p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] optRet fun x M =>
-      OptRes x (p.c.alloc < subSize p.a p.b) (fun c' => c'.Valid ∧ c'.val = p.a.val - p.b.val) ∧
-      HPost (lay p) ws .cD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_sub {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOwn m p.H p.pb p.bdp p.b) (c : MpOut m p.pc p.cdp p.c)
+    (size : CInt (max p.a.used p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pc] (eff p)
+      (mem := p.c.alloc < subSize p.a p.b) fun c' => c'.Valid ∧ c'.val = p.a.val - p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpSubGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, b.valid, c.shape, size, a.pos, b.pos, c.pos, c.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.valid, b.valid, c.shape, size, a.pos, b.pos, c.pos, c.off⟩
+    cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Tom.SubG.spec a.valid b.valid c.shape size hq).imp_right And.left
 
@@ -1211,15 +1232,15 @@ end Tom.Machine.Api.MpSubG
 namespace Tom.Machine.Api.MpSubGA
 open Tom.Machine.Api.MpAddGA (P R lay kind isW ws args Res)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .aD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_sub(a, b, a)`**: `a ← a - b` (`mp_sub` with `c := a`). -/
-theorem _root_.Specs.mp_sub_ca {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (b : MpOwn m p.H p.pb p.bdp p.b)
-    (size : max p.a.used p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pa] optRet fun x M =>
-      OptRes x (p.a.alloc < subSize p.a p.b) (fun a' => a'.Valid ∧ a'.val = p.a.val - p.b.val) ∧
-      HPost (lay p) ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_sub_ca {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOut m p.pa p.adp p.a)
+    (va : p.a.Valid) (b : MpOwn m p.H p.pb p.bdp p.b) (size : CInt (max p.a.used p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pa] (eff p)
+      (mem := p.a.alloc < subSize p.a p.b) fun a' => a'.Valid ∧ a'.val = p.a.val - p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpSubGAG5.correct cv.ra_al
-    ⟨cv.stk, va, b.valid, size, a.pos, b.pos, a.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, va, b.valid, size, a.pos, b.pos, a.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Tom.SubG.specA va b.valid size hq).imp_right And.left
 
@@ -1228,15 +1249,16 @@ end Tom.Machine.Api.MpSubGA
 namespace Tom.Machine.Api.MpSubGB
 open Tom.Machine.Api.MpAddGB (P R lay kind isW ws args Res)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_sub(a, b, b)`**: `b ← a - b` (`mp_sub` with `c := b`). -/
-theorem _root_.Specs.mp_sub_cb {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_sub_cb {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (vb : p.b.Valid)
-    (size : max p.a.used p.b.used + 1 < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pb] optRet fun x M =>
-      OptRes x (p.b.alloc < subSize p.a p.b) (fun b' => b'.Valid ∧ b'.val = p.a.val - p.b.val) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    (size : CInt (max p.a.used p.b.used + 1)) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb, p.pb] (eff p)
+      (mem := p.b.alloc < subSize p.a p.b) fun b' => b'.Valid ∧ b'.val = p.a.val - p.b.val :=
   ApiTriple.of (Reg.call (Fn.MpSubGBG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, vb, size, a.pos, b.pos, b.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.valid, vb, size, a.pos, b.pos, b.off⟩ cv.sound) cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (Tom.SubG.specB a.valid vb size hq).imp_right And.left
 
@@ -1246,13 +1268,13 @@ namespace Tom.Machine.Api.SubD
 open Tom.Machine.Api.Two
 
 /-- **`mp_sub_d(a, b, c)`**: `c ← a - b` for a digit `b`, `c` with room. -/
-theorem _root_.Specs.mp_sub_d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat}
-    {s0 : BitVec 64} (cv : ConvS m ra sp 128) (sound : Sound (lay 128 sp pa adp pc cdp a c) isW)
-    (ha : MpVal m pa adp a) (hc : MpOut m pc cdp c) (hb : b < radix) (room : a.used + 1 ≤ c.alloc) :
+theorem _root_.Specs.mp_sub_d {sp pa adp pc cdp : Nat} {a c : MpInt} {b : Nat} {s0 : BitVec 64}
+    (cv : ConvS m ra sp 128 (lay 128 sp pa adp pc cdp a c) isW) (ha : MpVal m pa adp a)
+    (hc : MpOut m pc cdp c) (hb : b < radix) (room : a.used + 1 ≤ c.alloc) :
     ApiTripleS m v outp ra s0 entry sp [pa, b, pc] 0#64 fun c' M =>
       (c'.Valid ∧ c'.val = a.val - b) ∧ Post 128 m sp pa adp pc cdp a b c c' M :=
   ApiTripleS.of (Fn.SubD.correct ⟨ha.mpAt, hc.mpAt, ha.valid, hc.shape, hb, ha.geom, hc.geom, room,
-    cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, sound⟩) fun _ _ h =>
+    cv.stk.ram, cv.stk.al, cv.sp_ge, cv.ra_al, cv.img, cv.sound⟩) fun _ _ h =>
     SubDPost.spec ha.valid hb room hc.shape.alloc_lt h.subd
 
 end Tom.Machine.Api.SubD
@@ -1260,24 +1282,23 @@ end Tom.Machine.Api.SubD
 namespace Tom.Machine.Api.MpToRadix
 open Tom.Radix
 
+def eff (p : P) := Eff.heap (lay p) isW ws .str (out p) (site' p) p.H (fun _ => p.H)
+  fun x => errView x.1 (bytesOf x.2 p.pstr p.maxlen)
+
 /-- **`mp_to_radix(a, str, maxlen, NULL, radix)`**: `str ← a` in base `radix` (`toRadixStr`: the
-digits, `'-'` first for `a < 0`, then `'\\0'`) when `2 ≤ radix ≤ 64` and it fits; else
-`MP_VAL`/`MP_BUF` (`ToRadixPost`, SPECS_UNFOLDED.lean) or `MP_MEM`. -/
-theorem _root_.Specs.mp_to_radix {p : P} (cv : Conv m ra p.sp F p.H) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (str : BufOut m p.m0 p.pstr p.maxlen) (hr : p.radix < 2 ^ 31) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pstr, p.maxlen, 0, p.radix] (fun x => BitVec.ofInt 64 x.1)
-      fun x M =>
-      (x.1 = Layout.mpMem ∨ (radixOk p.radix → (toRadixStr p.a p.radix).length ≤ p.maxlen →
-        2 ≤ p.maxlen → x.1 = Layout.mpOkay ∧ ∀ i, bytesOf x.2 p.pstr p.maxlen i =
-          (toRadixStr p.a p.radix).getD i (bytesOf p.m0 p.pstr p.maxlen i))) ∧
-      HPost (lay p) ws .str (out p x) (site' p x) p.H p.H m M :=
+digits, `'-'` first for `a < 0`, then `'\\0'`), for `2 ≤ radix ≤ 64` and a buffer it fits (else
+`MP_VAL`/`MP_BUF`: `ToRadixPost`, SPECS_UNFOLDED.lean); the result: the buffer's bytes. -/
+theorem _root_.Specs.mp_to_radix {p : P} (cv : Conv m ra p.sp F (eff p))
+    (a : MpOwn m p.H p.pa p.adp p.a) (str : BufOut m p.m0 p.pstr p.maxlen) (hr : radixOk p.radix)
+    (fit : (toRadixStr p.a p.radix).length ≤ p.maxlen) (two : 2 ≤ p.maxlen) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pstr, p.maxlen, 0, p.radix] (eff p)
+      fun s => ∀ i, s i = (toRadixStr p.a p.radix).getD i (bytesOf p.m0 p.pstr p.maxlen i) :=
+  have e := fun {x : Int × Mem} (hq : Q p x) => hq.symm.imp_right fun h =>
+    have s := ToRadixPost.spec_ok a.valid hr (by simpa using fit) two h; ⟨s.1, by simpa using s.2.1⟩
   ApiTriple.of (Reg.call (Fn.MpToRadixG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, a.blk, a.pos, a.off, hr⟩ sound) cv.heap (by mp_regions)) fun _ hq => by
-    rcases hq with hq | hq
-    · refine .inr fun hok hfit hm => ?_
-      have := ToRadixPost.spec_ok a.valid hok (by simpa using hfit) hm hq
-      simpa using ⟨this.1, this.2.1⟩
-    · exact .inl hq
+    ⟨cv.stk, a.valid, a.blk, a.pos, a.off, by have := hr.2; unfold radixOk at hr; omega⟩ cv.sound)
+    cv.heap (by mp_regions)) (fun _ hq => .errView (e hq))
+    (hr := fun _ hq => congrArg (fun b => [(1, ra), (10, b)]) (errView_ret (e hq)))
 
 end Tom.Machine.Api.MpToRadix
 
@@ -1285,12 +1306,12 @@ namespace Tom.Machine.Api.MpZero
 open Tom.Machine.Api.Un
 
 /-- **`mp_zero(a)`**: `a ← 0` (`void`). -/
-theorem _root_.Specs.mp_zero {sp pa adp : Nat} {a : MpInt}
-    (cv : ConvL m ra) (sound : Sound (lay sp pa adp a) isW) (ha : MpOut m pa adp a) :
+theorem _root_.Specs.mp_zero {sp pa adp : Nat} {a : MpInt} (cv : ConvM m ra (lay sp pa adp a) isW)
+    (ha : MpOut m pa adp a) :
     Triple (At entry ((1, ra) :: callArgs 10 [pa]) m v.keep outp) fun cf =>
       ∃ a' M, At ra [(1, ra)] M v.keep outp cf ∧ (a'.Valid ∧ a'.val = 0) ∧ Post m sp pa adp a a' M :=
   Triple.rmap (fun _ ⟨a', M, hat, h⟩ => ⟨a', M, hat,
       let s := ZeroPost.spec ha.shape h.zero; ⟨s.1, s.2.2⟩, h⟩)
-    (Fn.MpZero.correct ⟨ha.mpAt, ha.shape, ha.geom, cv.ra_al, cv.img, sound⟩)
+    (Fn.MpZero.correct ⟨ha.mpAt, ha.shape, ha.geom, cv.ra_al, cv.img, cv.sound⟩)
 
 end Tom.Machine.Api.MpZero

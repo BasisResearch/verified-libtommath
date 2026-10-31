@@ -14,12 +14,12 @@ namespace Tom.Machine.Api.MpZero
 open Tom.Machine.Api.Un
 
 /-- **`mp_zero(a)`**: `a ← 0` (`void`). -/
-theorem _root_.Specs.mp_zero {sp pa adp : Nat} {a : MpInt}
-    (cv : ConvL m ra) (sound : Sound (lay sp pa adp a) isW) (ha : MpOut m pa adp a) :
+theorem _root_.Specs.mp_zero {sp pa adp : Nat} {a : MpInt} (cv : ConvM m ra (lay sp pa adp a) isW)
+    (ha : MpOut m pa adp a) :
     Triple (At entry ((1, ra) :: callArgs 10 [pa]) m v.keep outp) fun cf =>
       ∃ a' M, At ra [(1, ra)] M v.keep outp cf ∧ (a'.Valid ∧ a'.val = 0) ∧ Post m sp pa adp a a' M :=
   Triple.rmap (fun _ ⟨a', M, hat, h⟩ => ⟨a', M, hat,
       let s := ZeroPost.spec ha.shape h.zero; ⟨s.1, s.2.2⟩, h⟩)
-    (Fn.MpZero.correct ⟨ha.mpAt, ha.shape, ha.geom, cv.ra_al, cv.img, sound⟩)
+    (Fn.MpZero.correct ⟨ha.mpAt, ha.shape, ha.geom, cv.ra_al, cv.img, cv.sound⟩)
 
 end Tom.Machine.Api.MpZero

@@ -16,11 +16,11 @@ open Tom.Machine.Api.Two
 /-- **`mp_exch(a, b)`**: swaps the structs: after, `a`'s struct holds `b` (digits at `bdp`) and
 `b`'s holds `a` (`Post`; `void`). -/
 theorem _root_.Specs.mp_exch {sp pa adp pb bdp : Nat} {a b : MpInt}
-    (cv : ConvL m ra) (sound : Sound (lay sp pa adp pb bdp a b) isW2)
-    (ha : MpVal m pa adp a) (hb : MpVal m pb bdp b) :
+    (cv : ConvM m ra (lay sp pa adp pb bdp a b) isW2) (ha : MpVal m pa adp a)
+    (hb : MpVal m pb bdp b) :
     Triple (At entry ((1, ra) :: callArgs 10 [pa, pb]) m v.keep outp) fun cf =>
       ∃ M, At ra [(1, ra)] M v.keep outp cf ∧ Post m sp pa adp pb bdp a b M :=
   Fn.Exch.correct ⟨ha.mpAt, hb.mpAt, ha.geom, hb.geom,
-    by rcases ha.valid.sign_ok with h | h <;> rw [h] <;> decide, cv.ra_al, cv.img, sound⟩
+    by rcases ha.valid.sign_ok with h | h <;> rw [h] <;> decide, cv.ra_al, cv.img, cv.sound⟩
 
 end Tom.Machine.Api.Exch

@@ -27,7 +27,7 @@ theorem _root_.Specs.mp_init {H : List (Nat × Nat)} {sp pa : Nat} (pre : Pre m 
 
 /-- **`mp_init_size(a, size)`**: as `mp_init` with `max(size, MP_MIN_PREC)` digits (`initPrec`). -/
 theorem _root_.Specs.mp_init_size {H : List (Nat × Nat)} {sp pa size : Nat}
-    (pre : Pre m v H sp pa Fsize ra) (hs : size < 2 ^ 31) :
+    (pre : Pre m v H sp pa Fsize ra) (hs : CInt size) :
     Triple (At Fn.MpInit.sizeEntry ((1, ra) :: callArgs 10 [pa, size]) m v.keep outp) fun cf =>
       ∃ r M, At ra [(1, ra), (10, r)] M v.keep outp cf ∧ Post m M H sp pa Fsize (initPrec size) r :=
   Fn.MpInit.size_correct pre hs

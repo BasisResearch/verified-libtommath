@@ -14,18 +14,19 @@ namespace Tom.Machine.Api.DrReduceG
 open Tom.Reduce
 open Tom.Machine.Api.MpReduce2k (R P kind)
 
+def eff (p : P) := Eff.heap (lay p) MpReduce2k.isW MpReduce2k.ws .aD (out p) (site' p) (hin p) (hout
+  p) okView
+
 /-- **`mp_dr_reduce(a, n, d)`**: `|a| ← |a| mod n` for a diminished-radix `n = radix^k - d`
 (`hk`: for the meaning only), `|a| < radix^(2k)`. -/
-theorem _root_.Specs.mp_dr_reduce {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) MpReduce2k.isW)
+theorem _root_.Specs.mp_dr_reduce {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOut m p.pa p.adp p.a) (va : p.a.Valid) (n : MpOwn m p.H p.pn p.ndp p.n)
     (npos : 0 < p.n.mag) (hb : p.d < radix) (hx : p.a.mag < radix ^ (2 * p.n.used))
     (hk : p.n.mag + p.d = radix ^ p.n.used) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] okRet fun x M =>
-      OkRes x (fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag) ∧
-      HPost (lay p) MpReduce2k.ws .aD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pn, p.d] (eff p)
+      fun a' => a'.Valid ∧ a'.mag = p.a.mag % p.n.mag :=
   ApiTriple.of (Reg.call (Fn.DrReduceGG5.correct cv.ra_al
-    ⟨cv.stk, va, n.valid, npos, hb, hx, a.pos, a.off, n.off⟩ sound) cv.heap (by mp_regions))
-    fun _ hq h => DrReducePost.spec npos hk hx (ReduxG.Out.post hq h)
+    ⟨cv.stk, va, n.valid, npos, hb, hx, a.pos, a.off, n.off⟩ cv.sound) cv.heap (by mp_regions))
+    fun _ hq => .okView fun h => DrReducePost.spec npos hk hx (ReduxG.Out.post hq h)
 
 end Tom.Machine.Api.DrReduceG

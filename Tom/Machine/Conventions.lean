@@ -7,35 +7,40 @@ Every public specification in SPECS.lean has one shape (Islaris's memcpy specifi
 "only in the calling convention, system registers, valid ranges of memory"; RefinedC's `ℓ @ &own(τ)`
 gives one ownership predicate per argument):
 
-    theorem Specs.mp_f … (cv : Conv m ra sp F hin) (a : MpOwn m H pa adp a) … (y : MpOut m py ydp y)
+    def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
+    theorem Specs.mp_f … (cv : Conv m ra sp F (eff p)) (a : MpOwn m H pa adp a) … (c : MpOut m pc cdp c)
         (side conditions) :
-        ApiTriple m v outp ra entry sp [pa, …, py] ret fun x M => meaning x ∧ HPost … m M
+        ApiTriple m v outp ra entry sp [pa, …, pc] (eff p) (mem := when MP_MEM) fun c' => meaning
 
 * `MpOwn`: an `mp_int` argument the call reads: its struct and digits in memory, its value valid,
   its digits a live heap block. `MpOut`: an `mp_int` the call writes (initialized, `Shape` only);
   its digit block is the front of the heap's live list `hin`.
+* `Eff` (`eff p`, in the contract's names): what the call does: its regions and the heap's live
+  blocks before; per outcome of the contract, the result the caller sees (`MP_MEM`, or `MP_OKAY`
+  and the value written) and the memory after (`HPost`, `Kit/MeetHeap.lean`: only the written
+  regions and the allocator's footprint change, the result's digits are the new front block).
 * `Conv`: the calling convention: `ra`, the stack of `F` bytes below `sp`, the program image, the
-  allocator's heap with the live blocks `hin`. `Cutoffs`: the four cut-off words `mp_mul`/`mp_sqr`
-  read (constants of the image's data section).
-* `ApiTriple`: total correctness on the Sail RISC-V model: from the entry with the arguments
-  in `a0, a1, …`, the run returns to `ra` with `a0 = ret x` for some outcome `x` and memory `M`
-  satisfying the post. The post states the result over `Int`/`Nat` first (`OptRes`: `MP_MEM` or the
-  written value's meaning), then the frame `HPost` (`Kit/MeetHeap.lean`: only the written regions and
-  the allocator's footprint change, the result's digits are the new front block).
-* `Sound (lay p) isW` (`Kit/Frame.lean`) stays as stated: the regions written are disjoint from
-  every other region (the aliasing a form allows is the one its argument list shows).
-* The calls that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvS` (the
-  convention without the heap), `ApiPure` (a leaf: a value in `a0`, memory unchanged) and
-  `ApiTripleS` (the frame-pointer calls writing an `mp_int` in place); `DigOut`/`BufOut` an
-  `mp_digit *`/`char *` result.
+  allocator's heap with the live blocks, the regions sound (`Sound`, `Kit/Frame.lean`: the regions
+  written are disjoint from every other; the aliasing a form allows is the one its argument list
+  shows). `Cutoffs`: the four cut-off words `mp_mul`/`mp_sqr` read (constants of the image).
+* `ApiTriple`: total correctness on the Sail RISC-V model: from the entry with the arguments in
+  `a0, a1, …`, the run returns to `ra` with `a0` `MP_MEM` (and then `mem`; by default no claim) or
+  `MP_OKAY` and the result meaning `ok` (`MemOr`), the memory after as `eff` says.
+* `CInt`, `CIdx`, `FitsBits`, `Fits`: the side conditions keeping the C's `int` arithmetic on sizes
+  in range.
+* The calls that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvM`/`ConvS`
+  (the convention without the heap; `ConvM`, `ConvS`: with `Sound`), `ApiPure` (a leaf: a value in
+  `a0`, memory unchanged) and `ApiTripleS` (the frame-pointer calls writing an `mp_int` in place);
+  `DigOut`/`BufOut` an `mp_digit *`/`char *` argument written.
 
 Each specification is proved from the machine contract (`…Statement`) by one bridging proof (the
 second half of this file): the contract's precondition fields are projections of these
 structures; its region witnesses and off-allocator facts come from `Reg.call` (one lemma for every
 contract), the tactic `mp_regions` choosing per region the `MpOwn`/`MpOut`/`Conv`/`Cutoffs`/`DigOut`
 lemma that backs it; `ApiTriple.of`/`ApiTripleS.of` turn the contract's triple into the concise
-one given its outcome's `.spec` lemma. The statements fully unfolded (no structure of this file)
-are in SPECS_UNFOLDED.lean.
+one given its outcome's `.spec` lemma. The statements fully unfolded (no structure of this file,
+the frame `HPost` and the outcomes' other facts written out) are in SPECS_UNFOLDED.lean.
 -/
 
 namespace Tom.Machine
@@ -85,25 +90,90 @@ structure BufOut (m m0 : Mem) (b n : Nat) : Prop where
   ram : Ram b n
   snap : ∀ x, (Iv.mk b n).In x → m[x]? = m0[x]?
 
+/-! ## Sizes: the C's `int` arithmetic
+
+The side conditions that only keep the C's `int` arithmetic on sizes from overflowing (`int` is
+32 bits). -/
+
+/-- `n` (an `int` argument, or a size the C computes) is an `int`. -/
+def CInt (n : Nat) : Prop := n < 2 ^ 31
+
+/-- `n`, with the headroom the C's index arithmetic on it needs (its sums and doublings,
+`mp_init_size`'s sizes), is an `int`: `n < 2^30`. -/
+def CIdx (n : Nat) : Prop := n < 2 ^ 30
+
+/-- The bit count of `n` digits (`n * MP_DIGIT_BIT`) is an `int`. -/
+def FitsBits (n : Nat) : Prop := Layout.digitBits * n < 2 ^ 31
+
 /-- `mp_count_bits(a)` and `a->used * MP_DIGIT_BIT` are C `int`s. -/
 def Fits (a : MpInt) : Prop := Layout.digitBits * a.used < 2 ^ 31
 
+/-! ## The effect of an allocating call -/
+
+/-- **What an allocating call does, in its contract's names**: its regions `lay` (`isW`: the
+written ones), the heap's live blocks `hin` before; for an outcome `x` of the contract, the result
+the caller sees, `res x` (`none`: `MP_MEM`; `some y`: `MP_OKAY` and the value `y` written), and the
+memory after, `frame x m M`. -/
+structure Eff (X Y : Type) where
+  {R : Type}
+  [deq : DecidableEq R]
+  lay : R → Iv
+  isW : R → Bool
+  hin : List (Nat × Nat)
+  res : X → Option Y
+  frame : X → Mem → Mem → Prop
+
+attribute [instance] Eff.deq
+
+/-- **The effect with `Kit/MeetHeap.lean`'s frame `HPost`**: only the regions `ws` and the
+allocator's footprint change; the region `site` (the result's digits) is placed at `J x`, the
+regions hold `out x`, the heap's live blocks are `hout x` after. -/
+def Eff.heap {X Y R : Type} [DecidableEq R] (lay : R → Iv) (isW : R → Bool) (ws : List R)
+    (site : R) (out : X → R → Kind) (J : X → Iv) (hin : List (Nat × Nat))
+    (hout : X → List (Nat × Nat)) (res : X → Option Y) : Eff X Y where
+  lay := lay
+  isW := isW
+  hin := hin
+  res := res
+  frame x m M := HPost lay ws site (out x) (J x) hin (hout x) m M
+
+/-- The result of an outcome `none` (`MP_MEM`) or `some (q, a')` (`a'` written, its digits at `q`). -/
+def optView : Option (Nat × MpInt) → Option MpInt := Option.map Prod.snd
+
+/-- The result of an outcome `(ok, q, a')`: `a'` when `ok` (`MP_OKAY`), else `MP_MEM`. -/
+def okView (x : Bool × Nat × MpInt) : Option MpInt := if x.1 = true then some x.2.2 else none
+
+/-- The result of an outcome that returns the code `r` and keeps the destination `y` in place:
+`MP_MEM`, else `y` (the contract's outcome `.err r` for `mp_exptmod`'s and `mp_invmod`'s paths that
+return before re-placing the result: then, under the specification's hypotheses, `MP_OKAY`). -/
+def errView {Y : Type} (r : Int) (y : Y) : Option Y := if r = Layout.mpMem then none else some y
+
+/-! ## The calling convention -/
+
 /-- **The calling convention**: `ra` a code address, `F` bytes of stack below `sp` above the
 allocator's arena (`sp` 16-aligned), the program image in memory, the allocator's heap with the
-live blocks `H`. -/
-structure Conv (m : Mem) (ra : BitVec 64) (sp F : Nat) (H : List (Nat × Nat)) : Prop where
+live blocks `e.hin`, and the regions of `e` sound (`Kit/Frame.lean`'s `Sound`: those written are
+disjoint from every other; the aliasing a form allows is the one its argument list shows). -/
+structure Conv {X Y : Type} (m : Mem) (ra : BitVec 64) (sp F : Nat) (e : Eff X Y) : Prop where
   ra_al : ra.toNat % 4 = 0
   stk : StkRes sp F
   img : Img m
-  heap : AHeap m H
+  heap : AHeap m e.hin
+  sound : Sound e.lay e.isW
 
 /-- **The calling convention of a call that does not allocate**: `ra` a code address and the
-program image (`ConvS`: and `F` bytes of stack below `sp`, as `Conv`). -/
+program image (`ConvM`: and the regions `lay` sound for the written ones `isW`; `ConvS`: and `F`
+bytes of stack below `sp`, as `Conv`). -/
 structure ConvL (m : Mem) (ra : BitVec 64) : Prop where
   ra_al : ra.toNat % 4 = 0
   img : Img m
 
-structure ConvS (m : Mem) (ra : BitVec 64) (sp F : Nat) : Prop extends ConvL m ra where
+structure ConvM {ι : Type} [DecidableEq ι] (m : Mem) (ra : BitVec 64) (lay : ι → Iv)
+    (isW : ι → Bool) : Prop extends ConvL m ra where
+  sound : Sound lay isW
+
+structure ConvS {ι : Type} [DecidableEq ι] (m : Mem) (ra : BitVec 64) (sp F : Nat) (lay : ι → Iv)
+    (isW : ι → Bool) : Prop extends ConvM m ra lay isW where
   stk : StkRes sp F
 
 /-- The cut-off words `mp_mul`/`mp_sqr` read: `KARATSUBA_SQR_CUTOFF`, `TOOM_SQR_CUTOFF`,
@@ -121,14 +191,46 @@ def callArgs : Nat → List Nat → GRegs
   | _, [] => []
   | i, a :: rest => (i, BitVec.ofNat 64 a) :: callArgs (i + 1) rest
 
-/-- **The call `f(args)`** from `entry`, `sp` and `gp` set, returning to `ra`: total correctness on the
-Sail model; the run ends at `ra` with `a0 = ret x` for an outcome `x` and memory `M` with
-`post x M` (registers `keep`: callee-saved, `gp`, `tp`, preserved; console output `outp`
-unchanged). -/
+/-- `MP_MEM` (`none`) or `MP_OKAY` in `a0`. -/
+def memRet {Y : Type} : Option Y → BitVec 64
+  | none => Api.MpGrow.memBV
+  | some _ => 0#64
+
+/-- **`MP_MEM`, or the result means `ok`**: `none` (`MP_MEM`, then `mem`) or `some y`, then `ok y`. -/
+def MemOr {Y : Type} (r : Option Y) (mem : Prop) (ok : Y → Prop) : Prop :=
+  match r with
+  | none => mem
+  | some y => ok y
+
+/-- `MemOr` of `okView x` from the meaning on `MP_OKAY`. -/
+theorem MemOr.okView {x : Bool × Nat × MpInt} {ok : MpInt → Prop} (h : x.1 = true → ok x.2.2) :
+    MemOr (okView x) True ok := by
+  obtain ⟨_ | _, _⟩ := x
+  · trivial
+  · exact h rfl
+
+/-- `MemOr` of `errView r y` from `MP_MEM` or `MP_OKAY` meaning `ok y`. -/
+theorem MemOr.errView {Y : Type} {r : Int} {y : Y} {ok : Y → Prop}
+    (h : r = Layout.mpMem ∨ r = Layout.mpOkay ∧ ok y) : MemOr (errView r y) True ok := by
+  rcases h with rfl | ⟨rfl, h⟩
+  · trivial
+  · exact h
+
+/-- The code `r` is the one `errView r y` gives, when it is `MP_MEM` or `MP_OKAY`. -/
+theorem errView_ret {Y : Type} {r : Int} {y : Y} {P : Prop}
+    (h : r = Layout.mpMem ∨ r = Layout.mpOkay ∧ P) : BitVec.ofInt 64 r = memRet (errView r y) := by
+  rcases h with rfl | ⟨rfl, -⟩ <;> rfl
+
+/-- **The allocating call `f(args)`** from `entry`, `sp` and `gp` set, returning to `ra`: total
+correctness on the Sail model; the run ends at `ra`, for an outcome `x` of the contract and memory
+`M`, with `a0` `MP_MEM` (and then `mem`: by default no claim) or `MP_OKAY` and the result `y`
+meaning `ok y` (`MemOr (e.res x) mem ok`), the memory after as `e.frame x m M` says (registers
+`keep`: callee-saved, `gp`, `tp`, preserved; console output `outp` unchanged). -/
 def ApiTriple (m : Mem) (v : Abi) (outp : Array String) (ra entry : BitVec 64) (sp : Nat)
-    (args : List Nat) {X : Type} (ret : X → BitVec 64) (post : X → Mem → Prop) : Prop :=
+    (args : List Nat) {X Y : Type} (e : Eff X Y) (ok : Y → Prop) (mem : Prop := True) : Prop :=
   Triple (At entry ((1, ra) :: (2, BitVec.ofNat 64 sp) :: (3, gpV) :: callArgs 10 args) m v.keep outp)
-    fun cf => ∃ x M, At ra [(1, ra), (10, ret x)] M v.keep outp cf ∧ post x M
+    fun cf => ∃ x M, At ra [(1, ra), (10, memRet (e.res x))] M v.keep outp cf ∧
+      MemOr (e.res x) mem ok ∧ e.frame x m M
 
 /-- **A pure call `f(args)`** (a leaf: no stack, memory unchanged) returning `ret` in `a0`. -/
 def ApiPure (m : Mem) (v : Abi) (outp : Array String) (ra entry : BitVec 64) (args : List Nat)
@@ -156,37 +258,22 @@ theorem ApiTripleS.of {m : Mem} {v : Abi} {outp : Array String} {ra s0 entry : B
   subst hL hR
   exact Triple.rmap (fun _ ⟨a', M, hat, hQ⟩ => ⟨a', M, hat, hq a' M hQ, hQ⟩) h
 
-/-- **From a machine contract**: its triple and its outcome predicate `Q` implying the readable
-one `Q'` (its argument and return registers are those of `ApiTriple`, by `rfl` per outcome). -/
+/-- **From a machine contract**: its triple, its outcome predicate `Q` implying the result's
+meaning (`hq`, the outcome's `.spec` lemma), its frame `e.frame` (by unfolding), its argument
+registers those of `ApiTriple` (`rfl`) and its return registers `MP_MEM`/`MP_OKAY` by `e.res`
+(`hr`: `rfl` per outcome, unless the code is the outcome's and `Q` fixes it). -/
 theorem ApiTriple.of {m : Mem} {v : Abi} {outp : Array String} {ra entry : BitVec 64} {sp : Nat}
-    {args : List Nat} {X : Type} {ret : X → BitVec 64} {L : GRegs} {rets : X → GRegs}
-    {Q Q' : X → Prop} {Fr : X → Mem → Prop}
-    (h : Triple (At entry L m v.keep outp) fun cf => ∃ x M, At ra (rets x) M v.keep outp cf ∧ Q x ∧ Fr x M)
-    (hq : ∀ x, Q x → Q' x)
+    {args : List Nat} {X Y : Type} {e : Eff X Y} {ok : Y → Prop} {mem : Prop} {L : GRegs}
+    {rets : X → GRegs} {Q : X → Prop}
+    (h : Triple (At entry L m v.keep outp) fun cf => ∃ x M, At ra (rets x) M v.keep outp cf ∧ Q x ∧
+      e.frame x m M)
+    (hq : ∀ x, Q x → MemOr (e.res x) mem ok)
     (hL : L = (1, ra) :: (2, BitVec.ofNat 64 sp) :: (3, gpV) :: callArgs 10 args := by rfl)
-    (hr : ∀ x, rets x = [(1, ra), (10, ret x)] := by intro x; cases x <;> rfl) :
-    ApiTriple m v outp ra entry sp args ret fun x M => Q' x ∧ Fr x M := by
+    (hr : ∀ x, Q x → rets x = [(1, ra), (10, memRet (e.res x))] := by
+      intro x _; first | rfl | (cases x <;> rfl) | (obtain ⟨_ | _, _⟩ := x <;> rfl)) :
+    ApiTriple m v outp ra entry sp args e ok mem := by
   subst hL
-  exact Triple.rmap (fun _ ⟨x, M, hat, hQ, hF⟩ => ⟨x, M, hr x ▸ hat, hq x hQ, hF⟩) h
-
-/-- `MP_MEM` or `MP_OKAY` in `a0` (`none`: `MP_MEM`). -/
-def optRet {α : Type} : Option α → BitVec 64
-  | none => Api.MpGrow.memBV
-  | some _ => 0#64
-
-/-- **The outcome of a call that may run out of memory**: `none` (`MP_MEM`, then `mem`) or
-`some (q, a')`, the value `a'` written (its digits at `q`), then `ok a'`. -/
-def OptRes (x : Option (Nat × MpInt)) (mem : Prop) (ok : MpInt → Prop) : Prop :=
-  match x with
-  | none => mem
-  | some (_, a') => ok a'
-
-/-- `MP_OKAY` or `MP_MEM` in `a0` by the outcome's flag (`(ok, q, a')`). -/
-def okRet (x : Bool × Nat × MpInt) : BitVec 64 := if x.1 = true then 0#64 else Api.MpInit.memBV
-
-/-- **The outcome `(ok, q, a')` of a call that may run out of memory**: on `MP_OKAY` (`ok`), `post`
-of the value `a'` written (its digits at `q`). -/
-def OkRes (x : Bool × Nat × MpInt) (post : MpInt → Prop) : Prop := x.1 = true → post x.2.2
+  exact Triple.rmap (fun _ ⟨x, M, hat, hQ, hF⟩ => ⟨x, M, hr x hQ ▸ hat, hq x hQ, hF⟩) h
 
 /-! ## The bridge: region witnesses from the arguments -/
 
@@ -194,7 +281,8 @@ theorem MpVal.mpAt {m p dp a} (o : MpVal m p dp a) : MpAt m p dp a := o.hdr.mpAt
 theorem MpVal.geom {m p dp a} (o : MpVal m p dp a) : MpGeom p dp a.alloc := o.hdr.geom
 theorem MpOut.mpAt {m p dp a} (o : MpOut m p dp a) : MpAt m p dp a := o.hdr.mpAt o.dig
 theorem MpOut.geom {m p dp a} (o : MpOut m p dp a) : MpGeom p dp a.alloc := o.hdr.geom
-theorem ConvS.sp_ge {m ra sp F} (c : ConvS m ra sp F) : F ≤ sp := by have := c.stk.lo; omega
+theorem ConvS.sp_ge {ι : Type} [DecidableEq ι] {m ra sp F} {lay : ι → Iv} {isW : ι → Bool}
+    (c : ConvS m ra sp F lay isW) : F ≤ sp := by have := c.stk.lo; omega
 
 /-- A region `I` of kind `k` is backed in `m`: the kind's footprint fits `I`, its witness holds,
 and `I` lies off the allocator for the blocks `H`. -/
@@ -217,13 +305,13 @@ theorem Std.StkRes.ram {sp F : Nat} (h : StkRes sp F) : Ram (sp - F) F := by
 
 /-- The stack region, matched by its length first (`rfl`): unifying another region's address with
 `sp - F` would unfold `Nat.sub` along the literal `F`. -/
-theorem Conv.regStk {m ra sp F H} (c : Conv m ra sp F H) {H' : List (Nat × Nat)} {I : Iv}
+theorem Conv.regStk {X Y : Type} {m ra sp F} {e : Eff X Y} (c : Conv m ra sp F e) {H' : List (Nat × Nat)} {I : Iv}
     (hl : I.len = F) (hb : I.base = sp - F) : Reg m H' .ram I := by
   obtain ⟨b, l⟩ := I; simp only at hl hb; subst hl hb
   exact ⟨trivial, c.stk.ram, Off.of_offHeap c.stk.off (by
     have := c.stk.lo; have e : heapEnd = 0x87800000 := rfl; simp only; omega)⟩
 
-theorem Conv.regCode {m ra sp F H} (c : Conv m ra sp F H) {H' : List (Nat × Nat)} :
+theorem Conv.regCode {X Y : Type} {m ra sp F} {e : Eff X Y} (c : Conv m ra sp F e) {H' : List (Nat × Nat)} :
     Reg m H' .code textIv :=
   ⟨Iv.sub_self _, c.img, Off.text _⟩
 

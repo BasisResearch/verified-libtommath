@@ -14,14 +14,15 @@ variable {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}
 
 namespace Tom.Machine.Api.MpCopyG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_copy(a, b)`**: `b ← a`, growing `b`; `MP_MEM` only when `b` had to grow. -/
-theorem _root_.Specs.mp_copy {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_copy {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (ne : p.pa ≠ p.pb) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] optRet fun x M =>
-      OptRes x (p.b.alloc < p.a.used) (fun b' => b'.Valid ∧ b'.val = p.a.val) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      (mem := p.b.alloc < p.a.used) fun b' => b'.Valid ∧ b'.val = p.a.val :=
   ApiTriple.of (Reg.call (Fn.MpCopyGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ sound)
+    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ cv.sound)
     cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (CopyPost.specG a.valid b.shape hq).imp_right And.right

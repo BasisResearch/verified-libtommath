@@ -15,17 +15,16 @@ variable {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}
 namespace Tom.Machine.Api.Reduce2kSetupGr
 open Tom.Machine.Api.Reduce2kSetup (R P)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .dD (out p) (fun _ => lay p .dD) p.H (fun _ => p.H) id
+
 /-- **`mp_reduce_2k_setup(a, &d)`**: `*d ← 2^⌈log₂ a⌉ - |a|` when that is one digit (README, bug 1: it
 is the low digit otherwise). -/
-theorem _root_.Specs.mp_reduce_2k_setup {p : P}
-    (cv : Conv m ra p.sp F p.H) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_reduce_2k_setup {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (d : DigOut m p.pd p.d.v) (fa : Fits p.a) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] optRet fun x M =>
-      (match x with
-        | none => True
-        | some d' => 2 ^ Mont.nbits p.a.mag - p.a.mag < radix → p.a.mag + d' = 2 ^ Mont.nbits p.a.mag) ∧
-      HPost (lay p) ws .dD (out p x) (lay p .dD) p.H p.H m M :=
-  ApiTriple.of (Reg.call (Fn.Reduce2kSetupGrG5.correct cv.ra_al ⟨cv.stk, a.valid, fa, a.pos⟩ sound)
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] (eff p)
+      fun d' => 2 ^ Mont.nbits p.a.mag - p.a.mag < radix → p.a.mag + d' = 2 ^ Mont.nbits p.a.mag :=
+  ApiTriple.of (Reg.call (Fn.Reduce2kSetupGrG5.correct cv.ra_al ⟨cv.stk, a.valid, fa, a.pos⟩
+  cv.sound)
     cv.heap (by mp_regions)) fun
     | none, _ => trivial
     | some _, hq => fun hs => Reduce.Setup2kPost.spec hq hs
@@ -36,15 +35,16 @@ namespace Tom.Machine.Api.Reduce2kSetupLG
 open Tom.Reduce Tom.Mont
 open Tom.Machine.Api.Reduce2kSetupL (entry P R all isW ws args)
 
+def eff (p : P) := Eff.heap (lay p) isW ws .dD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_reduce_2k_setup_l(a, d)`**: `d ← 2^⌈log₂ a⌉ - |a|`; `MP_MEM` leaves `d` as it was. -/
-theorem _root_.Specs.mp_reduce_2k_setup_l {p : P}
-    (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+theorem _root_.Specs.mp_reduce_2k_setup_l {p : P} (cv : Conv m ra p.sp F (eff p))
     (a : MpOwn m p.H p.pa p.adp p.a) (d : MpOut m p.pd p.ddp p.d) (fa : Fits p.a) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] optRet fun x M =>
-      OptRes x True (fun d' => p.a.mag + d'.mag = 2 ^ Mont.nbits p.a.mag) ∧
-      HPost (lay p) ws .dD (out p x) (site' p x) (hin p) (hout p x) m M :=
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pd] (eff p)
+      fun d' => p.a.mag + d'.mag = 2 ^ Mont.nbits p.a.mag :=
   ApiTriple.of (Reg.call (Fn.Reduce2kSetupLGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid, fa, d.shape, d.sign, a.pos, d.pos, d.off⟩ sound) cv.heap (by mp_regions)) fun
+    ⟨cv.stk, a.valid, fa, d.shape, d.sign, a.pos, d.pos, d.off⟩
+    cv.sound) cv.heap (by mp_regions)) fun
     | none, _ => trivial
     | some _, hq => Reduce.Setup2kLPost.spec hq
 

@@ -8,7 +8,7 @@ function of the proof image, for review.
 
 SPECS.lean holds the concise specification of each public function's main contract: the theorems
 of Tom/Machine/Specs/*.lean, verbatim (statement over Tom/Machine/Conventions.lean's `MpOwn`,
-`MpOut`, `Conv`, `ApiTriple`, `OptRes`, … and its bridging proof from the machine contract); the
+`MpOut`, `Conv`, `Eff`, `ApiTriple`, `MemOr`, … and its bridging proof from the machine contract); the
 generator checks that each main form of experiments/specs.tsv has one (`mp_add_correct_ca` ↦
 `Specs.mp_add_ca`) and that its proof names the form's machine proof. A main form without one is
 printed unfolded instead. SPECS_UNFOLDED.lean has the same contracts unfolded, as follows.
@@ -500,25 +500,30 @@ compiled for RV64I (c/tommath-arith.elf): for each, alphabetically, its main con
 form, then the aliasing forms such as `mp_add(a, b, a)`), over Int/Nat, in the conventions of
 Tom/Machine/Conventions.lean (read it once). The allocating functions read
 
-  theorem Specs.f {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-      (a : MpOwn m p.H p.pa p.adp p.a) ... (c : MpOut m p.pc p.cdp p.c) (side conditions) :
-      ApiTriple m v outp ra entry p.sp [p.pa, ..., p.pc] ret fun x M =>
-        OptRes x (when MP_MEM) (fun c' => c'.Valid ∧ c'.val = ...) ∧ HPost ... m M
+  def eff (p : P) := Eff.heap (lay p) isW ws .cD (out p) (site' p) (hin p) (hout p) optView
+
+  theorem Specs.f {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a) ...
+      (c : MpOut m p.pc p.cdp p.c) (side conditions) :
+      ApiTriple m v outp ra entry p.sp [p.pa, ..., p.pc] (eff p) (mem := when MP_MEM)
+        fun c' => c'.Valid ∧ c'.val = ...
 
 * `ApiTriple`: total correctness on the Sail RISC-V model: from `entry` with `a0, a1, ...` holding
-  the arguments, the run returns to `ra` with `a0 = ret x` (`MP_OKAY`, `MP_MEM`, ...) for an
-  outcome `x` and memory `M`. `m v outp ra` (the `variable`s below): the memory, the callee-saved
-  registers, the console output, the return address.
+  the arguments, the run returns to `ra` with `a0` `MP_MEM` (then `mem`, by default no claim) or
+  `MP_OKAY` and the result `c'` meaning what the `fun` says. `m v outp ra` (the `variable`s below):
+  the memory, the callee-saved registers, the console output, the return address.
 * `p : P` (the structure `P` of the namespace above the theorem) names the `mp_int`s (`p.a : MpInt`;
   `.val`/`.mag` its Int/Nat value) and where they are: `p.pa` the struct, `p.adp` its digits, `p.sp`
   the stack pointer, `p.H` the live heap blocks.
+* `eff p` (`Eff`): the contract's regions `lay`, written ones `isW`/`ws`, outcomes `out`, the
+  result's site and heap blocks before/after (`site'`, `hin`, `hout`), and the result an outcome
+  gives the caller (`optView`, `okView`, or the module's `res`); the memory frame it implies
+  (`HPost`: only the written regions and the allocator's footprint change) is part of `ApiTriple`.
 * `MpOwn`/`MpOut`: an `mp_int` argument read/written (struct and digits in memory, valid/initialized,
   digits a live heap block); `Conv`: the stack of `F` bytes, the program image, the allocator's
-  heap with the blocks `hin p`; `Sound`: the written regions are disjoint from all others.
-* The post: the result over Int/Nat (`OptRes`/`OkRes`, or a `match` on the contract's outcome),
-  then the frame `HPost`: only the written regions `ws` and the allocator's footprint change, the
-  result's digits are the new front heap block (`out`, `site'`, `hout`: the contract's).
-* The functions that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvS`,
+  heap, the written regions disjoint from all others (`Sound`).
+* `CInt n` (`n < 2^31`), `CIdx n` (`n < 2^30`), `FitsBits n`, `Fits a`: the C's `int` arithmetic on
+  sizes stays in range.
+* The functions that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvM`/`ConvS`,
   `ApiPure` (a value in `a0`, memory unchanged), `ApiTripleS` (the frame-pointer calls; `Post`, the
   contract's: the result in memory and the frame).
 Each proof bridges from the machine contract (`Fn.….correct : Api.….Statement`) and the `.spec`

@@ -14,14 +14,15 @@ variable {m : Mem} {v : Abi} {outp : Array String} {ra : BitVec 64}
 
 namespace Tom.Machine.Api.MpAbsG
 
+def eff (p : P) := Eff.heap (lay p) isW ws .bD (out p) (site' p) (hin p) (hout p) optView
+
 /-- **`mp_abs(a, b)`**: `b ← |a|`, growing `b`; `MP_MEM` only when `b` had to grow. -/
-theorem _root_.Specs.mp_abs {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
-    (a : MpOwn m p.H p.pa p.adp p.a) (b : MpOut m p.pb p.bdp p.b) (ne : p.pa ≠ p.pb) :
-    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] optRet fun x M =>
-      OptRes x (p.b.alloc < p.a.used) (fun b' => b'.Valid ∧ b'.val = p.a.mag) ∧
-      HPost (lay p) ws .bD (out p x) (site' p x) (hin p) (hout p x) m M :=
+theorem _root_.Specs.mp_abs {p : P} (cv : Conv m ra p.sp F (eff p)) (a : MpOwn m p.H p.pa p.adp p.a)
+    (b : MpOut m p.pb p.bdp p.b) (ne : p.pa ≠ p.pb) :
+    ApiTriple m v outp ra entry p.sp [p.pa, p.pb] (eff p)
+      (mem := p.b.alloc < p.a.used) fun b' => b'.Valid ∧ b'.val = p.a.mag :=
   ApiTriple.of (Reg.call (Fn.MpAbsGG5.correct cv.ra_al
-    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ sound)
+    ⟨cv.stk, a.valid.toShape, b.shape, a.valid.sign_ok, a.pos, ne, b.pos, b.off⟩ cv.sound)
     cv.heap (by mp_regions)) fun
     | none, hq => hq
     | some _, hq => (AbsPost.spec a.valid (copyIn_grown b.shape
@@ -32,12 +33,12 @@ end Tom.Machine.Api.MpAbsG
 namespace Tom.Machine.Api.MpAbs
 
 /-- **`mp_abs(a, a)`**: `a ← |a|` (in place: the sign cleared). -/
-theorem _root_.Specs.mp_abs_alias {sp pa adp : Nat}
-    {a : MpInt} {s0 : BitVec 64} (cv : ConvL m ra) (sound : Sound (Un.lay 0 sp pa adp a) Un.isW)
-    (ha : MpVal m pa adp a) :
+theorem _root_.Specs.mp_abs_alias {sp pa adp : Nat} {a : MpInt} {s0 : BitVec 64}
+    (cv : ConvM m ra (Un.lay 0 sp pa adp a) Un.isW) (ha : MpVal m pa adp a) :
     ApiTripleS m v outp ra s0 entry sp [pa, pa] 0#64 fun a' M =>
       (a'.Valid ∧ a'.val = a.mag) ∧ APost m sp pa adp a a' M :=
-  ApiTripleS.of (Fn.MpAbs.alias_correct ⟨ha.mpAt, ha.valid.toShape, ha.geom, cv.ra_al, cv.img, sound⟩)
+  ApiTripleS.of (Fn.MpAbs.alias_correct ⟨ha.mpAt, ha.valid.toShape, ha.geom, cv.ra_al, cv.img,
+    cv.sound⟩)
     fun _ _ h => (AbsPost.spec ha.valid ha.valid.toShape ha.valid.used_le h.abs).imp_right And.right
 
 end Tom.Machine.Api.MpAbs
