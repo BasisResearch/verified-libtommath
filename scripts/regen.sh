@@ -3,7 +3,7 @@
 # Tom/Machine/{Code,Img}.lean (gen_code.py), Tom/Machine/Seg/*.lean (gen_segs.py, experiments/segs/
 # modules.tsv), the segment lemmas (gen_rows.py, experiments/segs/*.rows.json), the function
 # assemblies (gen_asm.py, experiments/asm/*.asm.json), the allocator's step tables
-# (gen_alloc_steps.py) and SPECS.lean (gen_specs.py).
+# (gen_alloc_steps.py) and SPECS.lean, SPECS_UNFOLDED.lean, SPECS_INTERNAL.lean (gen_specs.py).
 set -u
 cd "$(dirname "$0")/.."
 fail=0

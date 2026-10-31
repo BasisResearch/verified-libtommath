@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Generate SPECS.lean: the specification of every function of the proof image, for review.
+"""Generate SPECS.lean, SPECS_UNFOLDED.lean and SPECS_INTERNAL.lean: the specifications of every
+function of the proof image, for review.
 
-    python3 scripts/gen_specs.py            # write SPECS.lean from experiments/specs_pp.jsonl
+    python3 scripts/gen_specs.py            # write the three files (experiments/specs_pp.jsonl)
     python3 scripts/gen_specs.py --lean     # first rerun Lean's pretty printer (needs the build)
-    python3 scripts/gen_specs.py --check    # fail if SPECS.lean is not what it generates
+    python3 scripts/gen_specs.py --check    # fail if a file is not what it generates
 
-Every proved form of each function's contract (experiments/specs.tsv, most general first) is stated
+SPECS.lean holds the concise specification of each public function's main contract: the theorems
+of Tom/Machine/Specs/*.lean, verbatim (statement over Tom/Machine/Conventions.lean's `MpOwn`,
+`MpOut`, `Conv`, `ApiTriple`, `OptRes`, … and its bridging proof from the machine contract); the
+generator checks that each main form of experiments/specs.tsv has one (`mp_add_correct_ca` ↦
+`Specs.mp_add_ca`) and that its proof names the form's machine proof. A main form without one is
+printed unfolded instead. SPECS_UNFOLDED.lean has the same contracts unfolded, as follows.
+
+In SPECS_UNFOLDED.lean and SPECS_INTERNAL.lean, every proved form of each function's contract (experiments/specs.tsv, most general first) is stated
 as a theorem whose type is the contract expanded down to its `Triple` and whose proof is the machine
 proof; after each function, its postcondition's `.spec` lemmas (the meaning over Int/Nat) restated.
 The expansion is Lean's: scripts/specs_pp.lean (run by `--lean`, under `lake env lean`, with
@@ -20,6 +28,7 @@ import glob, os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 OUT = 'SPECS.lean'
+OUT_UNF = 'SPECS_UNFOLDED.lean'
 OUT_INT = 'SPECS_INTERNAL.lean'
 
 # ---------------------------------------------------------------- Lean sources
@@ -289,9 +298,9 @@ def items():
     def form(f, fn, name, stmt, proof):
         out.append((f, fn, name, None if stmt == '-' else stmt, proof,
                     head(proof) if stmt == '-' else stmt.replace('∀ n, ', '').split()[0]))
-    for f in (OUT, OUT_INT):
+    for f in (OUT_UNF, OUT_INT):
         for fn in TOM:
-            fs = [x for x in forms[fn] if bool(main_form(fn, x[0])) == (f == OUT)]
+            fs = [x for x in forms[fn] if bool(main_form(fn, x[0])) == (f == OUT_UNF)]
             for name, stmt, proof in fs:
                 form(f, fn, name, stmt, proof)
             for k in spec_lemmas(fs, done):
@@ -314,7 +323,7 @@ def lean_pp():
     import subprocess, tempfile, json
     src = open('scripts/specs_pp.lean', encoding='utf-8').read()
     src = src.split('\n', 1)[1] if src.startswith('import Lean\n') else src
-    lines = [f'import {m}' for m in sorted(set(imports(OUT) + imports(OUT_INT)))] + ['import Lean', src]
+    lines = [f'import {m}' for m in sorted(set(imports(OUT_UNF) + imports(OUT_INT)))] + ['import Lean', src]
     for _, _, name, stmt, proof, decl in ITEMS:
         ns, opens = scope(decl)
         lines += [f'namespace {ns}'] + opens
@@ -410,9 +419,10 @@ def theorem(j, decl):
 
 
 WHAT = {
-    OUT: '''the public functions of libtommath v1.3.0 (those declared in tommath.h), compiled for RV64I
-(c/tommath-arith.elf): for each, alphabetically, its main contract (the growing form, then the
-aliasing forms such as `mp_add(a, b, a)`) and the `.spec` lemmas that read its postcondition over
+    OUT_UNF: '''the public functions of libtommath v1.3.0 (those declared in tommath.h), compiled for RV64I
+(c/tommath-arith.elf), unfolded: for each, alphabetically, the main contract that SPECS.lean states
+concisely (the growing form, then the aliasing forms such as `mp_add(a, b, a)`), with no
+definition of Tom/Machine/Conventions.lean, and the `.spec` lemmas that read its postcondition over
 Int/Nat. SPECS_INTERNAL.lean has the other forms, the s_mp_* helpers and newlib/libgcc''',
     OUT_INT: '''the rest of c/tommath-arith.elf (libtommath v1.3.0 on RV64I): the forms of the public
 functions not in SPECS.lean (destination with room, called D5 in the sources; narrower aliasing
@@ -480,18 +490,130 @@ def render(f):
     return re.sub(r'\n{4,}', '\n\n\n', text)
 
 
+# ---------------------------------------------------------------- SPECS.lean: the concise forms
+
+CONCISE_DIR = 'Tom/Machine/Specs'
+
+INTRO_C = """/-
+The specifications of the public functions of libtommath v1.3.0 (those declared in tommath.h),
+compiled for RV64I (c/tommath-arith.elf): for each, alphabetically, its main contract (the growing
+form, then the aliasing forms such as `mp_add(a, b, a)`), over Int/Nat, in the conventions of
+Tom/Machine/Conventions.lean (read it once). The allocating functions read
+
+  theorem Specs.f {p : P} (cv : Conv m ra p.sp F (hin p)) (sound : Sound (lay p) isW)
+      (a : MpOwn m p.H p.pa p.adp p.a) ... (c : MpOut m p.pc p.cdp p.c) (side conditions) :
+      ApiTriple m v outp ra entry p.sp [p.pa, ..., p.pc] ret fun x M =>
+        OptRes x (when MP_MEM) (fun c' => c'.Valid ∧ c'.val = ...) ∧ HPost ... m M
+
+* `ApiTriple`: total correctness on the Sail RISC-V model: from `entry` with `a0, a1, ...` holding
+  the arguments, the run returns to `ra` with `a0 = ret x` (`MP_OKAY`, `MP_MEM`, ...) for an
+  outcome `x` and memory `M`. `m v outp ra` (the `variable`s below): the memory, the callee-saved
+  registers, the console output, the return address.
+* `p : P` (the structure `P` of the namespace above the theorem) names the `mp_int`s (`p.a : MpInt`;
+  `.val`/`.mag` its Int/Nat value) and where they are: `p.pa` the struct, `p.adp` its digits, `p.sp`
+  the stack pointer, `p.H` the live heap blocks.
+* `MpOwn`/`MpOut`: an `mp_int` argument read/written (struct and digits in memory, valid/initialized,
+  digits a live heap block); `Conv`: the stack of `F` bytes, the program image, the allocator's
+  heap with the blocks `hin p`; `Sound`: the written regions are disjoint from all others.
+* The post: the result over Int/Nat (`OptRes`/`OkRes`, or a `match` on the contract's outcome),
+  then the frame `HPost`: only the written regions `ws` and the allocator's footprint change, the
+  result's digits are the new front heap block (`out`, `site'`, `hout`: the contract's).
+* The functions that do not allocate: `MpVal` (a valid `mp_int` in memory), `ConvL`/`ConvS`,
+  `ApiPure` (a value in `a0`, memory unchanged), `ApiTripleS` (the frame-pointer calls; `Post`, the
+  contract's: the result in memory and the frame).
+Each proof bridges from the machine contract (`Fn.….correct : Api.….Statement`) and the `.spec`
+lemma of its postcondition; SPECS_UNFOLDED.lean states the same contracts with every definition
+unfolded down to the triple (and the `.spec` lemmas). A form stated unfolded here has no concise
+one. SPECS_INTERNAL.lean has the other forms, the s_mp_* helpers and newlib/libgcc. Generated by
+scripts/gen_specs.py from Tom/Machine/Specs/*.lean; `#print axioms` of each theorem shows only
+propext, Classical.choice and Quot.sound.
+-/
+"""
+
+
+def concise_modules():
+    """Tom/Machine/Specs/*.lean: imports, body (module doc dropped), the theorems they state."""
+    mods = []
+    for path in sorted(glob.glob(CONCISE_DIR + '/*.lean')):
+        src = open(path, encoding='utf-8').read()
+        imps = re.findall(r'^import (\S+)$', src, re.M)
+        body = re.sub(r'^(import \S+|set_option autoImplicit false)\n', '', src, flags=re.M).lstrip('\n')
+        # the file-level `open`/`variable` lines (before the first namespace) go to SPECS.lean's header
+        k = body.find('\nnamespace ')
+        pre, post = (body[:k], body[k:]) if k >= 0 else (body, '')
+        head = re.findall(r'^(?:open|variable) .*$', pre, re.M)
+        pre = re.sub(r'^(?:open|variable) .*\n', '', pre, flags=re.M)
+        body = (pre + post).lstrip('\n')
+        body = re.sub(r'\A/-!.*?-/\n+', '', body, flags=re.S)
+        names = re.findall(r'^theorem _root_\.Specs\.(\S+)', blank(src), re.M)
+        mods.append(dict(path=path, imports=imps, body=body.rstrip() + '\n', names=names, src=src,
+                         head=head))
+    return mods
+
+
+def render_concise():
+    import json
+    rows = {}
+    for l in open(PP, encoding='utf-8'):
+        j = json.loads(l); rows[j['name']] = j
+    mods = concise_modules()
+    owner = {}
+    for md in mods:
+        for n in md['names']:
+            if n in owner:
+                sys.exit(f'gen_specs: Specs.{n} stated twice ({owner[n]["path"]}, {md["path"]})')
+            owner[n] = md
+    body, imps, done, used, n_thm = [], set(), set(), set(), 0
+    header = []
+    for md in mods:
+        header += [h for h in md['head'] if h not in header]
+    for fn in TOM:
+        fs = [x for x in forms[fn] if main_form(fn, x[0])]
+        sec = []
+        for name, stmt, proof in fs:
+            c = name.replace('_correct', '', 1)
+            md = owner.get(c)
+            if md is None:
+                # no concise form yet: the unfolded statement
+                decl = head(proof) if stmt == '-' else stmt.replace('∀ n, ', '').split()[0]
+                sec.append(theorem(rows[name], decl)); n_thm += 1
+                imps.update(D[head(p)]['file'][:-5].replace('/', '.') for p in proof.split())
+                continue
+            used.add(c)
+            # the bridge must start from the form's machine proof
+            short = '.'.join(head(proof.split()[0]).split('.')[-2:])
+            t = re.search(r'^theorem _root_\.Specs\.' + re.escape(c) + r'\b.*?(?=^(?:theorem|end|namespace) )',
+                          md['src'], re.M | re.S)
+            last = short.split('.')[-1]
+            if not t or not (short in t.group(0) or re.search(r'(?<![\w.])' + re.escape(last) + r'\b', t.group(0))
+                             and short.split('.')[0] in md['src']):
+                sys.exit(f'gen_specs: {md["path"]}: Specs.{c} does not cite {short} ({name} in experiments/specs.tsv)')
+            if md['path'] not in done:
+                done.add(md['path']); sec.append(md['body'].rstrip()); n_thm += len(md['names'])
+                imps.update(i for i in md['imports'] if not i.startswith('Tom.Machine.Specs.'))
+        if sec:
+            body.append('\n\n'.join(sec))
+    extra = sorted(set(owner) - used)
+    if extra:
+        sys.exit(f'gen_specs: Tom/Machine/Specs states {", ".join(extra)}, not a main form of experiments/specs.tsv')
+    text = ('\n'.join(f'import {m}' for m in sorted(imps)) + '\n\n' + INTRO_C +
+            '\nset_option autoImplicit false\nset_option linter.unusedVariables false\n'
+            'set_option linter.ambiguousOpen false\n\n' + '\n'.join(header) + '\n\n' +
+            '\n\n'.join(body) + '\n')
+    return re.sub(r'\n{4,}', '\n\n\n', text), n_thm
+
+
 if '--lean' in sys.argv:
     lean_pp()
 bad = []
-for f in (OUT, OUT_INT):
-    text = render(f)
+for f in (OUT, OUT_UNF, OUT_INT):
+    text, n = render_concise() if f == OUT else (render(f), sum(1 for x in ITEMS if x[0] == f))
     if '--check' in sys.argv:
         old = open(f, encoding='utf-8').read() if os.path.exists(f) else ''
         if old != text:
             bad.append(f)
         continue
     open(f, 'w', encoding='utf-8').write(text)
-    n = sum(1 for x in ITEMS if x[0] == f)
     print(f'gen_specs: {n} theorems -> {f} ({text.count(chr(10))} lines)')
 if bad:
     sys.exit(f'gen_specs: {", ".join(bad)} not what scripts/gen_specs.py generates')

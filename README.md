@@ -5,7 +5,9 @@ RV64I (`c/tommath-arith.elf`: xPack GCC 15.2.0, `-O2`, 28-bit digits), is correc
 the image (76 libtommath functions and the 24 newlib/libgcc routines they call: the allocator,
 `memset`/`memcpy`/`memmove`, 64-bit multiply and divide) meet specifications over Lean's `Int`/`Nat`,
 as total-correctness triples on the Sail RISC-V model. `SPECS.lean` states the main contract of each
-public function (declared in `tommath.h`), unfolded down to the triple; `SPECS_INTERNAL.lean` the
+public function (declared in `tommath.h`) over `Int`/`Nat` in the conventions of
+`Tom/Machine/Conventions.lean`, each proved from the machine contract; `SPECS_UNFOLDED.lean` states the
+same contracts unfolded down to the triple; `SPECS_INTERNAL.lean` the
 other forms, the `s_mp_*` helpers and the newlib/libgcc routines. Licensed under Apache-2.0 (`LICENSE`); third-party material and its
 licenses: `NOTICE`, `licenses/`.
 
